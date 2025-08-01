@@ -1,0 +1,163 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+# Install with: pre-commit install
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python import sorting
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black", "--line-length", "88"]
+
+  # Python code formatting
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3
+        args: ["--line-length", "88"]
+
+  # Python linting
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-import-order
+          - flake8-bugbear
+        args: ["--max-line-length", "88"]
+
+  # Security linting
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+        exclude: ^tests/
+
+  # Python docstring formatting
+  - repo: https://github.com/pycqa/docformatter
+    rev: v1.7.5
+    hooks:
+      - id: docformatter
+        args: [--in-place, --wrap-summaries=88, --wrap-descriptions=88]
+
+  # Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        args: [--ignore-missing-imports, --no-strict-optional]
+        exclude: ^(tests/|alembic/versions/)
+
+  # Python upgrade syntax
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args: [--py311-plus]
+
+  # Remove unused imports
+  - repo: https://github.com/pycqa/autoflake
+    rev: v2.2.1
+    hooks:
+      - id: autoflake
+        args:
+          - --in-place
+          - --remove-all-unused-imports
+          - --remove-unused-variables
+          - --remove-duplicate-keys
+          - --ignore-init-module-imports
+
+  # Requirements.txt sorting
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.12.0
+    hooks:
+      - id: reorder-python-imports
+        args: [--py311-plus]
+
+  # Spell checking
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        args: [--write-changes]
+        additional_dependencies: [tomli]
+        exclude: |
+          (?x)^(
+              .*\.po|
+              .*\.min\.js|
+              .*\.min\.css|
+              .*\.svg|
+              docs/.*\.rst|
+              alembic/versions/.*\.py
+          )$
+
+# Global settings
+default_language_version:
+  python: python3.11
+
+# Exclude patterns
+exclude: |
+  (?x)(
+      # Byte-compiled / optimized / DLL files
+      __pycache__/|
+      \.py[cod]$|
+      # Distribution / packaging
+      \.Python$|
+      build/|
+      develop-eggs/|
+      dist/|
+      downloads/|
+      eggs/|
+      \.eggs/|
+      lib/|
+      lib64/|
+      parts/|
+      sdist/|
+      var/|
+      wheels/|
+      # PyInstaller
+      \.spec$|
+      # Unit test / coverage reports
+      htmlcov/|
+      \.coverage$|
+      \.coverage\.|
+      \.cache$|
+      \.pytest_cache/|
+      # Alembic migration files
+      alembic/versions/|
+      # Virtual environments
+      venv/|
+      \.venv/|
+      ENV/|
+      env/|
+      # IDE
+      \.vscode/|
+      \.idea/
+  )

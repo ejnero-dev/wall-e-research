@@ -1,0 +1,146 @@
+# Configuración del Sistema de Análisis de Precios
+
+price_analyzer:
+  # Plataformas habilitadas para análisis
+  platforms:
+    wallapop:
+      enabled: true
+      max_results: 50
+      rate_limit: 1  # requests por segundo
+      
+    amazon:
+      enabled: true
+      max_results: 20
+      rate_limit: 0.5  # requests por segundo
+      
+    ebay:
+      enabled: false
+      max_results: 30
+      rate_limit: 1
+      
+    milanuncios:
+      enabled: false
+      max_results: 40
+      rate_limit: 1
+      
+    vinted:
+      enabled: false
+      max_results: 30
+      rate_limit: 1
+  
+  # Configuración del análisis
+  analysis:
+    # Número mínimo de muestras para un análisis confiable
+    min_samples: 5
+    
+    # Número máximo de muestras por plataforma
+    max_samples_per_platform: 50
+    
+    # Umbral para detectar outliers (precios anormales)
+    outlier_threshold: 0.3  # 30% de desviación
+    
+    # Considerar solo productos activos (no vendidos)
+    only_active_listings: true
+    
+    # Días máximos de antigüedad de los anuncios
+    max_listing_age_days: 30
+  
+  # Estrategias de precio
+  pricing:
+    # Percentiles para diferentes estrategias
+    competitive_percentile: 25  # Venta rápida
+    balanced_percentile: 50    # Equilibrado
+    premium_percentile: 75     # Máximo beneficio
+    
+    # Descuentos sugeridos
+    quick_sale_discount: 0.90   # 10% descuento para venta flash
+    normal_sale_discount: 0.95  # 5% descuento normal
+    
+    # Ajustes por condición (vs precio nuevo)
+    condition_multipliers:
+      nuevo: 0.95
+      como_nuevo: 0.80
+      buen_estado: 0.65
+      usado: 0.50
+  
+  # Caché de resultados
+  cache:
+    enabled: true
+    ttl_hours: 24  # Tiempo de vida del caché
+    max_size_mb: 100
+    
+  # Monitoreo de precios
+  monitoring:
+    # Verificar cambios de precio cada X horas
+    check_interval_hours: 12
+    
+    # Notificar si el precio cambia más del X%
+    price_change_threshold: 10
+    
+    # Guardar histórico de precios
+    save_history: true
+    history_retention_days: 90
+  
+  # Scrapers específicos
+  scrapers:
+    # Configuración de navegador (Playwright)
+    browser:
+      headless: true
+      timeout: 30000  # milliseconds
+      viewport:
+        width: 1920
+        height: 1080
+      
+    # User agents rotativos
+    user_agents:
+      - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+      - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+    
+    # Delays entre requests
+    delays:
+      min_delay: 2  # segundos
+      max_delay: 5  # segundos
+      
+  # Notificaciones de precios
+  notifications:
+    # Alertar cuando encuentre chollos
+    bargain_alerts:
+      enabled: true
+      threshold: 0.7  # 30% menos que la mediana
+      
+    # Alertar sobre cambios de precio en competencia
+    competition_alerts:
+      enabled: true
+      products_to_monitor: []  # URLs de productos competencia
+      
+  # Análisis avanzado (futuro)
+  advanced:
+    # Machine Learning para predicción
+    ml_predictions:
+      enabled: false
+      model: "price_predictor_v1"
+      
+    # Análisis de imágenes
+    image_analysis:
+      enabled: false
+      check_authenticity: true
+      assess_condition: true
+      
+    # Análisis de sentimiento en descripciones
+    sentiment_analysis:
+      enabled: false
+      
+  # Exportación de datos
+  export:
+    # Formatos de exportación
+    formats:
+      - json
+      - csv
+      - excel
+      
+    # Ruta de exportación
+    export_path: "./data/price_analysis/"
+    
+    # Incluir gráficos
+    include_charts: true

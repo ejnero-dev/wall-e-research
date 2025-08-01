@@ -1,0 +1,52 @@
+# Development and Testing Dependencies
+# Install with: pip install -r requirements-dev.txt
+
+# Code Quality
+black==23.11.0
+flake8==6.1.0
+flake8-docstrings==1.7.0
+flake8-import-order==0.18.2
+flake8-bugbear==23.12.2
+isort==5.13.2
+
+# Type Checking
+mypy==1.7.1
+types-redis==4.6.0.11
+types-PyYAML==6.0.12.12
+
+# Security
+bandit[toml]==1.7.5
+safety==2.3.5
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-timeout==2.2.0
+pytest-mock==3.12.0
+pytest-xdist==3.5.0
+pytest-html==4.1.1
+faker==20.1.0
+factory-boy==3.3.0
+freezegun==1.2.2
+
+# Development Tools
+pre-commit==3.5.0
+ipython==8.18.1
+ipdb==0.13.13
+watchdog==3.0.0
+
+# Documentation
+sphinx==7.2.6
+sphinx-rtd-theme==2.0.0
+sphinx-autodoc-typehints==1.25.2
+
+# Performance Testing
+locust==2.18.3
+
+# Database Testing
+pytest-postgresql==5.0.0
+
+# API Testing
+httpx==0.25.2
+responses==0.24.1

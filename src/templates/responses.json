@@ -1,0 +1,244 @@
+{
+  "saludos": {
+    "inicial": [
+      "¡Hola! Sí, está disponible 😊 ¿Te interesa?",
+      "Hola, sí está disponible. ¿Quieres saber algo más sobre él?",
+      "¡Buenas! Sí, aún lo tengo disponible ✨"
+    ],
+    "respuesta": [
+      "¡Hola! ¿Qué tal? ¿En qué puedo ayudarte?",
+      "¡Hey! Dime, ¿qué necesitas saber?",
+      "Hola 😊 ¿Qué te gustaría saber?"
+    ]
+  },
+  
+  "disponibilidad": {
+    "disponible": [
+      "Sí, está disponible 👍",
+      "Sí, aún lo tengo disponible",
+      "Está disponible, sí 😊"
+    ],
+    "reservado": [
+      "Lo siento, ya está reservado para otra persona 😕",
+      "Ay, justo acabo de reservarlo, lo siento",
+      "Ya hay alguien interesado que va a venir a por él"
+    ],
+    "vendido": [
+      "Lo siento, ya está vendido ❌",
+      "Se vendió hace poco, lo siento",
+      "Ya no está disponible, se ha vendido"
+    ]
+  },
+  
+  "precio": {
+    "informacion": [
+      "El precio es {precio}€ como pone en el anuncio",
+      "Lo tengo en {precio}€",
+      "Son {precio}€"
+    ],
+    "negociacion": {
+      "aceptar_pequeña": [
+        "Te lo podría dejar en {precio_rebajado}€ si te lo llevas hoy",
+        "Venga, te hago {descuento}€ de descuento por decisión rápida",
+        "Podríamos dejarlo en {precio_rebajado}€"
+      ],
+      "rechazar": [
+        "Lo siento, el precio es bastante ajustado ya",
+        "No puedo bajarlo más, está en muy buen estado",
+        "Es precio fijo, no puedo hacer descuento"
+      ],
+      "oferta_muy_baja": [
+        "Uf, es muy poco, no puedo dejarlo tan barato",
+        "No puedo aceptar tan poco, lo siento",
+        "Es una oferta muy baja, mi último precio sería {precio_minimo}€"
+      ]
+    }
+  },
+  
+  "estado_producto": {
+    "perfecto": [
+      "Está en perfecto estado, como nuevo",
+      "Está impecable, sin ningún defecto",
+      "Perfecto estado, lo he cuidado mucho"
+    ],
+    "buen_estado": [
+      "Está en muy buen estado, algún signo de uso normal",
+      "Buen estado general, funciona perfectamente",
+      "Está bien cuidado, con poco uso"
+    ],
+    "usado": [
+      "Tiene uso normal, pero funciona perfectamente",
+      "Se nota que está usado pero va genial",
+      "Algún arañazo del uso, pero funciona sin problemas"
+    ]
+  },
+  
+  "ubicacion": {
+    "zona": [
+      "Estoy por la zona de {zona}",
+      "Por {zona}, ¿te viene bien?",
+      "Zona {zona}, ¿conoces?"
+    ],
+    "punto_encuentro": [
+      "Podemos quedar en {lugar_publico}",
+      "¿Te viene bien en {lugar_publico}?",
+      "Te propongo {lugar_publico}, hay parking"
+    ],
+    "no_desplazamiento": [
+      "Lo siento, no me puedo desplazar",
+      "No puedo moverme, tendrías que venir tú",
+      "Prefiero que vengas a recogerlo, no me desplazo"
+    ]
+  },
+  
+  "envio": {
+    "si_wallapop": [
+      "Sí, puedo hacer envío por Wallapop",
+      "Claro, podemos hacerlo por Wallapop Envíos",
+      "Sin problema, lo envío por Wallapop"
+    ],
+    "si_ordinario": [
+      "Puedo hacer envío ordinario si pagas antes",
+      "Hago envío por Correos previo pago",
+      "Te lo envío cuando reciba el pago en mi cuenta"
+    ],
+    "no_envio": [
+      "Lo siento, solo entrega en mano",
+      "No hago envíos, prefiero en persona",
+      "Solo venta en mano, no envío"
+    ],
+    "coste_envio": [
+      "El envío por Wallapop son unos {coste_envio}€",
+      "Serían {coste_envio}€ de envío aproximadamente",
+      "El envío te saldría por {coste_envio}€ más o menos"
+    ]
+  },
+  
+  "coordinacion_entrega": {
+    "disponibilidad_horaria": [
+      "Puedo quedar {dias} por {horario}",
+      "Esta semana puedo {dias} a partir de las {hora}",
+      "¿Te viene bien {dia} sobre las {hora}?"
+    ],
+    "confirmar_cita": [
+      "Perfecto, entonces quedamos {dia} a las {hora} en {lugar}",
+      "Genial, nos vemos {dia} a las {hora} allí",
+      "Vale, pues {dia} a las {hora} en {lugar} 👍"
+    ],
+    "recordatorio": [
+      "Te mando ubicación exacta por aquí luego",
+      "Llevo {descripcion_vendedor} para que me reconozcas",
+      "Si hay algún problema avísame por aquí"
+    ]
+  },
+  
+  "metodo_pago": {
+    "efectivo": [
+      "Perfecto, en efectivo sin problema",
+      "Sí, efectivo está bien",
+      "En mano y en efectivo, perfecto"
+    ],
+    "bizum": [
+      "También acepto Bizum si prefieres",
+      "Bizum también me vale",
+      "Puedes pagar por Bizum si quieres"
+    ],
+    "no_otros_metodos": [
+      "Solo acepto efectivo o Bizum, lo siento",
+      "Prefiero efectivo o Bizum",
+      "No uso otros métodos de pago, solo efectivo/Bizum"
+    ]
+  },
+  
+  "cierre_venta": {
+    "confirmacion": [
+      "¡Perfecto! Entonces lo reservo para ti",
+      "¡Genial! Te lo guardo entonces",
+      "¡Estupendo! Ya es tuyo 😊"
+    ],
+    "datos_contacto": [
+      "Te paso mi número por privado: {telefono}",
+      "Mi teléfono es {telefono} por si necesitas algo",
+      "Cualquier cosa me escribes aquí o al {telefono}"
+    ],
+    "despedida": [
+      "¡Nos vemos entonces! 😊",
+      "¡Hasta luego! Gracias",
+      "¡Perfecto, nos vemos!"
+    ]
+  },
+  
+  "respuestas_seguridad": {
+    "no_whatsapp": [
+      "Prefiero mantener toda la comunicación por Wallapop 😊",
+      "Mejor hablamos todo por aquí",
+      "No doy mi WhatsApp, hablemos por la app"
+    ],
+    "no_datos_personales": [
+      "No comparto datos personales hasta cerrar la venta",
+      "Esos datos no los doy por seguridad",
+      "No necesitas esos datos para la compra"
+    ],
+    "pago_anticipado": [
+      "El pago se hace en el momento de la entrega",
+      "Cuando nos veamos y compruebes el producto",
+      "Pagas cuando veas que todo está bien"
+    ],
+    "no_enlaces": [
+      "No puedo acceder a enlaces externos",
+      "Prefiero gestionar todo por Wallapop",
+      "No abro enlaces, hablemos por aquí"
+    ],
+    "sospecha_fraude": [
+      "Lo siento, no me parece seguro",
+      "Prefiero no seguir con esta venta",
+      "No me fío, mejor lo dejamos"
+    ]
+  },
+  
+  "casos_especiales": {
+    "comprador_pesado": [
+      "Ya te he dicho el precio final",
+      "Si no te interesa, no pasa nada",
+      "Hay más gente interesada"
+    ],
+    "preguntas_excesivas": [
+      "Toda la info está en el anuncio",
+      "Ya te he contado todo lo importante",
+      "Si quieres verlo en persona, quedamos"
+    ],
+    "regateador_extremo": [
+      "Ese precio es ridículo, no gracias",
+      "No voy a regalarlo, lo siento",
+      "Si no te lo puedes permitir, no pasa nada"
+    ],
+    "maleducado": [
+      "Con esa actitud prefiero no venderte nada",
+      "Busca en otro sitio, gracias",
+      "No me interesa venderte, adiós"
+    ]
+  },
+  
+  "recuperacion_venta": {
+    "24h": [
+      "¡Hola! ¿Sigues interesado/a? 😊",
+      "¡Ey! ¿Al final te interesa?",
+      "Hola, ¿qué tal? ¿Lo sigues queriendo?"
+    ],
+    "48h": [
+      "¡Última oportunidad! Tengo otros interesados",
+      "Si sigues interesado/a avísame, si no lo pondré disponible",
+      "¿Lo quieres o lo libero para otros?"
+    ]
+  },
+  
+  "variables_sistema": {
+    "tiempo_respuesta": {
+      "min": 30,
+      "max": 120
+    },
+    "emojis_frecuentes": ["😊", "👍", "✨", "🤝", "💪", "😅", "🎯"],
+    "nivel_formalidad": "informal_amigable",
+    "usar_humor": true
+  }
+}

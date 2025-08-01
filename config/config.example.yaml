@@ -1,0 +1,177 @@
+# Configuración del Bot de Wallapop
+# IMPORTANTE: Renombrar este archivo a config.yaml
+
+# Configuración de Wallapop
+wallapop:
+  # Modo de autenticación
+  auth_method: "cookies"  # cookies o credentials
+  
+  # Si usas credentials (no recomendado por seguridad)
+  # username: ""
+  # password: ""
+  
+  # Configuración de comportamiento
+  behavior:
+    # Delays entre acciones (en segundos)
+    min_delay_between_messages: 30
+    max_delay_between_messages: 120
+    
+    # Horario de actividad
+    active_hours:
+      start: "09:00"
+      end: "22:00"
+      timezone: "Europe/Madrid"
+    
+    # Límites de seguridad
+    max_concurrent_conversations: 5
+    max_messages_per_conversation: 20
+    pause_after_conversations: 10
+    pause_duration_minutes: 5
+
+# Base de datos PostgreSQL
+database:
+  host: "localhost"
+  port: 5432
+  name: "wallapop_bot"
+  user: "wallapop_user"
+  password: "change_this_password"
+
+# Redis para caché y colas
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null  # Configurar si tienes password
+
+# Configuración del Motor NLP
+nlp:
+  # Modelo de spaCy a usar
+  spacy_model: "es_core_news_sm"
+  
+  # Confianza mínima para clasificación
+  confidence_threshold: 0.7
+  
+  # Usar Rasa (requiere configuración adicional)
+  use_rasa: false
+  rasa_endpoint: "http://localhost:5005"
+
+# LLM Local con Ollama (opcional)
+ollama:
+  enabled: false
+  host: "http://localhost:11434"
+  model: "llama2:7b"  # o mistral:7b
+  temperature: 0.7
+  max_tokens: 150
+
+# Configuración de respuestas
+responses:
+  # Personalización de mensajes
+  use_emojis: true
+  informal_tone: true
+  
+  # Plantillas de respuesta
+  templates_path: "./src/templates/responses.json"
+  
+  # A/B Testing
+  enable_ab_testing: true
+  ab_test_percentage: 20  # % de usuarios para test
+
+# Sistema Anti-Fraude
+security:
+  # Detección de patrones sospechosos
+  fraud_detection:
+    enabled: true
+    suspicious_keywords:
+      - "western union"
+      - "paypal familia"
+      - "adelantado"
+      - "mi transportista"
+    
+  # Bloqueo automático
+  auto_block_suspicious: false
+  report_suspicious: true
+  
+  # Lista negra de usuarios
+  blacklist_file: "./config/blacklist.txt"
+
+# Logging y Monitoreo
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "./logs/wallapop_bot.log"
+  max_size_mb: 100
+  backup_count: 5
+  
+  # Logs específicos
+  log_conversations: true
+  log_transactions: true
+
+# Métricas y Analytics
+metrics:
+  enabled: true
+  
+  # Prometheus
+  prometheus:
+    enabled: true
+    port: 9090
+    endpoint: "/metrics"
+  
+  # Grafana
+  grafana:
+    enabled: true
+    port: 3000
+
+# API REST (para integraciones futuras)
+api:
+  enabled: false
+  host: "0.0.0.0"
+  port: 8000
+  
+  # Autenticación API
+  require_auth: true
+  api_key_header: "X-API-Key"
+
+# Notificaciones
+notifications:
+  # Notificaciones locales
+  desktop_notifications: true
+  
+  # Email (usando SMTP local)
+  email:
+    enabled: false
+    smtp_host: "localhost"
+    smtp_port: 25
+    from_address: "bot@localhost"
+    to_address: ""
+  
+  # Telegram (opcional)
+  telegram:
+    enabled: false
+    bot_token: ""
+    chat_id: ""
+
+# Configuración de desarrollo
+development:
+  debug_mode: false
+  test_mode: false
+  dry_run: false  # Simula acciones sin ejecutar
+  
+  # Screenshots para debug
+  save_screenshots: true
+  screenshots_path: "./debug/screenshots"
+
+# Respaldos
+backup:
+  enabled: true
+  
+  # Respaldo de base de datos
+  database:
+    enabled: true
+    schedule: "0 3 * * *"  # 3 AM diario
+    retention_days: 30
+    path: "./backups/database"
+  
+  # Respaldo de conversaciones
+  conversations:
+    enabled: true
+    format: "json"  # json o csv
+    path: "./backups/conversations"

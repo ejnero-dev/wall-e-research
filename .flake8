@@ -1,0 +1,70 @@
+[flake8]
+# Configuration for flake8
+# See: https://flake8.pycqa.org/en/latest/user/configuration.html
+
+# Maximum line length
+max-line-length = 88
+
+# List of files and directories to exclude
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    .env,
+    build,
+    dist,
+    *.egg-info,
+    .pytest_cache,
+    .mypy_cache,
+    .coverage,
+    htmlcov,
+    alembic/versions/
+
+# Error codes to ignore
+ignore = 
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # W503: line break before binary operator (conflicts with black)
+    W503,
+    # E501: line too long (handled by black)
+    E501,
+    # F401: imported but unused (handled by isort/autoflake)
+    F401
+
+# Error codes to select (leave empty to use defaults)
+select = 
+    E,
+    W,
+    F,
+    C
+
+# Maximum complexity for functions
+max-complexity = 12
+
+# Import order style
+import-order-style = google
+
+# Docstring conventions
+docstring-convention = google
+
+# Per file ignores
+per-file-ignores =
+    # Tests can have longer lines and missing docstrings
+    tests/*:D100,D101,D102,D103,D104,D105,D106,D107
+    # Init files don't need docstrings
+    __init__.py:D104
+    # Alembic migration files
+    alembic/versions/*:D100,D101,D102,D103,D104,D105,D106,D107,E501
+    # Scripts may have print statements
+    scripts/*:T201
+
+# Show source code for each error
+show-source = True
+
+# Show pep8 violation statistics
+statistics = True
+
+# Count errors and warnings
+count = True

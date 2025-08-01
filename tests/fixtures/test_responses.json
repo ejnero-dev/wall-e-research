@@ -1,0 +1,48 @@
+{
+  "saludos": {
+    "inicial": ["¡Hola! Sí, está disponible"],
+    "respuesta": ["Hola, ¿qué tal?"]
+  },
+  "disponibilidad": {
+    "disponible": ["Sí, está disponible"],
+    "vendido": ["Lo siento, ya está vendido"]
+  },
+  "precio": {
+    "informacion": ["El precio es {precio}€"],
+    "negociacion": {
+      "rechazar": ["El precio es fijo"]
+    }
+  },
+  "estado_producto": {
+    "perfecto": ["Está en perfecto estado"]
+  },
+  "ubicacion": {
+    "zona": ["Estoy en {zona}"]
+  },
+  "envio": {
+    "si_wallapop": ["Sí, puedo enviar por Wallapop"]
+  },
+  "metodo_pago": {
+    "efectivo": ["Acepto efectivo"]
+  },
+  "cierre_venta": {
+    "confirmacion": ["¡Perfecto! Te lo reservo"]
+  },
+  "respuestas_seguridad": {
+    "no_whatsapp": ["Prefiero hablar por Wallapop"],
+    "no_datos_personales": ["No comparto datos personales"],
+    "pago_anticipado": ["El pago en la entrega"],
+    "no_enlaces": ["No abro enlaces externos"],
+    "sospecha_fraude": ["No me parece seguro"]
+  },
+  "recuperacion_venta": {
+    "24h": ["¿Sigues interesado?"],
+    "48h": ["Última oportunidad"]
+  },
+  "variables_sistema": {
+    "tiempo_respuesta": {
+      "min": 1,
+      "max": 2
+    }
+  }
+}
