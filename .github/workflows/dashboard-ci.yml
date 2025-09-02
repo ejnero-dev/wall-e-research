@@ -70,7 +70,7 @@ jobs:
         version: "latest"
         
     - name: 📥 Install dependencies
-      run: uv sync
+      run: uv sync --extra dev
       
     - name: 🧪 Run API tests
       run: uv run pytest tests/unit/test_dashboard_api.py -v
@@ -106,7 +106,7 @@ jobs:
       uses: astral-sh/setup-uv@v3
       
     - name: 📥 Install Python dependencies
-      run: uv sync
+      run: uv sync --extra dev
       
     - name: 📥 Install Node dependencies
       working-directory: ./frontend
