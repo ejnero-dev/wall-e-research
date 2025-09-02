@@ -23,7 +23,7 @@ cd frontend && npm run dev
 
 | Servicio | URL | Descripción |
 |----------|-----|-------------|
-| **Frontend Dashboard** | http://localhost:3000 | Interfaz principal del usuario |
+| **Frontend Dashboard** | http://localhost:8080 | Interfaz principal del usuario |
 | **Backend API** | http://localhost:8000 | API REST endpoints |
 | **API Documentation** | http://localhost:8000/docs | Swagger/OpenAPI docs |
 | **WebSocket Live** | ws://localhost:8000/api/dashboard/ws/live | Datos en tiempo real |
