@@ -1,0 +1,262 @@
+/* Estilos de accesibilidad para Wall-E Dashboard */
+
+/* Clase para contenido solo visible por lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Mostrar contenido sr-only cuando tiene foco */
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Reducir movimiento cuando está activado */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Alto contraste */
+.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --primary: 220 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 90%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 20%;
+  --accent: 220 100% 95%;
+  --accent-foreground: 220 100% 10%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 80%;
+  --input: 0 0% 90%;
+  --ring: 220 100% 50%;
+}
+
+.dark.high-contrast {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --primary: 220 100% 70%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 80%;
+  --accent: 220 100% 15%;
+  --accent-foreground: 220 100% 90%;
+  --destructive: 0 100% 70%;
+  --destructive-foreground: 0 0% 0%;
+  --border: 0 0% 30%;
+  --input: 0 0% 20%;
+  --ring: 220 100% 70%;
+}
+
+/* Tamaños de fuente */
+.font-small {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.font-small h1 { font-size: 1.5rem; }
+.font-small h2 { font-size: 1.25rem; }
+.font-small h3 { font-size: 1.125rem; }
+.font-small h4 { font-size: 1rem; }
+.font-small .text-sm { font-size: 0.75rem; }
+.font-small .text-xs { font-size: 0.6875rem; }
+
+.font-normal {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.font-large {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.font-large h1 { font-size: 2.25rem; }
+.font-large h2 { font-size: 2rem; }
+.font-large h3 { font-size: 1.75rem; }
+.font-large h4 { font-size: 1.5rem; }
+.font-large .text-sm { font-size: 1rem; }
+.font-large .text-xs { font-size: 0.875rem; }
+
+/* Indicadores de foco mejorados */
+.focus-indicators *:focus,
+.focus-indicators *:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.focus-indicators button:focus,
+.focus-indicators a:focus,
+.focus-indicators input:focus,
+.focus-indicators textarea:focus,
+.focus-indicators select:focus {
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
+}
+
+/* Mejoras para contraste en enlaces y botones */
+.high-contrast a {
+  text-decoration: underline;
+}
+
+.high-contrast button:not([disabled]):hover {
+  transform: none;
+  box-shadow: 0 0 0 2px hsl(var(--primary));
+}
+
+/* Mejoras para formularios */
+.high-contrast input:focus,
+.high-contrast textarea:focus,
+.high-contrast select:focus {
+  border-width: 2px;
+  border-color: hsl(var(--primary));
+}
+
+/* Estados de hover más visibles en alto contraste */
+.high-contrast [role="button"]:hover,
+.high-contrast button:hover {
+  border: 2px solid hsl(var(--primary));
+}
+
+/* Mejoras para tooltips y elementos interactivos */
+[role="tooltip"] {
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  max-width: 300px;
+  z-index: 50;
+}
+
+/* Animaciones respetando preferencias del usuario */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Estados de carga accesibles */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    hsl(var(--muted)) 25%, 
+    hsl(var(--muted-foreground) / 0.1) 50%, 
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Mejoras para tablas de datos */
+table[role="table"] th {
+  background-color: hsl(var(--muted));
+  font-weight: 600;
+  border-bottom: 2px solid hsl(var(--border));
+}
+
+table[role="table"] tr:nth-child(even) {
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+/* Estados de error más visibles */
+[aria-invalid="true"] {
+  border-color: hsl(var(--destructive));
+  box-shadow: 0 0 0 1px hsl(var(--destructive));
+}
+
+.error-message {
+  color: hsl(var(--destructive));
+  font-weight: 500;
+}
+
+/* Mejoras para navegación por teclado */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Mejoras para notificaciones y alerts */
+[role="alert"],
+[role="status"] {
+  padding: 12px 16px;
+  border-radius: 6px;
+  border-left: 4px solid hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.1);
+  margin: 8px 0;
+}
+
+[role="alert"] {
+  border-left-color: hsl(var(--destructive));
+  background-color: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive-foreground));
+}
+
+/* Asegurar que los iconos no interfieran con los lectores de pantalla */
+[aria-hidden="true"] {
+  speak: none;
+}
+
+/* Mejoras para diálogos y modales */
+[role="dialog"] {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid hsl(var(--border));
+}
+
+/* Asegurar contraste suficiente para placeholders */
+::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.7;
+}
+
+.high-contrast ::placeholder {
+  opacity: 1;
+  font-weight: 500;
+}
