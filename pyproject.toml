@@ -20,6 +20,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dynamic = ["version"]
+dependencies = [
+    "cryptography>=45.0.7",
+]
 
 [tool.setuptools_scm]
 write_to = "src/_version.py"
