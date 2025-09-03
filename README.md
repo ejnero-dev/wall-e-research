@@ -396,8 +396,8 @@ For detailed security documentation, see [🛡️ SECURITY_AUDIT_REPORT.md](SECU
 
 Wall-E maintains **three specialized versions** for different use cases:
 
-### 🔬 Research Version (`/home/emilio/wall-e-research/`)
-**Current directory - Latest AI Engine implementation**
+### 🔬 Research Version (Current Repository)
+**Latest AI Engine implementation**
 
 **Features:**
 - ✅ **Complete AI Engine** with 9 modules
@@ -412,7 +412,7 @@ Wall-E maintains **three specialized versions** for different use cases:
 - Feature development
 - Academic research
 
-### 🏢 Compliance Version (`/home/emilio/wall-e-compliance/`)
+### 🏢 Compliance Version
 **Commercial-grade with legal compliance**
 
 **Features:**
@@ -428,7 +428,7 @@ Wall-E maintains **three specialized versions** for different use cases:
 - Regulated environments
 - Production sales
 
-### 🌐 Project Hub (`/home/emilio/project-wall-e/`)
+### 🌐 Project Hub
 **Centralized documentation and coordination**
 
 **Features:**

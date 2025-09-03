@@ -204,3 +204,18 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Additional security files
+session.key
+*.key
+*.pem
+*.crt
+credentials/
+data/wallapop_cookies.json
+data/*.json
+cookies.json
+session_data.json
+
+# Development and testing
+.env.*
+!.env.example

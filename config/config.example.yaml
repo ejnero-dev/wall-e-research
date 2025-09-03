@@ -34,7 +34,7 @@ database:
   port: 5432
   name: "wallapop_bot"
   user: "wallapop_user"
-  password: "change_this_password"
+  password: "${DATABASE_PASSWORD}"
 
 # Redis para caché y colas
 redis:

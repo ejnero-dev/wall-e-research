@@ -119,7 +119,7 @@ def main():
     print("\n🎉 Setup completed successfully!")
     print("\nNext steps:")
     print("1. Check the database with pgAdmin: http://localhost:8080")
-    print("   - Email: admin@wallapop.local")
+    print("   - Email: admin@example.local")
     print("   - Password: admin123")
     print("2. Check Redis with Redis Commander: http://localhost:8081")
     print("3. Start the bot: python -m src.bot.wallapop_bot")
