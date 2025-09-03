@@ -17,7 +17,7 @@ from api.dashboard_routes import get_mock_metrics, get_mock_logs
 async def test_get_mock_metrics():
     """Test mock metrics generation"""
     metrics = await get_mock_metrics()
-    
+
     assert metrics.msg_rate > 0
     assert metrics.active_scrapers >= 0
     assert metrics.success_rate >= 0
@@ -31,11 +31,11 @@ async def test_get_mock_metrics():
 async def test_get_mock_logs():
     """Test mock logs generation"""
     logs = await get_mock_logs(limit=10)
-    
+
     assert len(logs) == 10
     assert all(log.id for log in logs)
     assert all(log.timestamp for log in logs)
-    assert all(log.level in ['info', 'warning', 'error', 'debug'] for log in logs)
+    assert all(log.level in ["info", "warning", "error", "debug"] for log in logs)
     assert all(log.message for log in logs)
     assert all(log.source for log in logs)
 
@@ -43,7 +43,7 @@ async def test_get_mock_logs():
 def test_dashboard_routes_import():
     """Test that dashboard routes can be imported"""
     from api.dashboard_routes import router, connection_manager
-    
+
     assert router is not None
     assert connection_manager is not None
     assert connection_manager.get_connection_count() == 0
@@ -52,7 +52,7 @@ def test_dashboard_routes_import():
 def test_pydantic_models():
     """Test that Pydantic models work correctly"""
     from api.dashboard_routes import MetricsSummary, LogEntry, ConfigUpdate
-    
+
     # Test MetricsSummary
     metrics = MetricsSummary(
         msg_rate=50.0,
@@ -61,27 +61,24 @@ def test_pydantic_models():
         avg_response_time=2.1,
         total_messages_today=150,
         total_errors_today=5,
-        timestamp="2025-01-01T00:00:00Z"
+        timestamp="2025-01-01T00:00:00Z",
     )
     assert metrics.msg_rate == 50.0
     assert metrics.active_scrapers == 2
-    
+
     # Test LogEntry
     log = LogEntry(
         id="test123",
         timestamp="2025-01-01T00:00:00Z",
         level="info",
         message="Test message",
-        source="test"
+        source="test",
     )
     assert log.id == "test123"
     assert log.level == "info"
-    
+
     # Test ConfigUpdate
-    config_update = ConfigUpdate(
-        key="msg_per_hour",
-        value=100
-    )
+    config_update = ConfigUpdate(key="msg_per_hour", value=100)
     assert config_update.key == "msg_per_hour"
     assert config_update.value == 100
     assert config_update.apply_immediately is True

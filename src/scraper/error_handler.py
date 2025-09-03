@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Callable, Any, Type
 from dataclasses import dataclass, field
 from enum import Enum
-from email.mime.text import MimeText
-from email.mime.multipart import MimeMultipart
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import aiohttp
 from functools import wraps
 import traceback
@@ -326,7 +326,7 @@ class AlertManager:
             Please investigate immediately.
             """
 
-            msg.attach(MimeText(body, "plain"))
+            msg.attach(MIMEText(body, "plain"))
 
             # Enviar usando asyncio para no bloquear
             await asyncio.get_event_loop().run_in_executor(

@@ -19,7 +19,8 @@
       "Bash(uv run black:*)",
       "Bash(uv sync:*)",
       "Bash(uv run flake8:*)",
-      "Bash(uv run:*)"
+      "Bash(uv run:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
