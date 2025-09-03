@@ -20,6 +20,20 @@ Wall-E is a comprehensive **Wallapop marketplace automation system** that revolu
 
 ---
 
+## ⚠️ Important Legal Notice
+
+**Terms of Service Compliance:** This project is provided for **educational and research purposes**. Users are responsible for ensuring compliance with Wallapop's Terms of Service and applicable laws in their jurisdiction. The authors do not encourage or endorse any activity that violates platform terms or regulations.
+
+**Responsible Use:** 
+- Always respect rate limits and platform policies
+- Obtain proper consent before automating interactions
+- Comply with local data protection regulations (GDPR, etc.)
+- Use anti-detection features responsibly and ethically
+
+**Disclaimer:** The authors are not liable for any misuse of this software or violations of third-party terms of service.
+
+---
+
 ## 📋 Table of Contents
 
 - [🏗️ Project Architecture](#️-project-architecture)
