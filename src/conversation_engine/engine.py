@@ -199,7 +199,7 @@ class ConversationEngine:
             "priority": priority,
             "fraud_risk": fraud_risk,
             "state": state,
-            "requires_human": fraud_risk > 70,
+            "requires_human": fraud_risk >= 50,
         }
 
         logger.debug(f"Message analysis result: {result}")
@@ -293,7 +293,6 @@ class ConversationEngine:
                 "last_activity": datetime.now(),
                 "fraud_score": 0,
             }
-            return ConversationState.INICIAL
 
         conv = self.conversations[buyer_id]
         conv["messages"] += 1
