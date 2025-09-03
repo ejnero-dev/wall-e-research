@@ -46,7 +46,7 @@ jobs:
       run: uv run bandit -r src/ -f json -o bandit-report.json || true
     
     - name: Upload Bandit Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: bandit-security-report
@@ -124,7 +124,9 @@ jobs:
     
     - name: Install spaCy model
       run: |
-        uv run python -m spacy download es_core_news_sm
+        uv run python -c "import spacy; print('spaCy is available')"
+        uv run python -m spacy download es_core_news_sm --user
+        uv run python -c "import spacy; nlp = spacy.load('es_core_news_sm'); print('Spanish model loaded successfully')"
     
     - name: Set up test environment
       env:
@@ -216,7 +218,7 @@ jobs:
       run: uv run safety check --json --output safety-report.json || true
     
     - name: Upload Safety Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: safety-vulnerability-report

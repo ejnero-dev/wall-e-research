@@ -1,0 +1,206 @@
+# Research Version Configuration Overrides
+# For "wall-e-research" repository - Full-featured version for personal/educational use
+# IMPORTANT: This version is for research and educational purposes only
+
+# Application identification
+app:
+  name: "Wall-E Research Assistant"
+  mode: "research"
+  disclaimer: "Research and educational use only - Not for commercial purposes"
+
+# Wallapop behavior - Research settings (more aggressive)
+wallapop:
+  auth_method: "cookies"  # Preferred method
+  
+  behavior:
+    # More aggressive timing for research purposes
+    min_delay_between_messages: 30
+    max_delay_between_messages: 120
+    
+    # Research activity hours
+    active_hours:
+      start: "08:00"
+      end: "23:00"
+      timezone: "Europe/Madrid"
+    
+    # Research limits - higher for testing
+    max_concurrent_conversations: 10
+    max_messages_per_conversation: 50
+    max_messages_per_hour: 50  # Original aggressive setting
+    max_actions_per_minute: 2
+    pause_after_conversations: 20
+    pause_duration_minutes: 10
+    
+    # Research-specific features
+    experimental_features:
+      enabled: true
+      a_b_testing: true
+      advanced_nlp: true
+      sentiment_analysis: true
+
+# Anti-detection settings - Research level (aggressive)
+anti_detection:
+  level: "aggressive"
+  enabled: true
+  
+  browser:
+    headless: true
+    stealth_mode: true
+    fingerprint_randomization: true
+    user_agent_rotation: true
+    proxy_rotation: false  # Default disabled
+    
+  behavioral:
+    mouse_movement_simulation: true
+    typing_delay_simulation: true
+    scroll_simulation: true
+    random_pauses: true
+    human_like_patterns: true
+  
+  evasion:
+    webdriver_detection_bypass: true
+    automation_markers_hiding: true
+    canvas_fingerprinting_protection: true
+    webgl_fingerprinting_protection: true
+
+# Security settings for research
+security:
+  fraud_detection:
+    enabled: true
+    strict_mode: false  # Less strict for research
+    auto_block_suspicious: false
+    report_suspicious: true
+    
+    suspicious_keywords:
+      - "western union"
+      - "paypal familia"
+      - "adelantado"
+      - "mi transportista"
+      - "transferencia bancaria"
+    
+    risk_thresholds:
+      low: 30
+      medium: 60
+      high: 80
+  
+  data_collection:
+    collect_user_profiles: true
+    collect_conversation_history: true
+    collect_price_data: true
+    anonymize_data: false  # Full data for research
+    retention_days: 365  # Longer retention for research
+
+# Enhanced price analyzer for research
+price_analyzer:
+  platforms:
+    wallapop:
+      enabled: true
+      max_results: 100  # Higher for comprehensive research
+      rate_limit: 2  # More aggressive
+    amazon:
+      enabled: true
+      max_results: 50
+      rate_limit: 1
+    ebay:
+      enabled: true
+      max_results: 50
+      rate_limit: 1
+    milanuncios:
+      enabled: true
+      max_results: 40
+      rate_limit: 1
+    vinted:
+      enabled: true
+      max_results: 30
+      rate_limit: 1
+  
+  analysis:
+    min_samples: 3
+    max_samples_per_platform: 100
+    advanced_algorithms: true
+    machine_learning: true
+    trend_analysis: true
+    
+  research_features:
+    export_raw_data: true
+    detailed_analytics: true
+    competitor_tracking: true
+    market_intelligence: true
+
+# Research-specific response system
+responses:
+  enable_ab_testing: true
+  ab_test_percentage: 50  # Higher for research
+  experimental_responses: true
+  personality_variants: true
+  response_optimization: true
+  
+  research_mode:
+    collect_response_metrics: true
+    track_conversion_rates: true
+    analyze_response_effectiveness: true
+
+# Development and debugging features
+development:
+  debug_mode: true
+  test_mode: false
+  dry_run: false
+  
+  debugging:
+    save_screenshots: true
+    screenshots_path: "./debug/screenshots"
+    save_page_source: true
+    detailed_logging: true
+    performance_profiling: true
+  
+  research_tools:
+    data_export: true
+    statistical_analysis: true
+    visualization_tools: true
+    experiment_tracking: true
+
+# Enhanced monitoring for research
+monitoring:
+  enabled: true
+  detailed_metrics: true
+  performance_tracking: true
+  user_behavior_analysis: true
+  
+  research_analytics:
+    conversation_success_rates: true
+    price_prediction_accuracy: true
+    fraud_detection_effectiveness: true
+    user_satisfaction_scoring: true
+
+# Notifications for research monitoring
+notifications:
+  desktop_notifications: true
+  
+  email:
+    enabled: true
+    smtp_host: "localhost"
+    smtp_port: 587
+    alerts:
+      - "system_errors"
+      - "performance_issues"
+      - "research_milestones"
+  
+  research_alerts:
+    significant_findings: true
+    anomaly_detection: true
+    data_quality_issues: true
+
+# Research data backup and export
+backup:
+  enabled: true
+  research_data:
+    enabled: true
+    include_raw_data: true
+    include_analytics: true
+    export_formats: ["json", "csv", "parquet"]
+    
+  academic_export:
+    enabled: true
+    anonymized_datasets: true
+    statistical_summaries: true
+    research_reports: true

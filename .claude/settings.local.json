@@ -12,7 +12,14 @@
       "Bash(git commit:*)",
       "Bash(git checkout:*)",
       "Bash(pytest:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(git push:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(uv run black:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv run flake8:*)",
+      "Bash(uv run:*)"
     ],
     "deny": []
   }

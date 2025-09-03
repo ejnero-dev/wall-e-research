@@ -1,0 +1,267 @@
+# Wall-E Compliance - Production Configuration
+# MANDATORY COMPLIANCE SETTINGS - DO NOT MODIFY WITHOUT LEGAL REVIEW
+
+# ==========================================
+# COMPLIANCE ENFORCEMENT LAYER
+# ==========================================
+compliance:
+  enabled: true
+  version: "1.0.0"
+  legal_review_date: "2025-08-05"
+  next_review_date: "2025-11-05"
+  
+  # STRICT RATE LIMITING (NON-NEGOTIABLE)
+  rate_limits:
+    max_messages_per_hour: 5              # STRICT: Legal maximum
+    max_actions_per_minute: 0.5           # STRICT: 1 action every 2 minutes
+    max_concurrent_conversations: 3        # STRICT: Maximum simultaneous chats
+    min_response_delay_seconds: 120       # STRICT: Minimum human-like delay
+    daily_action_limit: 40                # STRICT: Maximum daily actions
+    weekly_action_limit: 200              # STRICT: Maximum weekly actions
+    
+  # HUMAN OVERSIGHT (MANDATORY)
+  human_approval:
+    require_approval_for_responses: true     # MANDATORY: Human approval required
+    require_approval_for_negotiations: true  # MANDATORY: Price negotiation approval
+    require_approval_for_commitments: true   # MANDATORY: Purchase commitment approval
+    require_approval_for_personal_data: true # MANDATORY: Personal data handling approval
+    approval_timeout_minutes: 30            # MANDATORY: 30-minute approval timeout
+    escalation_after_timeout: true          # MANDATORY: Escalate expired approvals
+    emergency_stop_enabled: true            # MANDATORY: Emergency stop capability
+    
+  # GDPR COMPLIANCE (MANDATORY)
+  gdpr:
+    enabled: true                           # MANDATORY: GDPR compliance
+    data_retention_days: 30                 # MANDATORY: 30-day retention limit
+    anonymization_enabled: true            # MANDATORY: Auto-anonymization
+    consent_required: true                  # MANDATORY: Explicit consent required
+    consent_expiry_days: 90                 # MANDATORY: Consent expires after 90 days
+    deletion_on_request: true               # MANDATORY: Right to be forgotten
+    data_portability: true                  # MANDATORY: Data export capability
+    breach_notification_hours: 72           # MANDATORY: Breach notification within 72h
+    
+  # AUDIT LOGGING (MANDATORY)
+  audit:
+    log_all_actions: true                   # MANDATORY: Complete audit trail
+    encrypt_logs: true                      # MANDATORY: Encrypted audit logs
+    log_retention_years: 7                  # MANDATORY: 7-year log retention
+    real_time_monitoring: true              # MANDATORY: Real-time compliance monitoring
+    automated_reports: true                 # MANDATORY: Automated compliance reports
+    third_party_audit: true                 # MANDATORY: Third-party audit capability
+
+# ==========================================
+# WALLAPOP INTEGRATION (COMPLIANCE MODE)
+# ==========================================
+wallapop:
+  # ETHICAL BEHAVIOR PATTERNS
+  behavior:
+    identify_as_automated: true             # MANDATORY: Transparent automation
+    human_like_delays: true                # MANDATORY: Human-like timing
+    respect_user_opt_out: true             # MANDATORY: Honor opt-out requests
+    avoid_spam_patterns: true              # MANDATORY: Anti-spam measures
+    
+  # CONSERVATIVE SCRAPING LIMITS
+  scraper:
+    max_requests_per_hour: 30              # CONSERVATIVE: Well below detection
+    request_delay_seconds: 120             # CONSERVATIVE: 2-minute delays
+    max_concurrent_requests: 1             # CONSERVATIVE: Sequential requests only
+    user_agent_rotation: false             # COMPLIANCE: Consistent user agent
+    proxy_usage: false                     # COMPLIANCE: Direct connection only
+    
+  # CONVERSATION MANAGEMENT
+  conversations:
+    max_message_length: 200                # PROFESSIONAL: Concise messages
+    require_greeting: true                 # PROFESSIONAL: Polite conversation
+    avoid_aggressive_negotiation: true     # ETHICAL: Respectful negotiation
+    respect_boundaries: true               # ETHICAL: Honor user boundaries
+    
+  # ANTI-DETECTION (MINIMAL)
+  anti_detection:
+    enabled: false                         # COMPLIANCE: No stealth techniques
+    human_typing_simulation: true          # ACCEPTABLE: Natural typing speed
+    random_delays: true                    # ACCEPTABLE: Natural variation
+    browser_fingerprinting: false          # COMPLIANCE: No fingerprint spoofing
+
+# ==========================================
+# DATABASE AND SECURITY
+# ==========================================
+database:
+  # POSTGRESQL CONFIGURATION
+  postgres:
+    host: ${POSTGRES_HOST:-localhost}
+    port: ${POSTGRES_PORT:-5432}
+    database: ${POSTGRES_DB:-wallapop_compliance}
+    username: ${POSTGRES_USER:-compliance_user}
+    password: ${POSTGRES_PASSWORD}          # FROM ENV ONLY
+    ssl_mode: require                      # MANDATORY: SSL encryption
+    
+  # REDIS CONFIGURATION
+  redis:
+    host: ${REDIS_HOST:-localhost}
+    port: ${REDIS_PORT:-6379}
+    password: ${REDIS_PASSWORD}            # FROM ENV ONLY
+    ssl: true                             # MANDATORY: SSL encryption
+    ssl_cert_reqs: required               # MANDATORY: Certificate validation
+
+# ENCRYPTION SETTINGS
+security:
+  encryption:
+    algorithm: "AES-256-GCM"              # MANDATORY: Military-grade encryption
+    key_rotation_days: 90                 # MANDATORY: Quarterly key rotation
+    encrypt_at_rest: true                 # MANDATORY: Database encryption
+    encrypt_in_transit: true              # MANDATORY: Network encryption
+    
+  authentication:
+    mfa_required: true                    # MANDATORY: Multi-factor authentication
+    session_timeout_minutes: 60          # MANDATORY: 1-hour session timeout
+    password_complexity: high            # MANDATORY: Strong password requirements
+    login_attempt_limit: 3               # MANDATORY: Brute force protection
+
+# ==========================================
+# BUSINESS CONFIGURATION
+# ==========================================
+business:
+  company_info:
+    name: ${COMPANY_NAME:-"Your Company"}
+    contact_email: ${COMPANY_EMAIL:-"compliance@yourcompany.com"}
+    privacy_officer: ${PRIVACY_OFFICER_EMAIL:-"privacy@yourcompany.com"}
+    legal_contact: ${LEGAL_CONTACT_EMAIL:-"legal@yourcompany.com"}
+    data_controller: ${DATA_CONTROLLER:-"Your Company"}
+    
+  notification_settings:
+    compliance_alerts: true               # MANDATORY: Compliance notifications
+    security_incidents: true             # MANDATORY: Security notifications
+    approval_requests: true              # MANDATORY: Approval notifications
+    daily_reports: true                   # RECOMMENDED: Daily summaries
+    weekly_reports: true                  # RECOMMENDED: Weekly summaries
+    
+  support:
+    business_hours: "09:00-18:00"        # Business support hours
+    timezone: "Europe/Madrid"            # Business timezone
+    emergency_contact: ${EMERGENCY_CONTACT} # 24/7 emergency contact
+
+# ==========================================
+# MONITORING AND ALERTING
+# ==========================================
+monitoring:
+  metrics:
+    enabled: true                         # MANDATORY: Performance monitoring
+    retention_days: 365                   # MANDATORY: 1-year metrics retention
+    real_time_alerts: true               # MANDATORY: Real-time alerting
+    
+  alerts:
+    rate_limit_violations: true          # MANDATORY: Rate limit alerts
+    compliance_violations: true          # MANDATORY: Compliance alerts
+    security_incidents: true             # MANDATORY: Security alerts
+    system_failures: true                # MANDATORY: System failure alerts
+    
+  dashboards:
+    compliance_dashboard: true           # MANDATORY: Compliance monitoring
+    business_dashboard: true             # RECOMMENDED: Business metrics
+    security_dashboard: true             # MANDATORY: Security monitoring
+
+# ==========================================
+# NLP AND CONVERSATION SETTINGS
+# ==========================================
+nlp:
+  spacy_model: "es_core_news_sm"          # Spanish language model
+  confidence_threshold: 0.7              # Conservative confidence threshold
+  
+  conversation_engine:
+    max_conversation_length: 50          # PROFESSIONAL: Reasonable conversation length
+    response_templates: "professional"   # PROFESSIONAL: Business-appropriate responses
+    avoid_aggressive_sales: true         # ETHICAL: Non-aggressive sales approach
+    require_consent_acknowledgment: true  # MANDATORY: Consent tracking
+    
+  fraud_detection:
+    enabled: true                        # MANDATORY: Fraud protection
+    strict_mode: true                    # COMPLIANCE: Strict fraud detection
+    auto_report_suspicious: true         # MANDATORY: Auto-report fraud attempts
+    blacklist_management: true           # MANDATORY: Fraudster blacklisting
+
+# ==========================================
+# PRICE ANALYSIS (ETHICAL)
+# ==========================================
+price_analyzer:
+  market_analysis:
+    max_requests_per_platform: 10       # CONSERVATIVE: Limited market research
+    respect_robots_txt: true            # MANDATORY: Honor robots.txt
+    conservative_delays: true           # MANDATORY: Respectful scraping
+    
+  pricing_strategy:
+    fair_market_pricing: true           # ETHICAL: Fair pricing practices
+    avoid_price_manipulation: true      # ETHICAL: No market manipulation
+    transparent_pricing: true           # ETHICAL: Transparent pricing logic
+
+# ==========================================
+# LOGGING CONFIGURATION
+# ==========================================
+logging:
+  level: INFO                           # MANDATORY: Comprehensive logging
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  handlers:
+    file:
+      enabled: true                     # MANDATORY: File logging
+      filename: "logs/compliance.log"   # MANDATORY: Compliance log file
+      max_bytes: 10485760              # 10MB log rotation
+      backup_count: 10                 # Keep 10 backup files
+      
+    audit:
+      enabled: true                     # MANDATORY: Audit logging
+      filename: "logs/audit.log"       # MANDATORY: Audit log file
+      encrypt: true                     # MANDATORY: Encrypted audit logs
+      
+    security:
+      enabled: true                     # MANDATORY: Security logging
+      filename: "logs/security.log"    # MANDATORY: Security log file
+      real_time_monitoring: true       # MANDATORY: Real-time security monitoring
+
+# ==========================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# ==========================================
+environments:
+  production:
+    debug: false                        # MANDATORY: No debug in production
+    ssl_verify: true                   # MANDATORY: SSL verification
+    secure_cookies: true               # MANDATORY: Secure cookie settings
+    
+  staging:
+    debug: false                        # RECOMMENDED: No debug in staging
+    ssl_verify: true                   # RECOMMENDED: SSL verification
+    test_mode: true                    # ACCEPTABLE: Test mode indicators
+    
+  development:
+    debug: true                        # ACCEPTABLE: Debug in development
+    ssl_verify: false                  # ACCEPTABLE: Flexible SSL in dev
+    mock_external_apis: true           # ACCEPTABLE: API mocking
+
+# ==========================================
+# LEGAL AND COMPLIANCE METADATA
+# ==========================================
+legal:
+  terms_of_service_version: "2025.1"    # Track ToS version compliance
+  privacy_policy_version: "2025.1"      # Track privacy policy version
+  gdpr_compliance_version: "2025.1"     # Track GDPR compliance version
+  last_legal_review: "2025-08-05"       # Last legal review date
+  next_compliance_audit: "2025-11-05"   # Next scheduled audit
+  
+  applicable_jurisdictions:
+    - "European Union"                   # GDPR compliance
+    - "Spain"                           # National data protection laws
+    - "United States"                   # If operating in US
+    
+  compliance_certifications:
+    - "ISO 27001"                       # Information security
+    - "SOC 2 Type II"                   # Security and availability
+    - "GDPR Compliance"                 # Data protection
+
+# END OF COMPLIANCE CONFIGURATION
+# ==========================================
+# MODIFICATION WARNING:
+# Any changes to this configuration MUST be reviewed by:
+# 1. Legal counsel
+# 2. Compliance officer  
+# 3. Security team
+# 4. Data protection officer
+# ==========================================

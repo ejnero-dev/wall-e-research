@@ -1,0 +1,383 @@
+# Base Configuration Template
+# This file contains shared settings for both research and compliance versions
+# Do not modify directly - use version-specific overrides
+
+# Core application settings
+app:
+  name: "Wall-E Wallapop Assistant"
+  version: "1.0.0"
+  environment: "development"  # development, staging, production
+  
+# Database configuration (shared)
+database:
+  host: "localhost"
+  port: 5432
+  name: "wallapop_bot"
+  user: "wallapop_user"
+  password: "${DATABASE_PASSWORD}"  # Environment variable
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+
+# Redis configuration (shared)
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: "${REDIS_PASSWORD}"  # Environment variable
+  connection_pool_max: 50
+  socket_timeout: 5
+  socket_connect_timeout: 5
+
+# Logging configuration (shared base)
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  max_size_mb: 100
+  backup_count: 5
+  handlers:
+    file:
+      enabled: true
+      path: "./logs/wall-e.log"
+    console:
+      enabled: true
+    syslog:
+      enabled: false
+      host: "localhost"
+      port: 514
+
+# NLP configuration (shared)
+nlp:
+  spacy_model: "es_core_news_sm"
+  confidence_threshold: 0.7
+  use_rasa: false
+  rasa_endpoint: "http://localhost:5005"
+  cache_enabled: true
+  cache_ttl_hours: 24
+
+# Response templates (shared base)
+responses:
+  templates_path: "./src/templates/responses.json"
+  use_emojis: true
+  informal_tone: true
+  language: "es"
+  
+# Price analyzer base settings
+price_analyzer:
+  platforms:
+    wallapop:
+      enabled: true
+      max_results: 20  # Conservative default
+    amazon:
+      enabled: true
+      max_results: 10  # Conservative default
+    ebay:
+      enabled: false
+      max_results: 15
+  
+  analysis:
+    min_samples: 5
+    max_samples_per_platform: 25  # Conservative default
+    outlier_threshold: 0.3
+    only_active_listings: true
+    max_listing_age_days: 30
+  
+  cache:
+    enabled: true
+    ttl_hours: 24
+    max_size_mb: 50
+
+# Security base settings
+security:
+  encryption:
+    algorithm: "AES-256"
+    key_derivation: "PBKDF2"
+    iterations: 100000
+  
+  session:
+    timeout_hours: 24
+    max_login_attempts: 3
+    lockout_duration_minutes: 30
+  
+  audit:
+    enabled: true
+    log_all_actions: true
+    sensitive_data_masking: true
+
+# API configuration (shared)
+api:
+  enabled: false
+  host: "127.0.0.1"  # Localhost only by default
+  port: 8000
+  require_auth: true
+  api_key_header: "X-API-Key"
+  cors_enabled: false
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+
+# Monitoring and metrics (shared)
+monitoring:
+  enabled: true
+  metrics_retention_days: 30
+  health_check_interval_seconds: 30
+  
+  prometheus:
+    enabled: false
+    port: 9090
+    endpoint: "/metrics"
+  
+  grafana:
+    enabled: false
+    port: 3000
+
+# Scraper configuration (shared)
+scraper:
+  anti_detection:
+    level: "basic"  # basic, moderate, aggressive
+    enabled: false  # Default disabled for safety
+    
+  timing:
+    min_delay_seconds: 30
+    max_delay_seconds: 120
+    page_load_timeout: 30
+    element_timeout: 10
+    
+  browser:
+    headless: true
+    viewport:
+      width: 1366
+      height: 768
+      
+  session:
+    cookies_file: "data/wallapop_cookies.json"
+    timeout_hours: 24
+    max_login_attempts: 3
+    
+  limits:
+    max_concurrent_conversations: 5
+    max_messages_per_hour: 50
+    max_actions_per_minute: 2
+    
+  schedule:
+    active_hours:
+      start: "09:00"
+      end: "22:00"
+      timezone: "Europe/Madrid"
+      
+  user_agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15"
+    
+  headers:
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+    Accept-Language: "es-ES,es;q=0.9,en;q=0.8"
+    Accept-Encoding: "gzip, deflate, br"
+    DNT: "1"
+    Connection: "keep-alive"
+    Upgrade-Insecure-Requests: "1"
+    Sec-Fetch-Dest: "document"
+    Sec-Fetch-Mode: "navigate"
+    Sec-Fetch-Site: "none"
+    Sec-Fetch-User: "?1"
+    Cache-Control: "max-age=0"
+    
+  proxy:
+    enabled: false
+    rotation_enabled: false
+    proxy_list: []  # Add proxies as needed
+    
+  rate_limiting:
+    circuit_breaker:
+      threshold: 5
+      timeout_seconds: 300
+    reset_interval_seconds: 3600
+
+# Wallapop platform configuration
+wallapop:
+  urls:
+    base_url: "https://es.wallapop.com"
+    login_url: "/app/login"
+    chat_url: "/app/chat"
+    notifications_url: "/app/notifications"
+    profile_url: "/app/profile"
+    
+  selectors:
+    login:
+      login_button:
+        - 'button[data-testid="login-button"]'
+        - 'a[href*="login"]'
+        - 'button:has-text("Iniciar sesión")'
+        - '.login-button'
+        - '#login-btn'
+      email_input:
+        - 'input[data-testid="email-input"]'
+        - 'input[type="email"]'
+        - 'input[name="email"]'
+        - '#email'
+        - '.email-input'
+      password_input:
+        - 'input[data-testid="password-input"]'
+        - 'input[type="password"]'
+        - 'input[name="password"]'
+        - '#password'
+        - '.password-input'
+      submit_button:
+        - 'button[data-testid="login-submit"]'
+        - 'button[type="submit"]'
+        - 'button:has-text("Entrar")'
+        - '.login-submit'
+        - '#login-submit'
+    
+    chat:
+      chat_list:
+        - '[data-testid="chat-list"]'
+        - '.chat-list'
+        - '.conversations-list'
+        - '#chat-container ul'
+      chat_item:
+        - '[data-testid="chat-item"]'
+        - '.chat-item'
+        - '.conversation-item'
+        - '.chat-list li'
+      unread_badge:
+        - '[data-testid="unread-badge"]'
+        - '.unread-badge'
+        - '.notification-badge'
+        - '.badge-unread'
+      message_input:
+        - '[data-testid="message-input"]'
+        - 'textarea[placeholder*="Escribe"]'
+        - '.message-input textarea'
+        - '#message-textarea'
+      send_button:
+        - '[data-testid="send-button"]'
+        - 'button[aria-label*="Enviar"]'
+        - '.send-button'
+        - '#send-btn'
+      message_list:
+        - '[data-testid="messages-list"]'
+        - '.messages-container'
+        - '.chat-messages'
+        - '#messages'
+      message_item:
+        - '[data-testid="message"]'
+        - '.message-item'
+        - '.chat-message'
+        - '.message'
+    
+    navigation:
+      notifications_icon:
+        - '[data-testid="notifications"]'
+        - '.notifications-icon'
+        - 'button[aria-label*="Notificaciones"]'
+        - '#notifications-btn'
+      profile_menu:
+        - '[data-testid="profile-menu"]'
+        - '.profile-menu'
+        - '.user-menu'
+        - '#profile-dropdown'
+    
+    products:
+      title:
+        - '[data-testid="product-title"]'
+        - '.product-title'
+        - 'h1.title'
+        - '.item-title'
+      price:
+        - '[data-testid="product-price"]'
+        - '.product-price'
+        - '.price'
+        - '.item-price'
+      description:
+        - '[data-testid="product-description"]'
+        - '.product-description'
+        - '.description'
+        - '.item-description'
+
+# Notifications configuration
+notifications:
+  email:
+    enabled: false
+    smtp:
+      host: "localhost"
+      port: 587
+      use_tls: true
+      username: "${SMTP_USERNAME}"
+      password: "${SMTP_PASSWORD}"
+    addresses:
+      from: "${EMAIL_FROM}"
+      to: "${EMAIL_TO}"
+    alerts:
+      - "system_errors"
+      - "rate_limit_exceeded"
+      - "authentication_failed"
+  
+  slack:
+    enabled: false
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    
+  desktop:
+    enabled: false
+
+# File paths and directories
+file_paths:
+  data_dir: "data"
+  logs_dir: "logs"
+  screenshots_dir: "debug/screenshots"
+  backups_dir: "backups"
+  templates_dir: "src/templates"
+  config_dir: "config"
+  
+  files:
+    main_log: "wall-e.log"
+    scraper_log: "wallapop_scraper.log"
+    error_log: "errors.log"
+    access_log: "access.log"
+    cookies_file: "wallapop_cookies.json"
+    session_file: "session_data.json"
+    
+# Configuration hot-reloading
+config_management:
+  hot_reload:
+    enabled: true
+    check_interval_seconds: 30
+    auto_backup: true
+    validation_on_reload: true
+  
+  file_watchers:
+    enabled: true
+    watch_patterns:
+      - "*.yaml"
+      - "*.yml"
+      - "*.json"
+    
+  change_handlers:
+    restart_on_critical_change: false
+    notify_on_change: true
+    log_changes: true
+
+# Backup configuration (shared)
+backup:
+  enabled: true
+  schedule: "0 3 * * *"  # 3 AM daily
+  retention_days: 30
+  
+  database:
+    enabled: true
+    path: "./backups/database"
+    compression: true
+  
+  logs:
+    enabled: true
+    path: "./backups/logs"
+    compression: true
+  
+  config:
+    enabled: true
+    path: "./backups/config"
+    compression: true
+    before_changes: true

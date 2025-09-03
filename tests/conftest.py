@@ -14,12 +14,12 @@ import json
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from conversation_engine.engine import (
-    ConversationEngine, 
-    Buyer, 
+    ConversationEngine,
+    Buyer,
     Product,
     ConversationState,
     IntentionType,
-    BuyerPriority
+    BuyerPriority,
 )
 
 
@@ -38,7 +38,7 @@ def conversation_engine():
     test_templates_path = Path(__file__).parent / "fixtures" / "test_responses.json"
     if not test_templates_path.exists():
         test_templates_path = None
-    
+
     return ConversationEngine(templates_path=test_templates_path)
 
 
@@ -53,7 +53,7 @@ def sample_buyer():
         distancia_km=10.5,
         ultima_actividad=datetime.now(),
         perfil_verificado=True,
-        tiene_foto=True
+        tiene_foto=True,
     )
 
 
@@ -68,7 +68,7 @@ def new_buyer():
         distancia_km=850.0,
         ultima_actividad=datetime.now(),
         perfil_verificado=False,
-        tiene_foto=False
+        tiene_foto=False,
     )
 
 
@@ -84,7 +84,7 @@ def sample_product():
         estado="Como nuevo",
         categoria="Móviles y Telefonía",
         permite_envio=True,
-        zona="Centro Madrid"
+        zona="Centro Madrid",
     )
 
 
@@ -95,23 +95,23 @@ def test_messages():
         "saludos": [
             "Hola, está disponible?",
             "Buenas tardes, sigue en venta?",
-            "Hey! Me interesa el producto"
+            "Hey! Me interesa el producto",
         ],
         "negociacion": [
             "Cuánto es lo menos que aceptas?",
             "Te doy 200€ en mano ahora mismo",
-            "Puedes hacer descuento?"
+            "Puedes hacer descuento?",
         ],
         "fraude": [
             "Dame tu whatsapp para hablar mejor",
             "Pago por western union, mi hijo te recoge",
-            "Entra en este link bit.ly/12345 para el pago"
+            "Entra en este link bit.ly/12345 para el pago",
         ],
         "compra_directa": [
             "Lo quiero, cuando podemos quedar?",
             "Me lo llevo, dime donde quedamos",
-            "Lo compro ya mismo"
-        ]
+            "Lo compro ya mismo",
+        ],
     }
 
 
@@ -121,25 +121,18 @@ def mock_templates():
     return {
         "saludos": {
             "inicial": ["¡Hola! Sí, está disponible"],
-            "respuesta": ["Hola, ¿qué tal?"]
+            "respuesta": ["Hola, ¿qué tal?"],
         },
         "disponibilidad": {
             "disponible": ["Sí, está disponible"],
-            "vendido": ["Lo siento, ya está vendido"]
+            "vendido": ["Lo siento, ya está vendido"],
         },
-        "precio": {
-            "informacion": ["El precio es {precio}€"]
-        },
+        "precio": {"informacion": ["El precio es {precio}€"]},
         "respuestas_seguridad": {
             "no_whatsapp": ["Prefiero hablar por Wallapop"],
-            "sospecha_fraude": ["No me parece seguro"]
+            "sospecha_fraude": ["No me parece seguro"],
         },
-        "variables_sistema": {
-            "tiempo_respuesta": {
-                "min": 1,
-                "max": 2
-            }
-        }
+        "variables_sistema": {"tiempo_respuesta": {"min": 1, "max": 2}},
     }
 
 

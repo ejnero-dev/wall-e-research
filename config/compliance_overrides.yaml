@@ -1,0 +1,308 @@
+# Compliance Version Configuration Overrides
+# For "wall-e-compliance" repository - GDPR/ToS compliant version for commercial use
+# CRITICAL: All settings designed to meet ethical and legal requirements
+
+# Application identification
+app:
+  name: "Wall-E Compliance Assistant"
+  mode: "compliance"
+  disclaimer: "Commercial-grade assistant with full ethical compliance"
+  transparency_notice: "This is an automated assistant. Human oversight is always available."
+
+# Wallapop behavior - Strict compliance settings
+wallapop:
+  auth_method: "cookies"  # Preferred secure method
+  
+  behavior:
+    # Conservative, human-like timing
+    min_delay_between_messages: 120  # 2 minutes minimum
+    max_delay_between_messages: 600  # Up to 10 minutes
+    
+    # Limited active hours for natural behavior
+    active_hours:
+      start: "09:00"
+      end: "20:00"  # Shorter window
+      timezone: "Europe/Madrid"
+    
+    # Strict ethical limits
+    max_concurrent_conversations: 3  # Very conservative
+    max_messages_per_conversation: 10  # Limited depth
+    max_messages_per_hour: 5  # CRITICAL: Ethical limit per audit
+    max_actions_per_minute: 0.5  # Maximum one action per 2 minutes
+    pause_after_conversations: 5
+    pause_duration_minutes: 15  # Longer breaks
+    
+    # Compliance-mandatory features
+    human_confirmation_required: true
+    transparency_disclosure: true
+    consent_collection: true
+    opt_out_mechanism: true
+    
+    # Mandatory compliance checks
+    compliance_checks:
+      terms_of_service_compliance: true
+      gdpr_compliance: true
+      data_minimization: true
+      purpose_limitation: true
+
+# Anti-detection settings - Basic compliance level only
+anti_detection:
+  level: "basic"  # Minimal evasion for compliance
+  enabled: false  # CRITICAL: Disabled for ethical compliance
+  
+  browser:
+    headless: false  # Visible operation for transparency
+    stealth_mode: false  # No stealth for compliance
+    fingerprint_randomization: false
+    user_agent_rotation: false
+    proxy_rotation: false
+    
+  behavioral:
+    mouse_movement_simulation: false
+    typing_delay_simulation: true  # Only natural typing speed
+    scroll_simulation: false
+    random_pauses: true  # Natural pauses only
+    human_like_patterns: true  # Only natural behavior
+  
+  evasion:
+    webdriver_detection_bypass: false  # CRITICAL: No evasion
+    automation_markers_hiding: false   # CRITICAL: Transparent automation
+    canvas_fingerprinting_protection: false
+    webgl_fingerprinting_protection: false
+  
+  compliance_mode:
+    identify_as_automated: true  # MANDATORY: Transparency
+    display_automation_notice: true
+    allow_detection: true  # Accept platform detection
+
+# Enhanced security for compliance
+security:
+  fraud_detection:
+    enabled: true
+    strict_mode: true  # Maximum protection
+    auto_block_suspicious: true
+    report_suspicious: true
+    report_to_authorities: true  # Legal compliance
+    
+    suspicious_keywords:
+      - "western union"
+      - "paypal familia"
+      - "adelantado"
+      - "mi transportista"
+      - "transferencia bancaria"
+      - "crypto"
+      - "bitcoin"
+      - "fuera de wallapop"
+    
+    risk_thresholds:
+      low: 15   # Very sensitive
+      medium: 30
+      high: 50
+  
+  gdpr_compliance:
+    enabled: true  # MANDATORY
+    data_minimization: true
+    purpose_limitation: true
+    consent_required: true
+    right_to_be_forgotten: true
+    data_portability: true
+    breach_notification: true
+    
+    data_retention:
+      personal_data_days: 30  # Minimal retention
+      conversation_data_days: 90
+      analytics_data_days: 365
+      
+  data_collection:
+    collect_user_profiles: false  # GDPR compliance
+    collect_conversation_history: true  # With consent only
+    collect_price_data: true  # Public data only
+    anonymize_data: true  # MANDATORY
+    pseudonymization: true
+    encryption_at_rest: true
+    encryption_in_transit: true
+
+# Compliance-focused price analyzer
+price_analyzer:
+  platforms:
+    wallapop:
+      enabled: true
+      max_results: 20  # Conservative limits
+      rate_limit: 0.5  # Very conservative
+      respect_robots_txt: true
+    amazon:
+      enabled: true
+      max_results: 10
+      rate_limit: 0.25
+      respect_robots_txt: true
+    ebay:
+      enabled: false  # Disabled by default for compliance
+    milanuncios:
+      enabled: false  # Disabled by default
+    vinted:
+      enabled: false  # Disabled by default
+  
+  analysis:
+    min_samples: 5
+    max_samples_per_platform: 25
+    advanced_algorithms: false  # Basic analysis only
+    machine_learning: false  # Disabled for transparency
+    trend_analysis: false
+    
+  compliance_features:
+    respect_rate_limits: true
+    honor_robots_txt: true
+    minimal_data_collection: true
+    transparent_operation: true
+
+# Compliance response system
+responses:
+  enable_ab_testing: false  # No experimentation on users
+  ab_test_percentage: 0
+  experimental_responses: false
+  personality_variants: false
+  response_optimization: false
+  
+  compliance_mode:
+    transparency_notices: true
+    consent_requests: true
+    opt_out_instructions: true
+    human_handoff_available: true
+    
+  mandatory_disclosures:
+    automation_notice: "This message was generated by an automated assistant."
+    human_oversight: "Human oversight is available upon request."
+    data_usage: "Your data is processed according to our privacy policy."
+    opt_out: "You can opt out of automated responses at any time."
+
+# Restricted development features
+development:
+  debug_mode: false  # No debugging in compliance mode
+  test_mode: false
+  dry_run: false
+  
+  debugging:
+    save_screenshots: false  # Privacy protection
+    screenshots_path: null
+    save_page_source: false
+    detailed_logging: false  # Minimal logging
+    performance_profiling: false
+  
+  compliance_tools:
+    audit_logging: true
+    compliance_reporting: true
+    legal_documentation: true
+    consent_management: true
+
+# Compliance monitoring
+monitoring:
+  enabled: true
+  detailed_metrics: false  # Privacy-focused
+  performance_tracking: true
+  user_behavior_analysis: false  # Privacy protection
+  
+  compliance_monitoring:
+    gdpr_compliance_checks: true
+    terms_of_service_adherence: true
+    rate_limit_monitoring: true
+    consent_tracking: true
+    opt_out_tracking: true
+    legal_compliance_alerts: true
+
+# Mandatory compliance notifications
+notifications:
+  desktop_notifications: false  # Privacy protection
+  
+  email:
+    enabled: true
+    smtp_host: "localhost"
+    smtp_port: 587
+    alerts:
+      - "compliance_violations"
+      - "legal_issues"
+      - "consent_withdrawals"
+      - "system_errors"
+  
+  compliance_alerts:
+    gdpr_violations: true
+    terms_violations: true
+    rate_limit_exceeded: true
+    consent_issues: true
+    audit_failures: true
+
+# Legal compliance backup
+backup:
+  enabled: true
+  legal_compliance:
+    enabled: true
+    audit_trails: true
+    consent_records: true
+    compliance_reports: true
+    legal_documentation: true
+    
+  data_protection:
+    encryption_required: true
+    access_controls: true
+    retention_policies: true
+    deletion_schedules: true
+
+# Consent management system
+consent_management:
+  enabled: true  # MANDATORY
+  
+  required_consents:
+    - "data_processing"
+    - "automated_communication"
+    - "conversation_logging"
+    - "analytics_collection"
+  
+  consent_ui:
+    clear_language: true
+    granular_options: true
+    easy_withdrawal: true
+    record_keeping: true
+  
+  withdrawal_handling:
+    immediate_effect: true
+    data_deletion: true
+    notification_required: true
+    audit_logging: true
+
+# Human oversight system
+human_oversight:
+  enabled: true  # MANDATORY
+  
+  escalation_triggers:
+    - "user_requests_human"
+    - "complex_negotiation"
+    - "suspicious_activity"
+    - "compliance_violation"
+    - "technical_error"
+  
+  handoff_process:
+    notification_required: true
+    context_preservation: true
+    seamless_transition: true
+    documentation_required: true
+  
+  availability:
+    business_hours_only: true
+    response_time_sla: "4 hours"
+    emergency_contact: true
+
+# Legal documentation
+legal_documentation:
+  enabled: true
+  
+  required_documents:
+    - "privacy_policy"
+    - "terms_of_service"
+    - "consent_forms"
+    - "data_processing_agreement"
+    - "user_rights_notice"
+  
+  document_management:
+    version_control: true
+    update_notifications: true
+    user_acknowledgment: true
+    legal_review_required: true
