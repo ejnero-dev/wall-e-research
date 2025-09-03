@@ -7,6 +7,7 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+import pytest
 
 # Add src directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -15,6 +16,7 @@ import aiohttp
 from datetime import datetime
 
 
+@pytest.mark.asyncio
 async def test_endpoints():
     """Test all dashboard endpoints"""
     base_url = "http://localhost:8000"
@@ -162,6 +164,7 @@ async def test_endpoints():
     print("2. Start building the frontend with the working endpoints")
 
 
+@pytest.mark.asyncio
 async def test_websocket_stream():
     """Test WebSocket streaming for 10 seconds"""
     print("\n🔄 Testing WebSocket real-time stream (10 seconds)...")

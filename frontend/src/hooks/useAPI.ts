@@ -81,7 +81,7 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ productId, updates }: { productId: string; updates: Record<string, any> }) =>
+    mutationFn: ({ productId, updates }: { productId: string; updates: Record<string, unknown> }) =>
       api.updateProduct(productId, updates),
     onSuccess: (updatedProduct) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products });

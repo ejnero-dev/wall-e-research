@@ -10,7 +10,7 @@ import { toast } from './use-toast';
 
 interface WebSocketMessage {
   type: string;
-  data: any;
+  data: unknown;
   timestamp?: string;
 }
 
@@ -82,7 +82,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
         case 'new_log':
           // Add new log entry
-          queryClient.setQueryData(queryKeys.logs(50), (oldData: any[] | undefined) => {
+          queryClient.setQueryData(queryKeys.logs(50), (oldData: unknown[] | undefined) => {
             if (!oldData) return [message.data];
             return [message.data, ...oldData].slice(0, 50);
           });
@@ -90,7 +90,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
         case 'scraper_update':
           // Update scraper status
-          queryClient.setQueryData(queryKeys.scrapers, (oldData: any[] | undefined) => {
+          queryClient.setQueryData(queryKeys.scrapers, (oldData: unknown[] | undefined) => {
             if (!oldData) return [];
             return oldData.map(scraper => 
               scraper.scraper_id === message.data.scraper_id 
@@ -125,7 +125,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
         case 'heartbeat':
           // Respond to server heartbeat
-          sendMessage({ type: 'pong', timestamp: new Date().toISOString() });
+          if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+          }
           break;
 
         case 'pong':
@@ -147,7 +149,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }, [queryClient, onMessage]);
 
   // Send message to server
-  const sendMessage = useCallback((message: any) => {
+  const sendMessage = useCallback((message: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     }
@@ -161,10 +163,10 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
     heartbeatIntervalRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        sendMessage({ type: 'ping', timestamp: new Date().toISOString() });
+        wsRef.current.send(JSON.stringify({ type: 'ping', timestamp: new Date().toISOString() }));
       }
     }, 30000); // Ping every 30 seconds
-  }, [sendMessage]);
+  }, []);
 
   // Connect to WebSocket
   const connect = useCallback(() => {
@@ -253,7 +255,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         error: error instanceof Error ? error.message : 'Unknown error',
       }));
     }
-  }, [url, handleMessage, state.reconnectCount, maxReconnectAttempts, reconnectInterval, setupHeartbeat, onConnect, onDisconnect, onError]);
+  }, [url, handleMessage, state.reconnectCount, state.isConnecting, maxReconnectAttempts, reconnectInterval, setupHeartbeat, onConnect, onDisconnect, onError]);
 
   // Disconnect from WebSocket
   const disconnect = useCallback(() => {

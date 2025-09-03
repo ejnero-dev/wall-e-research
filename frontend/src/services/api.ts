@@ -64,7 +64,7 @@ export interface LogEntry {
   level: string;
   message: string;
   source: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AutoDetectionStatus {
@@ -73,6 +73,17 @@ export interface AutoDetectionStatus {
   last_scan?: string;
   products_detected?: number;
   total_products_managed?: number;
+}
+
+export interface AutoDetectionConfig {
+  enabled: boolean;
+  scan_interval_minutes: number;
+  auto_add_products: boolean;
+  auto_respond_new_products: boolean;
+  ai_personality: string;
+  response_delay_min: number;
+  response_delay_max: number;
+  enable_notifications: boolean;
 }
 
 export interface ConfigValues {
@@ -134,7 +145,7 @@ export const api = {
       body: JSON.stringify(productData),
     }),
 
-  updateProduct: (productId: string, updates: Record<string, any>) =>
+  updateProduct: (productId: string, updates: Record<string, unknown>) =>
     fetchAPI<Product>(`/products/${productId}`, {
       method: 'PUT',
       body: JSON.stringify(updates),
@@ -214,8 +225,8 @@ export const api = {
       enable_notifications: boolean;
     }>('/auto-detection/config'),
 
-  updateAutoDetectionConfig: (config: any) =>
-    fetchAPI<{ status: string; message: string; config: any }>('/auto-detection/config', {
+  updateAutoDetectionConfig: (config: AutoDetectionConfig) =>
+    fetchAPI<{ status: string; message: string; config: AutoDetectionConfig }>('/auto-detection/config', {
       method: 'PUT',
       body: JSON.stringify(config),
     }),
