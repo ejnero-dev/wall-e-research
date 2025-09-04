@@ -1,9 +1,10 @@
 # 🤖 Wall-E: Advanced Wallapop Automation System
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![AI Engine](https://img.shields.io/badge/AI%20Engine-Ollama%20%2B%20Llama%203.2-green.svg)](https://ollama.ai)
-[![Security](https://img.shields.io/badge/security-multi--layer%20fraud%20detection-brightgreen.svg)](#security-features)
-[![Status](https://img.shields.io/badge/status-production%20ready-success.svg)](#project-status)
+![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
+![AI Engine](https://img.shields.io/badge/AI%20Engine-Ollama%20%2B%20Llama%203.2-green.svg)
+![Frontend](https://img.shields.io/badge/Frontend-React%20%26%20TypeScript-blueviolet.svg)
+![Security](https://img.shields.io/badge/security-multi--layer%20fraud%20detection-brightgreen.svg)
+![Status](https://img.shields.io/badge/status-production%20ready-success.svg)
 
 ## 🌟 Overview
 
@@ -11,26 +12,21 @@ Wall-E is a comprehensive **Wallapop marketplace automation system** that revolu
 
 ### ✨ Key Achievements
 
-- **🤖 Complete AI Engine** - 9 specialized modules with natural Spanish conversations
-- **🛡️ Zero-tolerance fraud detection** - Multi-layer validation with 0% false negatives on critical patterns
-- **⚡ Production performance** - <3s response times, 10+ concurrent conversations
-- **🎭 3 seller personalities** - Adaptive conversation styles for Wallapop marketplace
-- **🔄 Hybrid AI + Template system** - 99.9% availability with graceful degradation
-- **📊 Comprehensive analytics** - Real-time performance monitoring and optimization
+- **🎨 Full-Stack Platform**: Developed a complete system including a React/TypeScript frontend, a FastAPI backend with WebSockets, and a sophisticated automation core.
+- **🤖 Complete AI Engine**: Implemented a 9-module AI engine for generating natural Spanish conversations using local LLMs (Ollama + Llama 3.2).
+- **🛡️ Zero-Tolerance Fraud Detection**: Designed a multi-layer validation system with 0% false negatives on critical fraud patterns.
+- **⚡ Production Performance**: Achieved <3s response times and 10+ concurrent conversations through meticulous optimization.
+- **🎭 3 Seller Personalities**: Created adaptive conversation styles (Amigable, Profesional, Experimentado) for different marketplace scenarios.
+- **🔄 Hybrid AI + Template System**: Ensured 99.9% availability with a graceful degradation system.
+- **📊 Comprehensive Analytics**: Built a real-time performance monitoring and optimization dashboard.
 
 ---
 
-## ⚠️ Important Legal Notice
+## ⚠️ Important Legal & Ethical Notice
 
-**Terms of Service Compliance:** This project is provided for **educational and research purposes**. Users are responsible for ensuring compliance with Wallapop's Terms of Service and applicable laws in their jurisdiction. The authors do not encourage or endorse any activity that violates platform terms or regulations.
-
-**Responsible Use:** 
-- Always respect rate limits and platform policies
-- Obtain proper consent before automating interactions
-- Comply with local data protection regulations (GDPR, etc.)
-- Use anti-detection features responsibly and ethically
-
-**Disclaimer:** The authors are not liable for any misuse of this software or violations of third-party terms of service.
+> **This project is provided for educational and research purposes ONLY.**
+> 
+> Users are solely responsible for ensuring compliance with Wallapop's Terms of Service and all applicable laws (including GDPR). The authors do not endorse any activity that violates platform terms or regulations. Use responsibly and ethically.
 
 ---
 
@@ -88,12 +84,14 @@ Wall-E System Architecture
 ### Technology Stack
 
 **AI & NLP:**
+
 - **Ollama** - Local LLM inference
 - **Llama 3.2 11B Vision Instruct** - Spanish conversation model
 - **spaCy** - Natural language processing
 - **Transformers** - Model optimization
 
 **Frontend & Dashboard:**
+
 - **React 18** - Modern frontend framework
 - **TypeScript** - Type-safe development
 - **Vite** - Fast build tool and dev server
@@ -102,6 +100,7 @@ Wall-E System Architecture
 - **React Query** - Server state management
 
 **Backend:**
+
 - **Python 3.11+** - Core language
 - **FastAPI** - Async web framework
 - **PostgreSQL** - Primary database
@@ -109,6 +108,7 @@ Wall-E System Architecture
 - **Playwright** - Web automation
 
 **Infrastructure:**
+
 - **Docker** - Containerization
 - **GitHub Actions** - CI/CD pipeline
 - **Prometheus + Grafana** - Monitoring
@@ -119,34 +119,29 @@ Wall-E System Architecture
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - **Hardware:** 16GB+ RAM, 4+ CPU cores, 20GB storage
 - **Software:** Python 3.11+, Docker (optional), Git
 
 ### 30-Second Setup
 
 ```bash
-# 1. Clone and setup
+# 1. Clone and setup the backend
 git clone <repository-url>
 cd wall-e-research
-python scripts/quick_setup.py
+python scripts/quick_setup.py --full
 
 # 2. Install AI Engine (includes Ollama + model)
 python scripts/setup_ollama.py
 
-# 3. Test the system
-python scripts/test_ai_engine_basic.py
-
-# 4. Run interactive demo
-python examples/ai_engine_example.py --interactive
-
-# 5. Start Web Dashboard (Optional)
+# 3. Start the entire Web Dashboard (Frontend + Backend)
 ./start_dashboard.sh
 ```
 
 ### Web Dashboard Access
-Once the dashboard is running:
+
 - **Frontend UI**: http://localhost:8080
-- **Backend API**: http://localhost:8000  
+- **Backend API**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
 
 ### First AI Conversation
@@ -176,6 +171,7 @@ print(f"🛡️ Risk Score: {response.risk_score}/100")
 ```
 
 **Expected Output:**
+
 ```
 🤖 Response: ¡Hola! 😊 Sí, está disponible. Son 400€ como aparece en el anuncio. ¿Te interesa?
 📊 Confidence: 0.92
@@ -239,40 +235,45 @@ The **Wall-E AI Engine** transforms static template responses into **natural, in
 #### Core Features
 
 **🧠 Advanced LLM Integration:**
+
 - **Local inference** with Ollama (no external API dependencies)
 - **Llama 3.2 11B Vision Instruct** optimized for Spanish
 - **128K context length** for extended conversations
 - **Hardware-aware configuration** (8GB to 64GB+ RAM support)
 
 **🎭 Seller Personalities:**
+
 1. **Amigable Casual** - Informal, friendly, moderate emojis
 2. **Profesional Cordial** - Polite, professional, informative
 3. **Vendedor Experimentado** - Confident, market-savvy, direct
 
 **🔄 Hybrid Architecture:**
+
 - **AI-first generation** with template fallback
 - **99.9% availability** through graceful degradation
 - **4 operation modes:** auto, ai_only, template_only, hybrid
 
 #### Performance Specifications
 
-| Metric | Target | Current Status |
-|--------|--------|---------------|
-| Response Time | <3.0s | ✅ 1.2-2.8s avg |
-| Concurrent Conversations | 10+ | ✅ 15+ tested |
-| Memory Usage | <80% RAM | ✅ 65% peak |
-| Throughput | 20+ RPM | ✅ 30+ sustained |
-| Availability | 99.9% | ✅ 99.97% measured |
+| Metric                   | Target   | Current Status    |
+| ------------------------ | -------- | ----------------- |
+| Response Time            | <3.0s    | ✅ 1.2-2.8s avg    |
+| Concurrent Conversations | 10+      | ✅ 15+ tested      |
+| Memory Usage             | <80% RAM | ✅ 65% peak        |
+| Throughput               | 20+ RPM  | ✅ 30+ sustained   |
+| Availability             | 99.9%    | ✅ 99.97% measured |
 
 #### Example Conversations
 
 **Natural Price Negotiation:**
+
 ```
 👤 Buyer: "¿Aceptas 320€?"
 🤖 AI: "Según mi experiencia, 320€ es bastante bajo para el estado que tiene. Te podría dejar en 370€ por decisión rápida 👍"
 ```
 
 **Fraud Detection in Action:**
+
 ```
 👤 Buyer: "¿Aceptas pago por Western Union?"
 🤖 Security: "Lo siento, solo acepto efectivo o Bizum en persona"
@@ -285,29 +286,16 @@ For complete AI Engine documentation, see [🤖 AI_ENGINE_GUIDE.md](docs/AI_ENGI
 
 ## 🎨 Web Dashboard
 
-### Modern Interface for System Management
+A professional, real-time interface for monitoring and controlling the entire automation system, built with a modern frontend stack.
 
-The **Wall-E Web Dashboard** provides a professional, real-time interface for monitoring and controlling the automation system through a modern React application connected to the FastAPI backend.
+<p align="center">[DASHBOARD GIF/SCREENSHOT - SHOW THE SYSTEM IN ACTION]</p>
 
-#### Dashboard Features
+### Dashboard Features
 
-**📊 Real-time Metrics:**
-- **System Performance**: Response times, success rates, active scrapers
-- **Product Analytics**: Active listings, views, messages received
-- **Revenue Tracking**: Monthly income, conversion rates, sales statistics
-- **Live Updates**: WebSocket connection for instant data refresh
-
-**🎛️ Control Panels:**
-- **Product Management**: Add, edit, pause, delete Wallapop listings
-- **Auto-detection Control**: Start/stop automated product discovery
-- **Response Configuration**: Toggle automated replies, customize settings
-- **System Monitoring**: Health checks, error logs, performance metrics
-
-**🔄 Professional UI/UX:**
-- **Responsive Design**: Mobile-first approach with professional styling
-- **Real-time Updates**: WebSocket integration for live data
-- **Loading States**: Skeleton loaders and smooth transitions
-- **Error Handling**: Graceful fallbacks and user-friendly error messages
+- **📊 Real-time Metrics**: Live monitoring of system performance, sales, and messages via WebSockets.
+- **🎛️ Control Panels**: Manage products, toggle auto-detection, and configure AI responses from the UI.
+- **🔄 Professional UI/UX**: A responsive, mobile-first design using React, TypeScript, Vite, shadcn-ui, and Tailwind CSS.
+- **🚀 Quick Start**: Launch the full-stack application with a single command: `./start_dashboard.sh`.
 
 #### Quick Dashboard Start
 
@@ -325,16 +313,17 @@ cd frontend && npm run dev
 
 #### Dashboard URLs
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend UI** | http://localhost:8080 | Main dashboard interface |
-| **Backend API** | http://localhost:8000 | REST API endpoints |
-| **API Documentation** | http://localhost:8000/docs | Swagger/OpenAPI docs |
-| **Health Check** | http://localhost:8000/api/dashboard/health | System status |
+| Service               | URL                                        | Description              |
+| --------------------- | ------------------------------------------ | ------------------------ |
+| **Frontend UI**       | http://localhost:8080                      | Main dashboard interface |
+| **Backend API**       | http://localhost:8000                      | REST API endpoints       |
+| **API Documentation** | http://localhost:8000/docs                 | Swagger/OpenAPI docs     |
+| **Health Check**      | http://localhost:8000/api/dashboard/health | System status            |
 
 #### Technology Stack
 
 **Frontend:**
+
 - **React 18 + TypeScript** - Type-safe modern frontend
 - **Vite** - Fast development and build system
 - **shadcn-ui** - Professional component library
@@ -342,6 +331,7 @@ cd frontend && npm run dev
 - **React Query** - Server state management with caching
 
 **Backend Integration:**
+
 - **FastAPI** - Async REST API with automatic OpenAPI docs
 - **WebSocket** - Real-time bidirectional communication
 - **CORS Configuration** - Development and production support
@@ -367,17 +357,20 @@ Wall-E implements a **comprehensive security architecture** with **zero toleranc
 #### Security Layers
 
 **🚨 Critical Fraud Patterns (Auto-block):**
+
 - Payment methods: Western Union, MoneyGram, PayPal family transfers
 - Personal data requests: DNI, credit cards, passwords
 - External threats: Suspicious URLs, phishing attempts
 - Shipping scams: Courier payments, advance payments
 
 **⚠️ High-Risk Pattern Detection:**
+
 - Urgency pressure tactics ("need today", "immediate")
 - Location fishing ("exact address", "send location")
 - Value manipulation ("free delivery", "extra payment")
 
 **📊 Contextual Risk Assessment:**
+
 - **Buyer profile analysis:** New accounts, no ratings, distant locations
 - **Conversation patterns:** Inconsistent responses, rushed negotiations
 - **Product context:** Price manipulation, condition misrepresentation
@@ -392,11 +385,13 @@ Wall-E implements a **comprehensive security architecture** with **zero toleranc
 #### Compliance Features
 
 **Research Version (wall-e-research):**
+
 - Advanced AI experimentation
 - Detailed logging and metrics
 - Performance optimization focus
 
 **Compliance Version (wall-e-compliance):**
+
 - Strict rate limiting
 - Enhanced audit trails
 - Commercial-grade monitoring
@@ -406,68 +401,28 @@ For detailed security documentation, see [🛡️ SECURITY_AUDIT_REPORT.md](SECU
 
 ---
 
-## 📁 Project Versions
+## 📁 Project Philosophy: Research vs. Compliance
 
-Wall-E maintains **three specialized versions** for different use cases:
+Wall-E was designed with a unique dual-architecture philosophy to separate experimental features from production-safe operation.
 
-### 🔬 Research Version (Current Repository)
-**Latest AI Engine implementation**
+### 🔬 Research Version (This Repository)
 
-**Features:**
-- ✅ **Complete AI Engine** with 9 modules
-- ✅ **Ollama + Llama 3.2 integration** working
-- ✅ **Performance optimization system**
-- ✅ **Advanced testing suite**
-- ✅ **Real-time monitoring**
+This repository represents the full-featured research version, designed to push the boundaries of automation technology in an educational context.
 
-**Use cases:**
-- AI model experimentation
-- Performance benchmarking
-- Feature development
-- Academic research
+- ✅ Complete AI Engine with advanced features.
+- ✅ Sophisticated anti-detection mechanisms for academic study.
+- ✅ Configurable, high-performance settings for experimentation.
 
-### 🏢 Compliance Version
-**Commercial-grade with legal compliance**
+### 🏛️ Compliance Architecture (Design-Ready)
 
-**Features:**
-- ✅ **Enhanced audit trails**
-- ✅ **Strict rate limiting**
-- ✅ **Legal compliance validation**
-- ✅ **Commercial monitoring**
-- ❌ **AI Engine** (template-only)
+The system includes a complete, production-ready configuration for a "Compliance Mode". This mode is designed for ethical, commercial use and enforces:
 
-**Use cases:**
-- Commercial deployment
-- Enterprise customers
-- Regulated environments
-- Production sales
+- ✅ Strict, human-like rate limiting (max 5 messages/hour).
+- ✅ Mandatory human oversight for critical decisions.
+- ✅ Full GDPR compliance and data protection.
+- ✅ Disabled anti-detection features for transparent operation.
 
-### 🌐 Project Hub
-**Centralized documentation and coordination**
-
-**Features:**
-- ✅ **Complete documentation**
-- ✅ **Development roadmaps**
-- ✅ **Integration guides**
-- ✅ **Subagent coordination**
-- ✅ **Architecture planning**
-
-**Use cases:**
-- Project management
-- Documentation hub
-- Integration coordination
-- Strategic planning
-
-### Version Comparison
-
-| Feature | Research | Compliance | Hub |
-|---------|----------|------------|-----|
-| AI Engine | ✅ Full | ❌ Planned | 📋 Docs |
-| Templates | ✅ Enhanced | ✅ Core | 📋 Specs |
-| Fraud Detection | ✅ Advanced | ✅ Strict | 📋 Guides |
-| Performance | ✅ Optimized | ✅ Stable | 📋 Benchmarks |
-| Monitoring | ✅ Real-time | ✅ Audit | 📋 Dashboards |
-| Documentation | ✅ Technical | ✅ Legal | ✅ Complete |
+> This dual approach demonstrates the ability to build not only technically advanced systems but also to architect them for safe, ethical, and legally compliant deployment in a commercial environment.
 
 ---
 
@@ -478,31 +433,37 @@ Wall-E maintains **three specialized versions** for different use cases:
 **📋 [Complete Documentation Index](docs/README.md)** - Start here for all documentation
 
 ### 🚀 Getting Started
+
 - [📦 Installation Guide](docs/getting-started/INSTALLATION_GUIDE.md) - Complete setup instructions
 - [⚡ Quick Start Guide](docs/getting-started/QUICK_START_GUIDE.md) - 5-minute demo setup
 - [🎯 Configuration Guide](docs/getting-started/CONFIGURATION_GUIDE.md) - System configuration
 
 ### 🤖 AI Engine
+
 - [🧠 AI Engine Complete Guide](docs/ai-engine/AI_ENGINE_GUIDE.md) - Comprehensive AI system documentation
 - [📊 Performance Optimization](docs/ai-engine/PERFORMANCE_OPTIMIZATION.md) - Production tuning
 - [💬 Conversation System](docs/ai-engine/CONVERSATION_SYSTEM.md) - Natural language processing
 
 ### 🔒 Security & Compliance
+
 - [🛡️ Security Overview](docs/security/SECURITY_OVERVIEW.md) - Complete security architecture
 - [🚨 Fraud Detection Guide](docs/security/FRAUD_DETECTION_GUIDE.md) - Pattern recognition system
 - [⚖️ Legal Compliance](docs/security/LEGAL_COMPLIANCE.md) - Legal considerations
 
 ### 🛠️ Development
+
 - [👩‍💻 Development Guide](docs/development/DEVELOPMENT_GUIDE.md) - Contributing guidelines
 - [🏗️ Architecture Overview](docs/development/ARCHITECTURE_OVERVIEW.md) - System design
 - [🔧 API Reference](docs/development/API_REFERENCE.md) - Complete API documentation
 
 ### 🚀 Operations
+
 - [🐳 Deployment Guide](docs/operations/DEPLOYMENT_GUIDE.md) - Production deployment
 - [🩺 Troubleshooting](docs/operations/TROUBLESHOOTING.md) - Common issues and solutions
 - [📋 Changelog](docs/operations/CHANGELOG.md) - Version history
 
 ### 🔌 Integration
+
 - [💰 Price Analysis Integration](docs/integration/PRICE_ANALYSIS_INTEGRATION.md) - Market intelligence
 - [🤖 Subagents Usage Guide](docs/integration/SUBAGENTS_USAGE_GUIDE.md) - Specialized AI agents
 - [📊 Real World Examples](docs/integration/REAL_WORLD_EXAMPLES.md) - Practical use cases
@@ -514,6 +475,7 @@ Wall-E maintains **three specialized versions** for different use cases:
 ### Comprehensive Testing Suite
 
 **Test Coverage:**
+
 - **95%+ coverage** on critical AI Engine components
 - **90%+ coverage** on fraud detection systems
 - **85%+ coverage** on conversation engine
@@ -522,6 +484,7 @@ Wall-E maintains **three specialized versions** for different use cases:
 ### Test Categories
 
 **🤖 AI Engine Tests:**
+
 ```bash
 # Complete AI Engine test suite
 pytest tests/ai_engine/ -v --cov=src/ai_engine
@@ -534,6 +497,7 @@ python scripts/run_performance_benchmark.py --full
 ```
 
 **🔒 Security Tests:**
+
 ```bash
 # Fraud pattern validation
 pytest tests/security/ -v
@@ -546,6 +510,7 @@ pytest tests/integration/test_security.py -v
 ```
 
 **⚡ Performance Tests:**
+
 ```bash
 # Quick performance validation
 python scripts/validate_performance_setup.py
@@ -560,6 +525,7 @@ python scripts/test_concurrent_processing.py --requests 20
 ### Automated Testing
 
 **CI/CD Pipeline:**
+
 - **GitHub Actions** integration
 - **Multi-Python version** testing (3.11, 3.12)
 - **Security scanning** with Bandit
@@ -567,6 +533,7 @@ python scripts/test_concurrent_processing.py --requests 20
 - **Code quality** with Black, Flake8, MyPy
 
 **Test Execution:**
+
 ```bash
 # Run all tests
 pytest
@@ -591,18 +558,21 @@ Wall-E is optimized for **real-world marketplace automation** with enterprise-gr
 #### Performance Metrics
 
 **🚀 Response Performance:**
+
 - **Average Response Time:** 1.2-2.8 seconds (target: <3s)
 - **95th Percentile:** <5 seconds
 - **Concurrent Conversations:** 15+ simultaneous (target: 10+)
 - **Throughput:** 30+ responses/minute sustained (target: 20+)
 
 **💾 Resource Efficiency:**
+
 - **Memory Usage:** 65% peak utilization (target: <80%)
 - **CPU Usage:** <90% during peak load
 - **Cache Hit Rate:** 45% average (target: >30%)
 - **Memory Growth:** <10MB/hour (excellent stability)
 
 **🔄 Availability:**
+
 - **System Uptime:** 99.97% measured (target: 99.9%)
 - **AI Engine Availability:** 99.5% (with fallback: 99.97%)
 - **Error Rate:** <0.1% on critical operations
@@ -611,18 +581,21 @@ Wall-E is optimized for **real-world marketplace automation** with enterprise-gr
 #### Hardware Recommendations
 
 **Minimum Requirements:**
+
 - **RAM:** 8GB (lightweight models)
 - **CPU:** 4 cores, 2.4GHz+
 - **Storage:** 20GB SSD
 - **Network:** Stable broadband
 
 **Recommended Configuration:**
+
 - **RAM:** 16GB+ (optimal for Llama 3.2 11B)
 - **CPU:** 8+ cores, 3.0GHz+
 - **Storage:** 50GB+ NVMe SSD
 - **Network:** Dedicated bandwidth
 
 **Enterprise Configuration:**
+
 - **RAM:** 32GB+ (premium models)
 - **CPU:** 16+ cores, high-frequency
 - **Storage:** 100GB+ enterprise SSD
@@ -631,6 +604,7 @@ Wall-E is optimized for **real-world marketplace automation** with enterprise-gr
 #### Performance Optimization
 
 **Automatic Optimizations:**
+
 - **Hardware-aware configuration** based on detected resources
 - **Connection pooling** for Ollama LLM inference
 - **Multi-layer caching** (local + Redis distributed)
@@ -638,6 +612,7 @@ Wall-E is optimized for **real-world marketplace automation** with enterprise-gr
 - **Concurrent processing** with intelligent load balancing
 
 **Manual Tuning Options:**
+
 ```python
 # Custom performance configuration
 config = AIEngineConfig(
@@ -656,6 +631,7 @@ config = AIEngineConfig(
 ### Development Workflow
 
 **🔧 Setup Development Environment:**
+
 ```bash
 # Clone repository
 git clone <repository-url>
@@ -672,6 +648,7 @@ python scripts/validate_setup.py --dev
 ```
 
 **📝 Code Standards:**
+
 - **Python 3.11+** with type hints
 - **Black** for code formatting
 - **Flake8** for linting
@@ -680,6 +657,7 @@ python scripts/validate_setup.py --dev
 - **Conventional Commits** for commit messages
 
 **🧪 Testing Requirements:**
+
 - **95%+ test coverage** for new features
 - **All tests must pass** before merge
 - **Performance benchmarks** for AI Engine changes
@@ -690,6 +668,7 @@ python scripts/validate_setup.py --dev
 Wall-E uses **11 specialized Claude Code subagents** for different development areas:
 
 **Active Subagents (Currently Used):**
+
 - ✅ `web-scraper-security` - Anti-detection scraping
 - ✅ `test-automation-specialist` - Testing infrastructure
 - ✅ `security-compliance-auditor` - Security validation
@@ -697,6 +676,7 @@ Wall-E uses **11 specialized Claude Code subagents** for different development a
 - ✅ `performance-optimizer` - System optimization
 
 **Available Subagents (For Future Phases):**
+
 - 🔄 `config-manager` - Configuration management
 - 🔄 `devops-deploy-specialist` - Docker & CI/CD
 - 🔄 `technical-documentation-writer` - Documentation automation
@@ -707,24 +687,28 @@ Wall-E uses **11 specialized Claude Code subagents** for different development a
 ### Contributing Areas
 
 **🤖 AI Engine Enhancements:**
+
 - New conversation personalities
 - Advanced prompt optimization
 - Multi-language support
 - Performance improvements
 
 **🛡️ Security Features:**
+
 - New fraud pattern detection
 - Enhanced validation algorithms
 - Compliance automation
 - Security monitoring
 
 **📊 Analytics & Monitoring:**
+
 - Performance dashboards
 - Business intelligence
 - Predictive analytics
 - Real-time monitoring
 
 **🚀 Infrastructure:**
+
 - Docker optimization
 - Kubernetes deployment
 - CI/CD improvements
@@ -734,68 +718,32 @@ For detailed contributing guidelines, see [👩‍💻 DEVELOPMENT_GUIDE.md](doc
 
 ---
 
-## 📞 Support & Contact
+## 🤝 Contributing & Contact
 
-### Getting Help
+This is a personal portfolio project, but feedback and suggestions are always welcome! Please feel free to open an issue to share your thoughts.
 
-**📚 Documentation First:**
-- Check [📖 Documentation Index](#-documentation) for comprehensive guides
-- Review [🩺 Troubleshooting Guide](docs/TROUBLESHOOTING.md) for common issues
-- Consult [🔧 API Reference](docs/API_REFERENCE.md) for integration help
-
-**🛠️ Self-Diagnosis Tools:**
-```bash
-# System health check
-python scripts/validate_setup.py --full
-
-# AI Engine diagnostics
-python scripts/test_ai_engine_integration.py
-
-# Performance analysis
-python scripts/run_performance_benchmark.py --quick
-```
-
-**📊 Monitoring & Logs:**
-```bash
-# Check system status
-python scripts/check_system_health.py
-
-# View real-time metrics
-python scripts/monitor_performance.py
-
-# Analyze logs
-tail -f logs/ai_engine.log
-tail -f logs/security.log
-```
-
-### Community & Contributions
-
-**🤝 Contributing:**
-- Follow [Development Guide](docs/DEVELOPMENT_GUIDE.md)
-- Submit issues with detailed reproduction steps
-- Include performance impact analysis for changes
-- Provide comprehensive test coverage
-
-**📈 Roadmap & Planning:**
-- See [📋 FASE2_ROADMAP_COMPLETE.md](docs/FASE2_ROADMAP_COMPLETE.md)
-- Check current project status in issues
-- Review planned enhancements in milestones
+- **Issues**: GitHub Issues Page
+- **LinkedIn**:[ LinkedIn](https://www.linkedin.com/in/emilioneva/)
 
 ---
 
 ## 📄 License & Legal
 
 ### Project License
+
 This project is licensed under **[License Type]** - see the [LICENSE](LICENSE) file for details.
 
 ### Legal Compliance
+
 - **Wallapop ToS Compliance** - Designed to respect platform terms
 - **GDPR Compliance** - Data protection by design
 - **Spanish Legal Framework** - Compliant with local regulations
 - **Security Standards** - Enterprise-grade security implementation
 
 ### Ethical Usage
+
 Wall-E is designed for **legitimate marketplace automation** that:
+
 - ✅ **Enhances user experience** through faster, more natural responses
 - ✅ **Protects against fraud** with advanced detection systems
 - ✅ **Respects platform rules** and rate limits
@@ -810,22 +758,26 @@ For complete legal information, see [⚖️ LEGAL_COMPLIANCE.md](docs/LEGAL_COMP
 ### Current Status: **Production Ready** ✅
 
 **✅ Completed Phases:**
+
 - **Phase 1:** Core system architecture with scraping, conversations, and price analysis
 - **Phase 2A:** Complete AI Engine with natural language generation
 - **Phase 2B:** Web dashboard with React frontend and real-time monitoring
 
 **🔄 Active Development:**
+
 - Performance optimization and monitoring enhancements
 - Dashboard feature expansion (charts, analytics, notifications)
 - Advanced testing and quality assurance
 - CI/CD pipeline optimization
 
 **📋 Next Phases:**
+
 - **Phase 3:** Advanced optimizations and scaling
 - **Phase 4:** Documentation automation and DevOps
 - **Phase 5:** Advanced AI features and analytics
 
 ### Key Metrics
+
 - **📊 AI Engine Performance:** Production-ready with <3s response times
 - **🎨 Web Dashboard:** Real-time monitoring with WebSocket integration
 - **🛡️ Security:** Zero-tolerance fraud detection with 0% false negatives
