@@ -20,7 +20,13 @@
       "Bash(uv sync:*)",
       "Bash(uv run flake8:*)",
       "Bash(uv run:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(./start_dashboard.sh:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }
