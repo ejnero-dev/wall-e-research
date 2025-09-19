@@ -40,7 +40,7 @@ class DetectionManager:
 
     def __init__(self, dashboard_api_url: str = "http://localhost:8000/api/dashboard"):
         self.dashboard_api_url = dashboard_api_url
-        self.scanner = AccountScanner(AuthMethod.AUTO)
+        self._scanner = None  # Lazy initialization
 
         # Estado del manager
         self.is_running = False
@@ -71,10 +71,16 @@ class DetectionManager:
         # Cola de productos para procesar
         self.product_queue = asyncio.Queue()
 
-        # Configurar callbacks del scanner
-        self._setup_scanner_callbacks()
-
         logger.info("DetectionManager initialized")
+
+    @property
+    def scanner(self):
+        """Lazy initialization of AccountScanner"""
+        if self._scanner is None:
+            logger.info("Initializing AccountScanner (lazy loading)")
+            self._scanner = AccountScanner(AuthMethod.AUTO)
+            self._setup_scanner_callbacks()
+        return self._scanner
 
     def _setup_scanner_callbacks(self):
         """Configura callbacks del scanner"""
@@ -490,7 +496,12 @@ class DetectionManager:
 
     def get_status(self) -> Dict[str, Any]:
         """Obtiene estado completo del sistema"""
-        scanner_status = self.scanner.get_status()
+        # Only get scanner status if scanner is already initialized
+        scanner_status = None
+        if self._scanner is not None:
+            scanner_status = self.scanner.get_status()
+        else:
+            scanner_status = {"status": "not_initialized", "message": "Scanner not yet initialized"}
 
         uptime = None
         if self.stats["uptime_start"]:

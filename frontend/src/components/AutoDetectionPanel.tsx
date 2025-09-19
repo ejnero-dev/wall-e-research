@@ -149,8 +149,8 @@ export const AutoDetectionPanel = () => {
               variant="outline" 
               size="sm"
               onClick={() => {
-                console.log('Abriendo configuración de auto-detección');
-                // TODO: Abrir panel de configuración
+                console.log('Opening auto-detection configuration');
+                // TODO: Could implement configuration dialog/panel
               }}
             >
               <Settings className="w-4 h-4 mr-2" />
@@ -348,8 +348,8 @@ export const AutoDetectionPanel = () => {
                   variant="ghost" 
                   size="sm"
                   onClick={() => {
-                    console.log('Mostrando todos los productos detectados:', detectedProducts.length);
-                    // TODO: Navegar a vista completa de productos detectados
+                    // Could navigate to a dedicated detected products page
+                    window.open('/detection', '_self');
                   }}
                 >
                   Ver todos ({detectedProducts.length})

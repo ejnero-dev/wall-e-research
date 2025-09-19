@@ -946,8 +946,27 @@ async def get_product_stats():
     """
     try:
         generate_mock_products()  # Ensure mock data exists
-
-        products = list(mock_products.values())
+        client = await get_redis_client()
+        products = []
+        
+        if client:
+            # Try to get products from Redis (same logic as get_products)
+            product_keys = await client.keys("product:*")
+            if product_keys:
+                for key in product_keys:
+                    product_data = await client.get(key)
+                    if product_data:
+                        try:
+                            product_dict = json.loads(product_data)
+                            product = Product(**product_dict)
+                            products.append(product)
+                        except Exception as e:
+                            logger.error(f"Error parsing product from Redis: {e}")
+                            continue
+        
+        # If no products from Redis, use mock data as fallback
+        if not products:
+            products = list(mock_products.values())
 
         stats = ProductStats(
             total=len(products),
@@ -1286,7 +1305,17 @@ async def get_auto_detection_status():
                 "is_running": False,
             }
 
-        return detection_manager.get_status()
+        # Get the detailed status from DetectionManager
+        detailed_status = detection_manager.get_status()
+        
+        # Transform to match frontend interface
+        return {
+            "status": "running" if detailed_status["detection_manager"]["is_running"] else "stopped",
+            "is_running": detailed_status["detection_manager"]["is_running"],
+            "last_scan": detailed_status["stats"].get("last_detection_time"),
+            "products_detected": detailed_status["stats"].get("products_detected", 0),
+            "total_products_managed": detailed_status["stats"].get("products_auto_added", 0)
+        }
 
     except Exception as e:
         logger.error(f"Error getting auto-detection status: {e}")

@@ -20,9 +20,12 @@ import {
   Bell,
   HelpCircle
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useMetrics, useProducts, useAutoDetectionStatus } from "@/hooks/useAPI";
 
 export function AppSidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { data: metrics } = useMetrics();
   const { data: products } = useProducts();
   const { data: autoDetection } = useAutoDetectionStatus();
@@ -36,14 +39,14 @@ export function AppSidebar() {
       icon: BarChart3,
       url: "/",
       badge: null,
-      active: true,
+      active: location.pathname === "/",
     },
     {
       title: "Productos",
       icon: Package,
       url: "/products",
       badge: activeProducts > 0 ? activeProducts.toString() : null,
-      active: false,
+      active: location.pathname === "/products",
     },
     {
       title: "Mensajes",
@@ -51,7 +54,7 @@ export function AppSidebar() {
       url: "/messages",
       badge: pendingMessages > 0 ? pendingMessages.toString() : null,
       badgeVariant: "destructive" as const,
-      active: false,
+      active: location.pathname === "/messages",
     },
     {
       title: "Auto-detección",
@@ -59,14 +62,14 @@ export function AppSidebar() {
       url: "/detection",
       badge: autoDetection?.is_running ? "ON" : "OFF",
       badgeVariant: autoDetection?.is_running ? "default" : "secondary" as const,
-      active: false,
+      active: location.pathname === "/detection",
     },
     {
       title: "Analíticas",
       icon: TrendingUp,
       url: "/analytics",
       badge: null,
-      active: false,
+      active: location.pathname === "/analytics",
     },
     {
       title: "Notificaciones",
@@ -74,7 +77,7 @@ export function AppSidebar() {
       url: "/notifications",
       badge: "3",
       badgeVariant: "secondary" as const,
-      active: false,
+      active: location.pathname === "/notifications",
     },
   ];
 
@@ -120,8 +123,7 @@ export function AppSidebar() {
               <SidebarMenuButton 
                 className={`w-full justify-start ${item.active ? 'bg-accent text-accent-foreground' : ''}`}
                 onClick={() => {
-                  // TODO: Implementar navegación real
-                  console.log('Navegando a:', item.url);
+                  navigate(item.url);
                 }}
               >
                 <item.icon className="w-4 h-4" />
@@ -146,8 +148,11 @@ export function AppSidebar() {
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 onClick={() => {
-                  // TODO: Implementar navegación real
-                  console.log('Navegando a:', item.url);
+                  if (item.url) {
+                    navigate(item.url);
+                  } else {
+                    console.log('Opening:', item.title);
+                  }
                 }}
               >
                 <item.icon className="w-4 h-4" />

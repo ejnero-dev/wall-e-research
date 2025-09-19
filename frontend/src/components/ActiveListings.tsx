@@ -5,12 +5,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Eye, MessageCircle, Settings, Plus, AlertTriangle, MoreVertical, Edit, Pause, Play, Trash2, ExternalLink } from "lucide-react";
-import { useProducts } from "@/hooks/useAPI";
+import { useProducts, useUpdateProduct, useDeleteProduct } from "@/hooks/useAPI";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { AddProductDialog } from "./AddProductDialog";
+import { useState } from "react";
 
 export const ActiveListings = () => {
   const { data: products, isLoading, error } = useProducts();
+  const updateProduct = useUpdateProduct();
+  const deleteProduct = useDeleteProduct();
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', {
@@ -105,8 +110,14 @@ export const ActiveListings = () => {
     product.status === 'active' || product.status === 'paused'
   ).slice(0, 6) || [];
 
+  // Debug: Log products data to console
+  console.log('All products:', products);
+  console.log('Filtered activeProducts:', activeProducts);
+  console.log('ActiveProducts count:', activeProducts.length);
+
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Anuncios Activos ({activeProducts.length})</CardTitle>
@@ -115,8 +126,7 @@ export const ActiveListings = () => {
               variant="outline" 
               size="sm"
               onClick={() => {
-                console.log('Agregando nuevo producto');
-                // TODO: Abrir modal/formulario para agregar producto
+                setAddDialogOpen(true);
               }}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -126,8 +136,8 @@ export const ActiveListings = () => {
               variant="outline" 
               size="sm"
               onClick={() => {
-                console.log('Gestionando todos los productos');
-                // TODO: Navegar a página de gestión de productos
+                // Already on products page, could implement bulk actions or advanced filters
+                console.log('Opening advanced product management');
               }}
             >
               <Settings className="w-4 h-4 mr-2" />
@@ -247,14 +257,17 @@ export const ActiveListings = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => {
                       console.log('Editando producto:', product.id);
-                      // TODO: Abrir modal de edición
+                      // TODO: Implementar modal de edición de producto específico
                     }}>
                       <Edit className="mr-2 h-4 w-4" />
                       Editar producto
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      console.log(product.status === 'active' ? 'Pausando' : 'Reactivando', 'producto:', product.id);
-                      // TODO: Implementar cambio de estado
+                    <DropdownMenuItem onClick={async () => {
+                      const newStatus = product.status === 'active' ? 'paused' : 'active';
+                      await updateProduct.mutateAsync({
+                        productId: product.id,
+                        updates: { status: newStatus }
+                      });
                     }}>
                       {product.status === 'active' ? (
                         <>
@@ -271,10 +284,9 @@ export const ActiveListings = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-destructive"
-                      onClick={() => {
-                        console.log('Eliminando producto:', product.id);
+                      onClick={async () => {
                         if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                          // TODO: Implementar eliminación
+                          await deleteProduct.mutateAsync(product.id);
                         }
                       }}
                     >
@@ -289,5 +301,11 @@ export const ActiveListings = () => {
         )}
       </CardContent>
     </Card>
+    
+      <AddProductDialog 
+        open={addDialogOpen} 
+        onOpenChange={setAddDialogOpen} 
+      />
+    </>
   );
 };
