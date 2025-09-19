@@ -21,6 +21,12 @@ Comprehensive documentation for the Wall-E Advanced Wallapop Automation System.
 - [⚖️ Legal Compliance](security/LEGAL_COMPLIANCE.md) - Legal considerations
 - [📋 Audit Reports](security/AUDIT_REPORTS.md) - Security audit findings
 
+### 🛡️ GDPR Compliance **[NEW]**
+- [⚖️ GDPR Compliance Guide](compliance/GDPR_COMPLIANCE_GUIDE.md) - Complete GDPR implementation
+- [📜 Ethical Usage Guidelines](compliance/ETHICAL_USAGE.md) - Legal and ethical boundaries
+- [🔍 Compliance Validation](compliance/COMPLIANCE_VALIDATION.md) - Testing and verification
+- [🏛️ Legal Deployment Guide](compliance/LEGAL_DEPLOYMENT.md) - Production compliance setup
+
 ### 🛠️ Development
 - [👩‍💻 Development Guide](development/DEVELOPMENT_GUIDE.md) - Contributing guidelines
 - [🏗️ Architecture Overview](development/ARCHITECTURE_OVERVIEW.md) - System design
@@ -48,6 +54,8 @@ Comprehensive documentation for the Wall-E Advanced Wallapop Automation System.
 **For Operations:** Review [Deployment Guide](operations/DEPLOYMENT_GUIDE.md) → [Monitoring Guide](operations/MONITORING_GUIDE.md)
 
 **For Security:** Read [Security Overview](security/SECURITY_OVERVIEW.md) → [Fraud Detection Guide](security/FRAUD_DETECTION_GUIDE.md)
+
+**For GDPR Compliance:** Start with [GDPR Compliance Guide](compliance/GDPR_COMPLIANCE_GUIDE.md) → [Legal Deployment Guide](compliance/LEGAL_DEPLOYMENT.md)
 
 ## 🆕 Latest Updates
 
