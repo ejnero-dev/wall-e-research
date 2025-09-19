@@ -1,6 +1,10 @@
 """
-SQLAlchemy models for Wallapop Bot MVP
-Minimal schema focusing on Happy Path: products, buyers, conversations, messages
+SQLAlchemy models for Wallapop Bot with GDPR Compliance
+Schema includes core functionality plus comprehensive compliance features:
+- GDPR consent management and tracking
+- Audit trails for all data operations
+- Data retention policies and automatic cleanup
+- Compliance monitoring and reporting
 """
 
 from datetime import datetime
@@ -23,6 +27,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 import enum
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 Base = declarative_base()
 
@@ -51,6 +57,52 @@ class ProductStatus(enum.Enum):
     RESERVED = "reserved"
     SOLD = "sold"
     INACTIVE = "inactive"
+
+
+class ConsentType(enum.Enum):
+    """Types of user consent for GDPR compliance"""
+
+    DATA_PROCESSING = "data_processing"
+    AUTOMATED_COMMUNICATION = "automated_communication"
+    CONVERSATION_LOGGING = "conversation_logging"
+    ANALYTICS_COLLECTION = "analytics_collection"
+    MARKETING_COMMUNICATION = "marketing_communication"
+
+
+class ConsentStatus(enum.Enum):
+    """Status of user consent"""
+
+    GRANTED = "granted"
+    WITHDRAWN = "withdrawn"
+    EXPIRED = "expired"
+    PENDING = "pending"
+
+
+class AuditAction(enum.Enum):
+    """Types of auditable actions"""
+
+    CREATE = "create"
+    READ = "read"
+    UPDATE = "update"
+    DELETE = "delete"
+    LOGIN = "login"
+    LOGOUT = "logout"
+    CONSENT_GRANTED = "consent_granted"
+    CONSENT_WITHDRAWN = "consent_withdrawn"
+    DATA_EXPORTED = "data_exported"
+    DATA_DELETED = "data_deleted"
+    FRAUD_DETECTED = "fraud_detected"
+    COMPLIANCE_VIOLATION = "compliance_violation"
+
+
+class DataRetentionPolicy(enum.Enum):
+    """Data retention policies"""
+
+    PERSONAL_DATA = "personal_data"  # 30 days
+    CONVERSATION_DATA = "conversation_data"  # 90 days
+    ANALYTICS_DATA = "analytics_data"  # 365 days
+    AUDIT_DATA = "audit_data"  # 7 years
+    CONSENT_RECORDS = "consent_records"  # Permanent
 
 
 class Product(Base):
@@ -103,7 +155,7 @@ class Product(Base):
 
 
 class Buyer(Base):
-    """Buyer/User model"""
+    """Buyer/User model with GDPR compliance features"""
 
     __tablename__ = "buyers"
 
@@ -117,7 +169,7 @@ class Buyer(Base):
     is_blocked = Column(Boolean, default=False)
     trust_score = Column(Float, default=0.5)  # 0-1 scale
 
-    # Contact info (optional, for completed sales)
+    # Contact info (optional, for completed sales) - GDPR sensitive
     phone = Column(String(20))
     email = Column(String(100))
 
@@ -125,6 +177,17 @@ class Buyer(Base):
     total_conversations = Column(Integer, default=0)
     completed_purchases = Column(Integer, default=0)
     cancelled_conversations = Column(Integer, default=0)
+
+    # GDPR Compliance fields
+    gdpr_consent_given = Column(Boolean, default=False)
+    gdpr_consent_date = Column(DateTime(timezone=True))
+    data_processing_consent = Column(Boolean, default=False)
+    marketing_consent = Column(Boolean, default=False)
+    anonymized = Column(Boolean, default=False)
+    pseudonymized = Column(Boolean, default=False)
+    deletion_requested = Column(Boolean, default=False)
+    deletion_scheduled_at = Column(DateTime(timezone=True))
+    data_export_requested = Column(Boolean, default=False)
 
     # Metadata
     profile_data = Column(JSON)  # Store additional profile info
@@ -145,12 +208,22 @@ class Buyer(Base):
     messages = relationship(
         "Message", back_populates="buyer", cascade="all, delete-orphan"
     )
+    consent_records = relationship(
+        "ConsentRecord", back_populates="buyer", cascade="all, delete-orphan"
+    )
+    audit_logs = relationship(
+        "AuditLog", back_populates="buyer", cascade="all, delete-orphan"
+    )
 
     # Indexes
-    __table_args__ = (Index("idx_buyer_active", "is_blocked", "last_active_at"),)
+    __table_args__ = (
+        Index("idx_buyer_active", "is_blocked", "last_active_at"),
+        Index("idx_buyer_gdpr_consent", "gdpr_consent_given", "gdpr_consent_date"),
+        Index("idx_buyer_deletion", "deletion_requested", "deletion_scheduled_at"),
+    )
 
     def __repr__(self):
-        return f"<Buyer(id={self.id}, username={self.username}, verified={self.is_verified})>"
+        return f"<Buyer(id={self.id}, username={self.username}, verified={self.is_verified}, gdpr_consent={self.gdpr_consent_given})>"
 
 
 class Conversation(Base):
@@ -284,3 +357,193 @@ class BotSession(Base):
 
     def __repr__(self):
         return f"<BotSession(id={self.id}, session_id={self.session_id}, active={self.active_conversations_count})>"
+
+
+class ConsentRecord(Base):
+    """GDPR consent tracking model"""
+
+    __tablename__ = "consent_records"
+
+    id = Column(Integer, primary_key=True)
+    consent_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+
+    # Foreign keys
+    buyer_id = Column(Integer, ForeignKey("buyers.id"), nullable=False)
+
+    # Consent details
+    consent_type = Column(Enum(ConsentType), nullable=False)
+    status = Column(Enum(ConsentStatus), default=ConsentStatus.PENDING, nullable=False)
+
+    # Legal basis for processing (GDPR Article 6)
+    legal_basis = Column(String(50))  # consent, contract, legal_obligation, vital_interests, public_task, legitimate_interests
+    purpose = Column(Text)  # Specific purpose of data processing
+
+    # Consent metadata
+    granted_at = Column(DateTime(timezone=True))
+    withdrawn_at = Column(DateTime(timezone=True))
+    expires_at = Column(DateTime(timezone=True))
+
+    # Technical details
+    ip_address = Column(String(45))  # IPv4/IPv6
+    user_agent = Column(Text)
+    consent_version = Column(String(20))  # Version of consent form
+
+    # Evidence and audit
+    consent_evidence = Column(JSON)  # Store evidence of consent (form data, etc.)
+    withdrawal_evidence = Column(JSON)  # Store evidence of withdrawal
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    buyer = relationship("Buyer", back_populates="consent_records")
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_consent_buyer_type", "buyer_id", "consent_type"),
+        Index("idx_consent_status_expires", "status", "expires_at"),
+        Index("idx_consent_granted_withdrawn", "granted_at", "withdrawn_at"),
+    )
+
+    def __repr__(self):
+        return f"<ConsentRecord(id={self.id}, buyer_id={self.buyer_id}, type={self.consent_type.value}, status={self.status.value})>"
+
+
+class AuditLog(Base):
+    """Comprehensive audit trail for GDPR compliance"""
+
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True)
+    audit_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+
+    # What happened
+    action = Column(Enum(AuditAction), nullable=False)
+    entity_type = Column(String(50), nullable=False)  # table/model name
+    entity_id = Column(String(50))  # ID of affected record
+
+    # Who did it
+    buyer_id = Column(Integer, ForeignKey("buyers.id"))  # Null for system actions
+    user_identifier = Column(String(100))  # Username, email, or system identifier
+
+    # When and where
+    ip_address = Column(String(45))
+    user_agent = Column(Text)
+    session_id = Column(String(100))
+
+    # Details
+    description = Column(Text, nullable=False)
+    old_values = Column(JSON)  # Previous state
+    new_values = Column(JSON)  # New state
+    audit_metadata = Column(JSON)  # Additional context
+
+    # Risk assessment
+    risk_level = Column(String(20))  # low, medium, high, critical
+    compliance_relevant = Column(Boolean, default=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    # Relationships
+    buyer = relationship("Buyer", back_populates="audit_logs")
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_audit_action_entity", "action", "entity_type"),
+        Index("idx_audit_buyer_created", "buyer_id", "created_at"),
+        Index("idx_audit_compliance_risk", "compliance_relevant", "risk_level"),
+        Index("idx_audit_created_desc", created_at.desc()),
+    )
+
+    def __repr__(self):
+        return f"<AuditLog(id={self.id}, action={self.action.value}, entity={self.entity_type}, buyer_id={self.buyer_id})>"
+
+
+class DataRetentionSchedule(Base):
+    """Schedule for automatic data deletion per GDPR requirements"""
+
+    __tablename__ = "data_retention_schedules"
+
+    id = Column(Integer, primary_key=True)
+    schedule_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+
+    # What to delete
+    entity_type = Column(String(50), nullable=False)  # table/model name
+    entity_id = Column(String(50), nullable=False)  # ID of record to delete
+    policy = Column(Enum(DataRetentionPolicy), nullable=False)
+
+    # Scheduling
+    scheduled_deletion_at = Column(DateTime(timezone=True), nullable=False)
+    processed = Column(Boolean, default=False)
+    processing_attempted_at = Column(DateTime(timezone=True))
+    processing_completed_at = Column(DateTime(timezone=True))
+
+    # Results
+    deletion_successful = Column(Boolean)
+    deletion_error = Column(Text)
+
+    # Metadata
+    reason = Column(String(200))  # Reason for deletion
+    legal_basis = Column(String(100))  # Legal requirement or user request
+    retention_metadata = Column(JSON)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_retention_scheduled", "scheduled_deletion_at", "processed"),
+        Index("idx_retention_entity", "entity_type", "entity_id"),
+        Index("idx_retention_policy", "policy"),
+    )
+
+    def __repr__(self):
+        return f"<DataRetentionSchedule(id={self.id}, entity={self.entity_type}:{self.entity_id}, scheduled={self.scheduled_deletion_at})>"
+
+
+class ComplianceReport(Base):
+    """Compliance monitoring and reporting"""
+
+    __tablename__ = "compliance_reports"
+
+    id = Column(Integer, primary_key=True)
+    report_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+
+    # Report details
+    report_type = Column(String(50), nullable=False)  # daily, weekly, monthly, incident
+    period_start = Column(DateTime(timezone=True), nullable=False)
+    period_end = Column(DateTime(timezone=True), nullable=False)
+
+    # Metrics
+    total_users = Column(Integer, default=0)
+    consents_granted = Column(Integer, default=0)
+    consents_withdrawn = Column(Integer, default=0)
+    data_exports_requested = Column(Integer, default=0)
+    data_deletions_requested = Column(Integer, default=0)
+    data_breaches_detected = Column(Integer, default=0)
+    compliance_violations = Column(Integer, default=0)
+
+    # Detailed data
+    report_data = Column(JSON)  # Detailed metrics and analysis
+    issues_identified = Column(JSON)  # List of compliance issues
+    recommendations = Column(JSON)  # Recommended actions
+
+    # Status
+    generated_by = Column(String(100))  # System or user who generated
+    reviewed_by = Column(String(100))  # Who reviewed the report
+    status = Column(String(20), default="draft")  # draft, final, archived
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    reviewed_at = Column(DateTime(timezone=True))
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_compliance_report_period", "period_start", "period_end"),
+        Index("idx_compliance_report_type", "report_type", "status"),
+    )
+
+    def __repr__(self):
+        return f"<ComplianceReport(id={self.id}, type={self.report_type}, period={self.period_start} to {self.period_end})>"

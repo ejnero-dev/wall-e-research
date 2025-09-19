@@ -25,13 +25,13 @@ class ConfigMode(Enum):
 
 @dataclass
 class ConfigPaths:
-    """Configuration file paths"""
+    """Configuration file paths (relative to config_dir)"""
 
-    base_config: str = "config/base_config.yaml"
-    research_overrides: str = "config/research_overrides.yaml"
-    compliance_overrides: str = "config/compliance_overrides.yaml"
-    environment_config: str = "config/environment.yaml"  # Optional
-    local_config: str = "config/local.yaml"  # Optional, git-ignored
+    base_config: str = "base_config.yaml"
+    research_overrides: str = "research_overrides.yaml"
+    compliance_overrides: str = "compliance_overrides.yaml"
+    environment_config: str = "environment.yaml"  # Optional
+    local_config: str = "local.yaml"  # Optional, git-ignored
 
 
 class ConfigurationLoader:
@@ -231,25 +231,86 @@ class ConfigurationLoader:
             # Validate compliance-specific requirements
             wallapop = config.get("wallapop", {}).get("behavior", {})
 
-            # Check rate limits for compliance
+            # CRITICAL: Check rate limits for compliance (max 5 messages/hour)
             max_messages_per_hour = wallapop.get("max_messages_per_hour", 0)
             if max_messages_per_hour > 5:
                 validation_errors.append(
-                    f"Compliance mode requires max_messages_per_hour <= 5, got {max_messages_per_hour}"
+                    f"COMPLIANCE VIOLATION: max_messages_per_hour must be <= 5, got {max_messages_per_hour}"
                 )
 
-            # Check anti-detection is disabled
+            # CRITICAL: Check anti-detection is disabled for transparency
             anti_detection = config.get("anti_detection", {})
             if anti_detection.get("enabled", False):
                 validation_errors.append(
-                    "Compliance mode requires anti_detection.enabled = false"
+                    "COMPLIANCE VIOLATION: anti_detection.enabled must be false for transparency"
                 )
 
-            # Check GDPR compliance is enabled
+            # CRITICAL: Check GDPR compliance is enabled
             gdpr_compliance = config.get("security", {}).get("gdpr_compliance", {})
             if not gdpr_compliance.get("enabled", False):
                 validation_errors.append(
-                    "Compliance mode requires security.gdpr_compliance.enabled = true"
+                    "COMPLIANCE VIOLATION: security.gdpr_compliance.enabled must be true"
+                )
+
+            # CRITICAL: Check human confirmation is required
+            if not wallapop.get("human_confirmation_required", False):
+                validation_errors.append(
+                    "COMPLIANCE VIOLATION: wallapop.behavior.human_confirmation_required must be true"
+                )
+
+            # CRITICAL: Check transparency disclosure is enabled
+            if not wallapop.get("transparency_disclosure", False):
+                validation_errors.append(
+                    "COMPLIANCE VIOLATION: wallapop.behavior.transparency_disclosure must be true"
+                )
+
+            # CRITICAL: Check consent collection is enabled
+            if not wallapop.get("consent_collection", False):
+                validation_errors.append(
+                    "COMPLIANCE VIOLATION: wallapop.behavior.consent_collection must be true"
+                )
+
+            # Check consent management system
+            consent_mgmt = config.get("consent_management", {})
+            if not consent_mgmt.get("enabled", False):
+                validation_errors.append(
+                    "COMPLIANCE VIOLATION: consent_management.enabled must be true"
+                )
+
+            # Check human oversight system
+            human_oversight = config.get("human_oversight", {})
+            if not human_oversight.get("enabled", False):
+                validation_errors.append(
+                    "COMPLIANCE VIOLATION: human_oversight.enabled must be true"
+                )
+
+            # Check legal documentation is enabled
+            legal_docs = config.get("legal_documentation", {})
+            if not legal_docs.get("enabled", False):
+                validation_errors.append(
+                    "COMPLIANCE VIOLATION: legal_documentation.enabled must be true"
+                )
+
+            # Validate GDPR data retention limits
+            data_retention = gdpr_compliance.get("data_retention", {})
+            personal_data_days = data_retention.get("personal_data_days", 999)
+            if personal_data_days > 30:
+                validation_errors.append(
+                    f"COMPLIANCE VIOLATION: GDPR requires personal_data_days <= 30, got {personal_data_days}"
+                )
+
+            # Validate conservative limits
+            max_concurrent = wallapop.get("max_concurrent_conversations", 999)
+            if max_concurrent > 5:
+                validation_errors.append(
+                    f"COMPLIANCE VIOLATION: max_concurrent_conversations should be <= 5, got {max_concurrent}"
+                )
+
+            # Check audit logging is enabled
+            development = config.get("development", {}).get("compliance_tools", {})
+            if not development.get("audit_logging", False):
+                validation_errors.append(
+                    "COMPLIANCE VIOLATION: development.compliance_tools.audit_logging must be true"
                 )
 
         elif mode == ConfigMode.RESEARCH:
@@ -266,35 +327,44 @@ class ConfigurationLoader:
                 logger.error(f"Configuration validation error: {error}")
             return False
 
-        logger.info("Configuration validation passed")
+        logger.info(f"Configuration validation passed for mode: {mode.value}")
         return True
 
     def get_config_summary(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Generate a summary of key configuration settings"""
+        wallapop_behavior = config.get("wallapop", {}).get("behavior", {})
+        gdpr_compliance = config.get("security", {}).get("gdpr_compliance", {})
+
         summary = {
             "mode": config.get("app", {}).get("mode", "unknown"),
             "app_name": config.get("app", {}).get("name", "unknown"),
             "wallapop_settings": {
-                "max_messages_per_hour": config.get("wallapop", {})
-                .get("behavior", {})
-                .get("max_messages_per_hour"),
-                "max_concurrent_conversations": config.get("wallapop", {})
-                .get("behavior", {})
-                .get("max_concurrent_conversations"),
-                "anti_detection_enabled": config.get("anti_detection", {}).get(
-                    "enabled", False
-                ),
+                "max_messages_per_hour": wallapop_behavior.get("max_messages_per_hour"),
+                "max_concurrent_conversations": wallapop_behavior.get("max_concurrent_conversations"),
+                "anti_detection_enabled": config.get("anti_detection", {}).get("enabled", False),
+                "human_confirmation_required": wallapop_behavior.get("human_confirmation_required", False),
+                "transparency_disclosure": wallapop_behavior.get("transparency_disclosure", False),
+                "consent_collection": wallapop_behavior.get("consent_collection", False),
             },
             "compliance_features": {
-                "gdpr_enabled": config.get("security", {})
-                .get("gdpr_compliance", {})
-                .get("enabled", False),
-                "human_oversight": config.get("human_oversight", {}).get(
-                    "enabled", False
-                ),
-                "consent_management": config.get("consent_management", {}).get(
-                    "enabled", False
-                ),
+                "gdpr_enabled": gdpr_compliance.get("enabled", False),
+                "human_oversight": config.get("human_oversight", {}).get("enabled", False),
+                "consent_management": config.get("consent_management", {}).get("enabled", False),
+                "legal_documentation": config.get("legal_documentation", {}).get("enabled", False),
+                "audit_logging": config.get("development", {}).get("compliance_tools", {}).get("audit_logging", False),
+            },
+            "gdpr_settings": {
+                "data_minimization": gdpr_compliance.get("data_minimization", False),
+                "purpose_limitation": gdpr_compliance.get("purpose_limitation", False),
+                "consent_required": gdpr_compliance.get("consent_required", False),
+                "right_to_be_forgotten": gdpr_compliance.get("right_to_be_forgotten", False),
+                "personal_data_retention_days": gdpr_compliance.get("data_retention", {}).get("personal_data_days", None),
+            },
+            "security_settings": {
+                "fraud_detection_enabled": config.get("security", {}).get("fraud_detection", {}).get("enabled", False),
+                "strict_mode": config.get("security", {}).get("fraud_detection", {}).get("strict_mode", False),
+                "encryption_at_rest": config.get("security", {}).get("data_collection", {}).get("encryption_at_rest", False),
+                "anonymize_data": config.get("security", {}).get("data_collection", {}).get("anonymize_data", False),
             },
             "database": {
                 "host": config.get("database", {}).get("host"),

@@ -28,7 +28,13 @@
       "Bash(./start_dashboard.sh:*)",
       "Bash(curl:*)",
       "Read(//home/emilio/**)",
-      "Bash(eslint:*)"
+      "Bash(eslint:*)",
+      "Bash(git log:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker compose:*)",
+      "Bash(alembic upgrade:*)",
+      "Bash(alembic current:*)",
+      "Bash(uv add:*)"
     ],
     "deny": []
   }

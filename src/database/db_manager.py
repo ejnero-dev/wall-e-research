@@ -1,6 +1,10 @@
 """
-Database Manager for Wallapop Bot MVP
-Handles database connections and basic CRUD operations
+Database Manager for Wallapop Bot with GDPR Compliance
+Handles database connections, CRUD operations, and compliance features:
+- GDPR consent management
+- Audit logging for all operations
+- Data retention and automatic cleanup
+- Compliance reporting and monitoring
 """
 
 import logging
@@ -20,9 +24,17 @@ from .models import (
     Conversation,
     Message,
     BotSession,
+    ConsentRecord,
+    AuditLog,
+    DataRetentionSchedule,
+    ComplianceReport,
     ProductStatus,
     ConversationStatus,
     MessageType,
+    ConsentType,
+    ConsentStatus,
+    AuditAction,
+    DataRetentionPolicy,
 )
 
 logger = logging.getLogger(__name__)
@@ -473,3 +485,532 @@ class DatabaseManager:
                 .delete()
             )
             logger.info(f"Cleaned up {deleted} old bot sessions")
+
+    # GDPR Compliance Methods
+
+    def create_audit_log(
+        self,
+        action: AuditAction,
+        entity_type: str,
+        entity_id: str = None,
+        buyer_id: int = None,
+        user_identifier: str = None,
+        description: str = "",
+        old_values: Dict = None,
+        new_values: Dict = None,
+        ip_address: str = None,
+        user_agent: str = None,
+        session_id: str = None,
+        risk_level: str = "low",
+        compliance_relevant: bool = True,
+        **kwargs
+    ) -> AuditLog:
+        """Create an audit log entry for compliance tracking"""
+        with self.get_session() as session:
+            audit_log = AuditLog(
+                action=action,
+                entity_type=entity_type,
+                entity_id=entity_id,
+                buyer_id=buyer_id,
+                user_identifier=user_identifier,
+                description=description,
+                old_values=old_values,
+                new_values=new_values,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                session_id=session_id,
+                risk_level=risk_level,
+                compliance_relevant=compliance_relevant,
+                audit_metadata=kwargs
+            )
+            session.add(audit_log)
+            session.flush()
+            session.refresh(audit_log)
+            return audit_log
+
+    def create_consent_record(
+        self,
+        buyer_id: int,
+        consent_type: ConsentType,
+        status: ConsentStatus = ConsentStatus.PENDING,
+        legal_basis: str = "consent",
+        purpose: str = "",
+        ip_address: str = None,
+        user_agent: str = None,
+        consent_version: str = "1.0",
+        **kwargs
+    ) -> ConsentRecord:
+        """Create a consent record for GDPR compliance"""
+        with self.get_session() as session:
+            consent = ConsentRecord(
+                buyer_id=buyer_id,
+                consent_type=consent_type,
+                status=status,
+                legal_basis=legal_basis,
+                purpose=purpose,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                consent_version=consent_version,
+                consent_evidence=kwargs
+            )
+            session.add(consent)
+            session.flush()
+            session.refresh(consent)
+
+            # Create audit log for consent creation
+            self.create_audit_log(
+                action=AuditAction.CONSENT_GRANTED if status == ConsentStatus.GRANTED else AuditAction.CREATE,
+                entity_type="consent_records",
+                entity_id=str(consent.id),
+                buyer_id=buyer_id,
+                description=f"Consent record created for {consent_type.value}",
+                new_values={"consent_type": consent_type.value, "status": status.value},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                compliance_relevant=True
+            )
+
+            return consent
+
+    def grant_consent(
+        self,
+        buyer_id: int,
+        consent_type: ConsentType,
+        purpose: str = "",
+        ip_address: str = None,
+        user_agent: str = None,
+        consent_version: str = "1.0",
+        evidence: Dict = None
+    ) -> ConsentRecord:
+        """Grant consent for a specific purpose"""
+        with self.get_session() as session:
+            # Check if consent already exists
+            existing_consent = (
+                session.query(ConsentRecord)
+                .filter(
+                    and_(
+                        ConsentRecord.buyer_id == buyer_id,
+                        ConsentRecord.consent_type == consent_type
+                    )
+                )
+                .first()
+            )
+
+            if existing_consent:
+                # Update existing consent
+                existing_consent.status = ConsentStatus.GRANTED
+                existing_consent.granted_at = datetime.utcnow()
+                existing_consent.purpose = purpose
+                existing_consent.consent_evidence = evidence or {}
+                consent = existing_consent
+            else:
+                # Create new consent
+                consent = ConsentRecord(
+                    buyer_id=buyer_id,
+                    consent_type=consent_type,
+                    status=ConsentStatus.GRANTED,
+                    granted_at=datetime.utcnow(),
+                    legal_basis="consent",
+                    purpose=purpose,
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    consent_version=consent_version,
+                    consent_evidence=evidence or {}
+                )
+                session.add(consent)
+
+            session.flush()
+
+            # Update buyer GDPR fields
+            buyer = session.query(Buyer).filter(Buyer.id == buyer_id).first()
+            if buyer:
+                buyer.gdpr_consent_given = True
+                buyer.gdpr_consent_date = datetime.utcnow()
+                if consent_type == ConsentType.DATA_PROCESSING:
+                    buyer.data_processing_consent = True
+                elif consent_type == ConsentType.MARKETING_COMMUNICATION:
+                    buyer.marketing_consent = True
+
+            # Create audit log
+            self.create_audit_log(
+                action=AuditAction.CONSENT_GRANTED,
+                entity_type="consent_records",
+                entity_id=str(consent.id),
+                buyer_id=buyer_id,
+                description=f"Consent granted for {consent_type.value}",
+                new_values={"status": "granted", "purpose": purpose},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                compliance_relevant=True
+            )
+
+            session.refresh(consent)
+            return consent
+
+    def withdraw_consent(
+        self,
+        buyer_id: int,
+        consent_type: ConsentType,
+        reason: str = "",
+        ip_address: str = None,
+        user_agent: str = None,
+        evidence: Dict = None
+    ) -> bool:
+        """Withdraw consent and schedule data deletion if required"""
+        with self.get_session() as session:
+            consent = (
+                session.query(ConsentRecord)
+                .filter(
+                    and_(
+                        ConsentRecord.buyer_id == buyer_id,
+                        ConsentRecord.consent_type == consent_type,
+                        ConsentRecord.status == ConsentStatus.GRANTED
+                    )
+                )
+                .first()
+            )
+
+            if not consent:
+                return False
+
+            # Update consent record
+            consent.status = ConsentStatus.WITHDRAWN
+            consent.withdrawn_at = datetime.utcnow()
+            consent.withdrawal_evidence = evidence or {"reason": reason}
+
+            # Update buyer GDPR fields
+            buyer = session.query(Buyer).filter(Buyer.id == buyer_id).first()
+            if buyer:
+                if consent_type == ConsentType.DATA_PROCESSING:
+                    buyer.data_processing_consent = False
+                    buyer.deletion_requested = True
+                elif consent_type == ConsentType.MARKETING_COMMUNICATION:
+                    buyer.marketing_consent = False
+
+            # Schedule data deletion based on consent type
+            if consent_type == ConsentType.DATA_PROCESSING:
+                self.schedule_data_deletion(
+                    entity_type="buyers",
+                    entity_id=str(buyer_id),
+                    policy=DataRetentionPolicy.PERSONAL_DATA,
+                    reason="Consent withdrawn for data processing",
+                    legal_basis="GDPR Article 17 - Right to be forgotten"
+                )
+
+            # Create audit log
+            self.create_audit_log(
+                action=AuditAction.CONSENT_WITHDRAWN,
+                entity_type="consent_records",
+                entity_id=str(consent.id),
+                buyer_id=buyer_id,
+                description=f"Consent withdrawn for {consent_type.value}",
+                old_values={"status": "granted"},
+                new_values={"status": "withdrawn", "reason": reason},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                compliance_relevant=True
+            )
+
+            return True
+
+    def get_buyer_consents(self, buyer_id: int) -> List[ConsentRecord]:
+        """Get all consent records for a buyer"""
+        with self.get_session() as session:
+            return (
+                session.query(ConsentRecord)
+                .filter(ConsentRecord.buyer_id == buyer_id)
+                .order_by(ConsentRecord.created_at.desc())
+                .all()
+            )
+
+    def check_consent(self, buyer_id: int, consent_type: ConsentType) -> bool:
+        """Check if buyer has granted specific consent"""
+        with self.get_session() as session:
+            consent = (
+                session.query(ConsentRecord)
+                .filter(
+                    and_(
+                        ConsentRecord.buyer_id == buyer_id,
+                        ConsentRecord.consent_type == consent_type,
+                        ConsentRecord.status == ConsentStatus.GRANTED
+                    )
+                )
+                .first()
+            )
+            return consent is not None
+
+    def schedule_data_deletion(
+        self,
+        entity_type: str,
+        entity_id: str,
+        policy: DataRetentionPolicy,
+        reason: str = "",
+        legal_basis: str = "",
+        deletion_date: datetime = None
+    ) -> DataRetentionSchedule:
+        """Schedule data for deletion based on retention policy"""
+        with self.get_session() as session:
+            if not deletion_date:
+                # Calculate deletion date based on policy
+                now = datetime.utcnow()
+                if policy == DataRetentionPolicy.PERSONAL_DATA:
+                    deletion_date = now + timedelta(days=30)
+                elif policy == DataRetentionPolicy.CONVERSATION_DATA:
+                    deletion_date = now + timedelta(days=90)
+                elif policy == DataRetentionPolicy.ANALYTICS_DATA:
+                    deletion_date = now + timedelta(days=365)
+                elif policy == DataRetentionPolicy.AUDIT_DATA:
+                    deletion_date = now + timedelta(days=7*365)  # 7 years
+                else:
+                    deletion_date = now + timedelta(days=30)  # Default
+
+            schedule = DataRetentionSchedule(
+                entity_type=entity_type,
+                entity_id=entity_id,
+                policy=policy,
+                scheduled_deletion_at=deletion_date,
+                reason=reason,
+                legal_basis=legal_basis
+            )
+            session.add(schedule)
+            session.flush()
+            session.refresh(schedule)
+
+            # Create audit log
+            self.create_audit_log(
+                action=AuditAction.CREATE,
+                entity_type="data_retention_schedules",
+                entity_id=str(schedule.id),
+                description=f"Data deletion scheduled for {entity_type}:{entity_id}",
+                new_values={"scheduled_for": deletion_date.isoformat(), "policy": policy.value},
+                compliance_relevant=True
+            )
+
+            return schedule
+
+    def process_data_deletions(self) -> int:
+        """Process scheduled data deletions that are due"""
+        with self.get_session() as session:
+            now = datetime.utcnow()
+            due_deletions = (
+                session.query(DataRetentionSchedule)
+                .filter(
+                    and_(
+                        DataRetentionSchedule.scheduled_deletion_at <= now,
+                        DataRetentionSchedule.processed == False
+                    )
+                )
+                .all()
+            )
+
+            processed_count = 0
+            for deletion in due_deletions:
+                try:
+                    deletion.processing_attempted_at = now
+
+                    # Perform actual deletion based on entity type
+                    if deletion.entity_type == "buyers":
+                        buyer = session.query(Buyer).filter(Buyer.id == deletion.entity_id).first()
+                        if buyer:
+                            # Anonymize instead of delete to preserve referential integrity
+                            buyer.anonymized = True
+                            buyer.email = None
+                            buyer.phone = None
+                            buyer.username = f"anonymous_{buyer.id}"
+                            buyer.display_name = "Anonymous User"
+                            buyer.profile_data = {}
+
+                    deletion.processed = True
+                    deletion.processing_completed_at = now
+                    deletion.deletion_successful = True
+                    processed_count += 1
+
+                    # Create audit log
+                    self.create_audit_log(
+                        action=AuditAction.DATA_DELETED,
+                        entity_type=deletion.entity_type,
+                        entity_id=deletion.entity_id,
+                        description=f"Data deleted/anonymized according to retention policy",
+                        audit_metadata={"policy": deletion.policy.value},
+                        compliance_relevant=True
+                    )
+
+                except Exception as e:
+                    deletion.deletion_successful = False
+                    deletion.deletion_error = str(e)
+                    logger.error(f"Failed to process deletion {deletion.id}: {e}")
+
+            return processed_count
+
+    def export_user_data(self, buyer_id: int) -> Dict[str, Any]:
+        """Export all user data for GDPR data portability"""
+        with self.get_session() as session:
+            buyer = session.query(Buyer).filter(Buyer.id == buyer_id).first()
+            if not buyer:
+                return {}
+
+            # Get related data
+            conversations = (
+                session.query(Conversation)
+                .filter(Conversation.buyer_id == buyer_id)
+                .all()
+            )
+
+            messages = (
+                session.query(Message)
+                .filter(Message.buyer_id == buyer_id)
+                .all()
+            )
+
+            consents = (
+                session.query(ConsentRecord)
+                .filter(ConsentRecord.buyer_id == buyer_id)
+                .all()
+            )
+
+            # Create audit log
+            self.create_audit_log(
+                action=AuditAction.DATA_EXPORTED,
+                entity_type="buyers",
+                entity_id=str(buyer_id),
+                buyer_id=buyer_id,
+                description="User data exported for GDPR compliance",
+                compliance_relevant=True
+            )
+
+            # Mark export as requested
+            buyer.data_export_requested = True
+
+            return {
+                "export_date": datetime.utcnow().isoformat(),
+                "buyer": {
+                    "id": buyer.id,
+                    "username": buyer.username,
+                    "display_name": buyer.display_name,
+                    "email": buyer.email,
+                    "phone": buyer.phone,
+                    "created_at": buyer.created_at.isoformat() if buyer.created_at else None,
+                    "profile_data": buyer.profile_data
+                },
+                "conversations": [
+                    {
+                        "id": conv.id,
+                        "product_id": conv.product_id,
+                        "status": conv.status.value,
+                        "created_at": conv.created_at.isoformat() if conv.created_at else None,
+                        "negotiated_price": conv.negotiated_price,
+                        "meeting_location": conv.meeting_location
+                    }
+                    for conv in conversations
+                ],
+                "messages": [
+                    {
+                        "id": msg.id,
+                        "conversation_id": msg.conversation_id,
+                        "content": msg.content,
+                        "message_type": msg.message_type.value,
+                        "created_at": msg.created_at.isoformat() if msg.created_at else None
+                    }
+                    for msg in messages
+                ],
+                "consents": [
+                    {
+                        "consent_type": consent.consent_type.value,
+                        "status": consent.status.value,
+                        "granted_at": consent.granted_at.isoformat() if consent.granted_at else None,
+                        "withdrawn_at": consent.withdrawn_at.isoformat() if consent.withdrawn_at else None,
+                        "purpose": consent.purpose
+                    }
+                    for consent in consents
+                ]
+            }
+
+    def generate_compliance_report(
+        self,
+        report_type: str = "daily",
+        period_start: datetime = None,
+        period_end: datetime = None
+    ) -> ComplianceReport:
+        """Generate compliance report for monitoring"""
+        with self.get_session() as session:
+            if not period_start:
+                period_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+            if not period_end:
+                period_end = period_start + timedelta(days=1)
+
+            # Gather metrics
+            total_users = session.query(func.count(Buyer.id)).scalar()
+
+            consents_granted = (
+                session.query(func.count(ConsentRecord.id))
+                .filter(
+                    and_(
+                        ConsentRecord.granted_at.between(period_start, period_end),
+                        ConsentRecord.status == ConsentStatus.GRANTED
+                    )
+                )
+                .scalar()
+            )
+
+            consents_withdrawn = (
+                session.query(func.count(ConsentRecord.id))
+                .filter(
+                    and_(
+                        ConsentRecord.withdrawn_at.between(period_start, period_end),
+                        ConsentRecord.status == ConsentStatus.WITHDRAWN
+                    )
+                )
+                .scalar()
+            )
+
+            data_exports_requested = (
+                session.query(func.count(Buyer.id))
+                .filter(
+                    and_(
+                        Buyer.data_export_requested == True,
+                        Buyer.updated_at.between(period_start, period_end)
+                    )
+                )
+                .scalar()
+            )
+
+            data_deletions_requested = (
+                session.query(func.count(Buyer.id))
+                .filter(
+                    and_(
+                        Buyer.deletion_requested == True,
+                        Buyer.updated_at.between(period_start, period_end)
+                    )
+                )
+                .scalar()
+            )
+
+            compliance_violations = (
+                session.query(func.count(AuditLog.id))
+                .filter(
+                    and_(
+                        AuditLog.action == AuditAction.COMPLIANCE_VIOLATION,
+                        AuditLog.created_at.between(period_start, period_end)
+                    )
+                )
+                .scalar()
+            )
+
+            report = ComplianceReport(
+                report_type=report_type,
+                period_start=period_start,
+                period_end=period_end,
+                total_users=total_users,
+                consents_granted=consents_granted,
+                consents_withdrawn=consents_withdrawn,
+                data_exports_requested=data_exports_requested,
+                data_deletions_requested=data_deletions_requested,
+                compliance_violations=compliance_violations,
+                generated_by="system"
+            )
+
+            session.add(report)
+            session.flush()
+            session.refresh(report)
+
+            return report

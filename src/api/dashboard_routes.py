@@ -17,6 +17,14 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, HttpUrl
 import redis.asyncio as redis
 
+# Import compliance database models
+from ..database.models import (
+    ConsentRecord, AuditLog, DataRetentionSchedule, ComplianceReport,
+    ConsentType, ConsentStatus, AuditAction
+)
+from ..database.db_manager import DatabaseManager
+from ..config_loader import load_config, ConfigMode
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -96,6 +104,55 @@ connection_manager = ConnectionManager()
 
 
 # ============= Pydantic Models =============
+
+# Compliance Models
+class ComplianceStatus(BaseModel):
+    """Current compliance status"""
+    gdpr_enabled: bool
+    audit_logging_active: bool
+    rate_limit_compliant: bool
+    human_oversight_enabled: bool
+    transparency_mode: bool
+    consent_system_active: bool
+    current_rate_limit: int
+    max_allowed_rate: int
+    compliance_score: float  # 0-100
+    last_audit_check: Optional[datetime] = None
+
+class ConsentRecordModel(BaseModel):
+    """User consent record"""
+    id: str
+    buyer_id: str
+    consent_type: ConsentType
+    consent_status: ConsentStatus
+    granted_at: Optional[datetime] = None
+    withdrawn_at: Optional[datetime] = None
+    evidence: Optional[Dict[str, Any]] = None
+
+class AuditLogModel(BaseModel):
+    """Audit log entry"""
+    id: str
+    action: AuditAction
+    user_id: Optional[str] = None
+    resource_type: Optional[str] = None
+    resource_id: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    timestamp: datetime
+
+class ComplianceReportModel(BaseModel):
+    """Compliance report summary"""
+    id: str
+    report_type: str
+    period_start: datetime
+    period_end: datetime
+    metrics: Dict[str, Any]
+    compliance_score: float
+    violations_count: int
+    recommendations: List[str]
+    generated_at: datetime
+
 class MetricsSummary(BaseModel):
     """Summary metrics for dashboard overview"""
 
@@ -1582,3 +1639,139 @@ async def health_check():
         return JSONResponse(
             status_code=503, content={"status": "unhealthy", "error": str(e)}
         )
+
+
+# ============= Compliance API Endpoints =============
+
+# Initialize database manager for compliance operations
+db_manager: Optional[DatabaseManager] = None
+
+def get_db_manager():
+    """Get or initialize database manager"""
+    global db_manager
+    if not db_manager:
+        try:
+            # Load compliance configuration
+            config = load_config(ConfigMode.COMPLIANCE)
+            db_url = config.get("database", {}).get("url", "postgresql://wallapop_user:change_this_password@localhost:5432/wallapop_bot")
+            db_manager = DatabaseManager(db_url)
+            logger.info("Database manager initialized for compliance operations")
+        except Exception as e:
+            logger.error(f"Failed to initialize database manager: {e}")
+            return None
+    return db_manager
+
+@router.get("/compliance/status", response_model=ComplianceStatus)
+async def get_compliance_status():
+    """
+    Get current GDPR compliance status
+    Returns comprehensive compliance metrics
+    """
+    try:
+        # Load compliance configuration
+        config = load_config(ConfigMode.COMPLIANCE)
+
+        # Calculate compliance score based on configuration
+        gdpr_enabled = config.get("security", {}).get("gdpr_compliance", {}).get("enabled", False)
+        rate_limit = config.get("wallapop", {}).get("behavior", {}).get("max_messages_per_hour", 50)
+        max_allowed = 5  # Compliance limit
+        human_oversight = config.get("wallapop", {}).get("behavior", {}).get("human_confirmation_required", False)
+        transparency = config.get("security", {}).get("automation_disclosure", {}).get("enabled", False)
+
+        # Calculate compliance score
+        score = 0.0
+        if gdpr_enabled:
+            score += 30
+        if rate_limit <= max_allowed:
+            score += 25
+        if human_oversight:
+            score += 20
+        if transparency:
+            score += 15
+        if config.get("development", {}).get("audit_logging", False):
+            score += 10
+
+        return ComplianceStatus(
+            gdpr_enabled=gdpr_enabled,
+            audit_logging_active=config.get("development", {}).get("audit_logging", False),
+            rate_limit_compliant=rate_limit <= max_allowed,
+            human_oversight_enabled=human_oversight,
+            transparency_mode=transparency,
+            consent_system_active=gdpr_enabled,
+            current_rate_limit=rate_limit,
+            max_allowed_rate=max_allowed,
+            compliance_score=score,
+            last_audit_check=datetime.now()
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting compliance status: {e}")
+        # Return default safe values
+        return ComplianceStatus(
+            gdpr_enabled=False,
+            audit_logging_active=False,
+            rate_limit_compliant=False,
+            human_oversight_enabled=False,
+            transparency_mode=False,
+            consent_system_active=False,
+            current_rate_limit=50,
+            max_allowed_rate=5,
+            compliance_score=0.0
+        )
+
+@router.post("/compliance/validate")
+async def validate_compliance():
+    """
+    Run compliance validation check
+    Returns validation results and recommendations
+    """
+    try:
+        # Load compliance configuration and validate
+        config = load_config(ConfigMode.COMPLIANCE)
+
+        validation_results = {
+            "status": "compliant",
+            "checks": {},
+            "recommendations": [],
+            "timestamp": datetime.now().isoformat()
+        }
+
+        # Check rate limits
+        rate_limit = config.get("wallapop", {}).get("behavior", {}).get("max_messages_per_hour", 50)
+        if rate_limit > 5:
+            validation_results["checks"]["rate_limit"] = "FAIL"
+            validation_results["recommendations"].append("Reduce rate limit to 5 messages/hour for compliance")
+            validation_results["status"] = "non_compliant"
+        else:
+            validation_results["checks"]["rate_limit"] = "PASS"
+
+        # Check GDPR compliance
+        gdpr_enabled = config.get("security", {}).get("gdpr_compliance", {}).get("enabled", False)
+        validation_results["checks"]["gdpr"] = "PASS" if gdpr_enabled else "FAIL"
+        if not gdpr_enabled:
+            validation_results["recommendations"].append("Enable GDPR compliance features")
+            validation_results["status"] = "non_compliant"
+
+        # Check human oversight
+        human_oversight = config.get("wallapop", {}).get("behavior", {}).get("human_confirmation_required", False)
+        validation_results["checks"]["human_oversight"] = "PASS" if human_oversight else "FAIL"
+        if not human_oversight:
+            validation_results["recommendations"].append("Enable human confirmation for all actions")
+            validation_results["status"] = "non_compliant"
+
+        # Check anti-detection
+        anti_detection = config.get("anti_detection", {}).get("enabled", True)
+        validation_results["checks"]["transparency"] = "PASS" if not anti_detection else "FAIL"
+        if anti_detection:
+            validation_results["recommendations"].append("Disable anti-detection for transparency compliance")
+            validation_results["status"] = "non_compliant"
+
+        return validation_results
+
+    except Exception as e:
+        logger.error(f"Error validating compliance: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }

@@ -8,6 +8,10 @@ from sqlalchemy import pool
 
 from alembic import context
 
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 # Add the src directory to the path so we can import our models
 current_path = Path(__file__).parent.parent
 sys.path.insert(0, str(current_path))
