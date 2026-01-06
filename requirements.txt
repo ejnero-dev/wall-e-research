@@ -27,7 +27,6 @@ kombu==5.4.2
 # Configuration
 pyyaml==6.0.2
 python-dotenv==1.0.1
-deepmerge==2.0
 
 # Logging & Monitoring
 loguru==0.7.3

@@ -55,8 +55,8 @@ export const AutomatedResponses = () => {
               variant="outline" 
               size="sm"
               onClick={() => {
-                console.log('Creating new automated response');
-                // TODO: Could implement response template dialog
+                console.log('Agregando nueva respuesta automática');
+                // TODO: Abrir modal para crear nueva respuesta
               }}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -129,8 +129,8 @@ export const AutomatedResponses = () => {
               variant="outline" 
               size="sm"
               onClick={() => {
-                console.log('Opening automated responses configuration');
-                // TODO: Could implement settings dialog
+                console.log('Abriendo configuración de respuestas automáticas');
+                // TODO: Abrir panel de configuración
               }}
             >
               <Settings className="w-4 h-4 mr-2" />
@@ -186,8 +186,8 @@ export const AutomatedResponses = () => {
               variant="ghost" 
               size="sm"
               onClick={() => {
-                console.log('Adding new response template');
-                // TODO: Could implement template creation form
+                console.log('Agregando nueva plantilla de respuesta');
+                // TODO: Abrir formulario para nueva plantilla
               }}
             >
               <Plus className="w-4 h-4 mr-1" />

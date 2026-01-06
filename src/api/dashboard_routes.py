@@ -2,7 +2,6 @@
 Dashboard API Routes for Wall-E Research
 Minimal endpoints for MVP dashboard functionality
 """
-
 import asyncio
 import json
 import logging
@@ -17,14 +16,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, HttpUrl
 import redis.asyncio as redis
 
-# Import compliance database models
-from ..database.models import (
-    ConsentRecord, AuditLog, DataRetentionSchedule, ComplianceReport,
-    ConsentType, ConsentStatus, AuditAction
-)
-from ..database.db_manager import DatabaseManager
-from ..config_loader import load_config, ConfigMode
-
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -34,39 +25,34 @@ router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 # Redis connection (will be initialized in server)
 redis_client: Optional[redis.Redis] = None
 
-
 # WebSocket connection manager
 class ConnectionManager:
     """Manages WebSocket connections for the dashboard"""
-
+    
     def __init__(self):
         self.active_connections: Set[WebSocket] = set()
         self._connection_tasks: Dict[str, asyncio.Task] = {}
-
+    
     async def connect(self, websocket: WebSocket) -> str:
         """Accept new WebSocket connection and return connection ID"""
         connection_id = str(uuid.uuid4())
         await websocket.accept()
         self.active_connections.add(websocket)
-        logger.info(
-            f"WebSocket connection {connection_id} established. Total connections: {len(self.active_connections)}"
-        )
+        logger.info(f"WebSocket connection {connection_id} established. Total connections: {len(self.active_connections)}")
         return connection_id
-
+    
     def disconnect(self, websocket: WebSocket, connection_id: str = None):
         """Remove WebSocket connection"""
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-
+        
         if connection_id and connection_id in self._connection_tasks:
             task = self._connection_tasks.pop(connection_id)
             if not task.done():
                 task.cancel()
-
-        logger.info(
-            f"WebSocket connection {connection_id} disconnected. Total connections: {len(self.active_connections)}"
-        )
-
+        
+        logger.info(f"WebSocket connection {connection_id} disconnected. Total connections: {len(self.active_connections)}")
+    
     async def send_to_connection(self, websocket: WebSocket, message: dict) -> bool:
         """Send message to specific connection with error handling"""
         try:
@@ -78,84 +64,33 @@ class ConnectionManager:
             if websocket in self.active_connections:
                 self.active_connections.remove(websocket)
         return False
-
+    
     async def broadcast(self, message: dict):
         """Broadcast message to all active connections"""
         if not self.active_connections:
             return
-
+        
         disconnected = set()
         for websocket in self.active_connections.copy():
             success = await self.send_to_connection(websocket, message)
             if not success:
                 disconnected.add(websocket)
-
+        
         # Clean up disconnected connections
         for websocket in disconnected:
             self.active_connections.discard(websocket)
-
+    
     def get_connection_count(self) -> int:
         """Get number of active connections"""
         return len(self.active_connections)
-
 
 # Global connection manager instance
 connection_manager = ConnectionManager()
 
 
 # ============= Pydantic Models =============
-
-# Compliance Models
-class ComplianceStatus(BaseModel):
-    """Current compliance status"""
-    gdpr_enabled: bool
-    audit_logging_active: bool
-    rate_limit_compliant: bool
-    human_oversight_enabled: bool
-    transparency_mode: bool
-    consent_system_active: bool
-    current_rate_limit: int
-    max_allowed_rate: int
-    compliance_score: float  # 0-100
-    last_audit_check: Optional[datetime] = None
-
-class ConsentRecordModel(BaseModel):
-    """User consent record"""
-    id: str
-    buyer_id: str
-    consent_type: ConsentType
-    consent_status: ConsentStatus
-    granted_at: Optional[datetime] = None
-    withdrawn_at: Optional[datetime] = None
-    evidence: Optional[Dict[str, Any]] = None
-
-class AuditLogModel(BaseModel):
-    """Audit log entry"""
-    id: str
-    action: AuditAction
-    user_id: Optional[str] = None
-    resource_type: Optional[str] = None
-    resource_id: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    timestamp: datetime
-
-class ComplianceReportModel(BaseModel):
-    """Compliance report summary"""
-    id: str
-    report_type: str
-    period_start: datetime
-    period_end: datetime
-    metrics: Dict[str, Any]
-    compliance_score: float
-    violations_count: int
-    recommendations: List[str]
-    generated_at: datetime
-
 class MetricsSummary(BaseModel):
     """Summary metrics for dashboard overview"""
-
     msg_rate: float  # Messages per hour
     active_scrapers: int  # Number of active scrapers
     success_rate: float  # Success rate percentage
@@ -167,7 +102,6 @@ class MetricsSummary(BaseModel):
 
 class ScraperStatus(BaseModel):
     """Status of a scraper instance"""
-
     scraper_id: str
     status: str  # 'active', 'idle', 'error', 'stopped'
     last_activity: str
@@ -178,7 +112,6 @@ class ScraperStatus(BaseModel):
 
 class LogEntry(BaseModel):
     """Log entry for live monitoring"""
-
     id: str
     timestamp: str
     level: str  # 'info', 'warning', 'error', 'debug'
@@ -189,7 +122,6 @@ class LogEntry(BaseModel):
 
 class ConfigUpdate(BaseModel):
     """Configuration update request"""
-
     key: str
     value: Union[str, int, float, bool]
     apply_immediately: bool = True
@@ -197,20 +129,17 @@ class ConfigUpdate(BaseModel):
 
 # ============= Product Management Models =============
 
-
 class ProductCondition(str):
     """Product condition types"""
-
     NUEVO = "nuevo"
     COMO_NUEVO = "como_nuevo"
-    BUEN_ESTADO = "buen_estado"
+    BUEN_ESTADO = "buen_estado" 
     USADO = "usado"
     PARA_PIEZAS = "para_piezas"
 
 
 class ProductStatus(str):
     """Product status types"""
-
     ACTIVE = "active"
     PAUSED = "paused"
     SOLD = "sold"
@@ -221,7 +150,6 @@ class ProductStatus(str):
 
 class ProductFormData(BaseModel):
     """Product creation form data"""
-
     wallapop_url: HttpUrl
     auto_respond: bool = True
     ai_personality: Optional[str] = "professional"
@@ -231,7 +159,6 @@ class ProductFormData(BaseModel):
 
 class Product(BaseModel):
     """Product model for dashboard"""
-
     id: str
     title: str
     description: str
@@ -240,29 +167,29 @@ class Product(BaseModel):
     sku: Optional[str] = None
     category: str
     condition: str  # ProductCondition
-    status: str  # ProductStatus
+    status: str     # ProductStatus
     wallapop_url: str
     image_url: Optional[str] = None
     images: Optional[List[str]] = None
-
+    
     # Analytics & Performance
     views: int = 0
     messages_received: int = 0
     last_activity: Optional[str] = None
     created_at: str
     updated_at: str
-
+    
     # AI & Automation Settings
     auto_respond: bool = False
     ai_personality: Optional[str] = None
     response_delay_min: Optional[int] = None
     response_delay_max: Optional[int] = None
-
+    
     # Location & Shipping
     location: Optional[str] = None
     shipping_available: bool = False
     shipping_cost: Optional[float] = None
-
+    
     # Performance Metrics
     conversion_rate: Optional[float] = None
     avg_response_time: Optional[float] = None
@@ -272,7 +199,6 @@ class Product(BaseModel):
 
 class ProductStats(BaseModel):
     """Product statistics summary"""
-
     total: int
     active: int
     paused: int
@@ -285,7 +211,6 @@ class ProductStats(BaseModel):
 
 class BulkProductUpdate(BaseModel):
     """Bulk product update request"""
-
     product_ids: List[str]
     updates: Dict[str, Union[str, int, float, bool]]
 
@@ -297,7 +222,9 @@ async def get_redis_client():
     if not redis_client:
         try:
             redis_client = await redis.from_url(
-                "redis://localhost:6379", encoding="utf-8", decode_responses=True
+                "redis://localhost:6379",
+                encoding="utf-8",
+                decode_responses=True
             )
             await redis_client.ping()
         except Exception as e:
@@ -310,7 +237,6 @@ async def get_redis_client():
 async def get_mock_metrics() -> MetricsSummary:
     """Generate mock metrics for development"""
     import random
-
     return MetricsSummary(
         msg_rate=random.uniform(30, 60),
         active_scrapers=random.randint(1, 5),
@@ -318,7 +244,7 @@ async def get_mock_metrics() -> MetricsSummary:
         avg_response_time=random.uniform(1.5, 3.5),
         total_messages_today=random.randint(200, 500),
         total_errors_today=random.randint(0, 20),
-        timestamp=datetime.now().isoformat(),
+        timestamp=datetime.now().isoformat()
     )
 
 
@@ -326,7 +252,7 @@ async def get_mock_logs(limit: int = 50) -> List[LogEntry]:
     """Generate mock logs for development"""
     import random
     import uuid
-
+    
     log_templates = [
         ("info", "Scraper initialized", "scraper"),
         ("info", "Login successful", "auth"),
@@ -336,33 +262,28 @@ async def get_mock_logs(limit: int = 50) -> List[LogEntry]:
         ("info", "Configuration reloaded", "config"),
         ("debug", "Cache hit for price data", "cache"),
     ]
-
+    
     logs = []
     base_time = datetime.now()
-
+    
     for i in range(limit):
         level, msg, source = random.choice(log_templates)
-        log_time = base_time - timedelta(seconds=i * 10)
-
-        logs.append(
-            LogEntry(
-                id=str(uuid.uuid4())[:8],
-                timestamp=log_time.isoformat(),
-                level=level,
-                message=f"{msg} #{random.randint(1000, 9999)}",
-                source=source,
-                metadata=(
-                    {"session_id": str(uuid.uuid4())[:8]} if level == "error" else None
-                ),
-            )
-        )
-
+        log_time = base_time - timedelta(seconds=i*10)
+        
+        logs.append(LogEntry(
+            id=str(uuid.uuid4())[:8],
+            timestamp=log_time.isoformat(),
+            level=level,
+            message=f"{msg} #{random.randint(1000, 9999)}",
+            source=source,
+            metadata={"session_id": str(uuid.uuid4())[:8]} if level == "error" else None
+        ))
+    
     return logs
 
 
 # AI Engine integration
 ai_engine_instance = None
-
 
 def get_ai_engine():
     """Get or initialize AI Engine instance"""
@@ -370,7 +291,6 @@ def get_ai_engine():
     if not ai_engine_instance:
         try:
             from src.ai_engine import AIEngine, AIEngineConfig
-
             config = AIEngineConfig.for_research()
             ai_engine_instance = AIEngine(config)
             logger.info("AI Engine initialized for dashboard metrics")
@@ -389,40 +309,37 @@ async def get_metrics_summary():
     """
     try:
         client = await get_redis_client()
-
+        
         if client:
             # Try to get real metrics from Redis
             metrics_data = await client.get("dashboard:metrics:summary")
             if metrics_data:
                 return MetricsSummary(**json.loads(metrics_data))
-
+        
         # Try to get AI Engine metrics if available
         ai_engine = get_ai_engine()
         if ai_engine:
             try:
                 ai_stats = ai_engine.get_performance_stats()
                 # Calculate derived metrics
-                total_reqs = ai_stats.get("total_requests", 0)
-                success_count = int(total_reqs * ai_stats.get("success_rate", 0.0))
-
+                total_reqs = ai_stats.get('total_requests', 0)
+                success_count = int(total_reqs * ai_stats.get('success_rate', 0.0))
+                
                 return MetricsSummary(
-                    msg_rate=ai_stats.get("requests_per_second", 0.0)
-                    * 3600,  # Convert to per hour
-                    active_scrapers=(
-                        2 if ai_stats.get("engine_status") == "ready" else 0
-                    ),
-                    success_rate=ai_stats.get("success_rate", 0.0) * 100,
-                    avg_response_time=ai_stats.get("average_response_time", 0.0),
+                    msg_rate=ai_stats.get('requests_per_second', 0.0) * 3600,  # Convert to per hour
+                    active_scrapers=2 if ai_stats.get('engine_status') == 'ready' else 0,
+                    success_rate=ai_stats.get('success_rate', 0.0) * 100,
+                    avg_response_time=ai_stats.get('average_response_time', 0.0),
                     total_messages_today=total_reqs,
                     total_errors_today=total_reqs - success_count,
-                    timestamp=datetime.now().isoformat(),
+                    timestamp=datetime.now().isoformat()
                 )
             except Exception as e:
                 logger.warning(f"Error getting AI Engine metrics: {e}")
-
+        
         # Fallback to mock data for development
         return await get_mock_metrics()
-
+        
     except Exception as e:
         logger.error(f"Error fetching metrics: {e}")
         # Return mock data on error
@@ -437,7 +354,7 @@ async def get_scraper_status():
     """
     try:
         client = await get_redis_client()
-
+        
         if client:
             # Try to get real scraper status
             scraper_keys = await client.keys("scraper:status:*")
@@ -448,7 +365,7 @@ async def get_scraper_status():
                     if data:
                         scrapers.append(ScraperStatus(**json.loads(data)))
                 return scrapers
-
+        
         # Mock data for development
         return [
             ScraperStatus(
@@ -457,7 +374,7 @@ async def get_scraper_status():
                 last_activity=datetime.now().isoformat(),
                 messages_processed=47,
                 uptime_seconds=3600,
-                current_task="Processing message queue",
+                current_task="Processing message queue"
             ),
             ScraperStatus(
                 scraper_id="scraper-002",
@@ -465,10 +382,10 @@ async def get_scraper_status():
                 last_activity=(datetime.now() - timedelta(minutes=5)).isoformat(),
                 messages_processed=123,
                 uptime_seconds=7200,
-                current_task=None,
-            ),
+                current_task=None
+            )
         ]
-
+        
     except Exception as e:
         logger.error(f"Error fetching scraper status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -476,11 +393,13 @@ async def get_scraper_status():
 
 @router.get("/logs/recent", response_model=List[LogEntry])
 async def get_recent_logs(
-    limit: int = 50, level: Optional[str] = None, source: Optional[str] = None
+    limit: int = 50,
+    level: Optional[str] = None,
+    source: Optional[str] = None
 ):
     """
     Get recent log entries
-
+    
     Args:
         limit: Maximum number of logs to return (default: 50, max: 200)
         level: Filter by log level (info, warning, error, debug)
@@ -489,34 +408,34 @@ async def get_recent_logs(
     try:
         # Validate parameters
         limit = min(limit, 200)  # Cap at 200
-
+        
         client = await get_redis_client()
-
+        
         if client:
             # Try to get real logs from Redis
-            logs_data = await client.lrange("dashboard:logs", 0, limit - 1)
+            logs_data = await client.lrange("dashboard:logs", 0, limit-1)
             if logs_data:
                 logs = [LogEntry(**json.loads(log)) for log in logs_data]
-
+                
                 # Apply filters if provided
                 if level:
                     logs = [log for log in logs if log.level == level]
                 if source:
                     logs = [log for log in logs if log.source == source]
-
+                
                 return logs[:limit]
-
+        
         # Fallback to mock data
         logs = await get_mock_logs(limit)
-
+        
         # Apply filters
         if level:
             logs = [log for log in logs if log.level == level]
         if source:
             logs = [log for log in logs if log.source == source]
-
+        
         return logs
-
+        
     except Exception as e:
         logger.error(f"Error fetching logs: {e}")
         # Return mock data on error
@@ -527,54 +446,56 @@ async def get_recent_logs(
 async def update_configuration(config: ConfigUpdate):
     """
     Update configuration with hot-reload
-
+    
     Args:
         config: Configuration key-value pair to update
     """
     try:
         client = await get_redis_client()
-
+        
         # Validate config key (add your valid keys here)
         valid_keys = [
             "msg_per_hour",
-            "retry_attempts",
+            "retry_attempts", 
             "timeout",
             "rate_limit",
             "debug_mode",
-            "auto_response",
+            "auto_response"
         ]
-
+        
         if config.key not in valid_keys:
             raise HTTPException(
-                status_code=400, detail=f"Invalid configuration key: {config.key}"
+                status_code=400,
+                detail=f"Invalid configuration key: {config.key}"
             )
-
+        
         if client:
             # Store in Redis
             await client.set(
                 f"config:{config.key}",
-                json.dumps(
-                    {
-                        "value": config.value,
-                        "updated_at": datetime.now().isoformat(),
-                        "updated_by": "dashboard",
-                    }
-                ),
+                json.dumps({
+                    "value": config.value,
+                    "updated_at": datetime.now().isoformat(),
+                    "updated_by": "dashboard"
+                })
             )
-
+            
             # Publish update event if immediate apply requested
             if config.apply_immediately:
                 await client.publish(
                     "config:updates",
-                    json.dumps({"key": config.key, "value": config.value}),
+                    json.dumps({
+                        "key": config.key,
+                        "value": config.value
+                    })
                 )
-
+        
         return {
             "status": "success",
             "message": f"Configuration '{config.key}' updated",
-            "applied": config.apply_immediately,
+            "applied": config.apply_immediately
         }
-
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -590,7 +511,7 @@ async def get_ai_engine_stats():
     """
     try:
         ai_engine = get_ai_engine()
-
+        
         if not ai_engine:
             # Return mock/fallback stats if AI Engine not available
             return {
@@ -602,15 +523,15 @@ async def get_ai_engine_stats():
                 "ai_response_rate": 0.0,
                 "average_response_time": 0.0,
                 "requests_per_second": 0.0,
-                "error": "AI Engine not available",
+                "error": "AI Engine not available"
             }
-
+        
         # Get real performance stats
         stats = ai_engine.get_performance_stats()
         stats["status"] = "available"
-
+        
         return stats
-
+        
     except Exception as e:
         logger.error(f"Error fetching AI Engine stats: {e}")
         return {
@@ -622,7 +543,7 @@ async def get_ai_engine_stats():
             "success_rate": 0.0,
             "ai_response_rate": 0.0,
             "average_response_time": 0.0,
-            "requests_per_second": 0.0,
+            "requests_per_second": 0.0
         }
 
 
@@ -633,16 +554,16 @@ async def get_current_configuration():
     """
     try:
         client = await get_redis_client()
-
+        
         config = {
             "msg_per_hour": 50,
             "retry_attempts": 3,
             "timeout": 30,
             "rate_limit": 100,
             "debug_mode": True,
-            "auto_response": True,
+            "auto_response": True
         }
-
+        
         if client:
             # Get config from Redis
             for key in config.keys():
@@ -650,9 +571,9 @@ async def get_current_configuration():
                 if data:
                     config_data = json.loads(data)
                     config[key] = config_data.get("value", config[key])
-
+        
         return config
-
+        
     except Exception as e:
         logger.error(f"Error fetching configuration: {e}")
         # Return default config on error
@@ -662,7 +583,7 @@ async def get_current_configuration():
             "timeout": 30,
             "rate_limit": 100,
             "debug_mode": True,
-            "auto_response": True,
+            "auto_response": True
         }
 
 
@@ -670,7 +591,6 @@ async def get_current_configuration():
 
 # In-memory mock storage for products (in production, use database)
 mock_products: Dict[str, Product] = {}
-
 
 def generate_mock_products() -> None:
     """Initialize mock products if empty"""
@@ -701,7 +621,7 @@ def generate_mock_products() -> None:
                 shipping_available=True,
                 shipping_cost=5.99,
                 conversion_rate=18.5,
-                successful_sales=0,
+                successful_sales=0
             ),
             Product(
                 id="prod-002",
@@ -727,7 +647,7 @@ def generate_mock_products() -> None:
                 shipping_available=True,
                 shipping_cost=9.99,
                 conversion_rate=16.8,
-                successful_sales=0,
+                successful_sales=0
             ),
             Product(
                 id="prod-003",
@@ -749,10 +669,10 @@ def generate_mock_products() -> None:
                 location="Valencia",
                 shipping_available=False,
                 conversion_rate=21.8,
-                successful_sales=1,
-            ),
+                successful_sales=1
+            )
         ]
-
+        
         for product in products:
             mock_products[product.id] = product
 
@@ -765,9 +685,9 @@ async def get_products():
     """
     try:
         generate_mock_products()  # Ensure mock data exists
-
+        
         client = await get_redis_client()
-
+        
         if client:
             # Try to get products from Redis
             product_keys = await client.keys("product:*")
@@ -778,10 +698,10 @@ async def get_products():
                     if data:
                         products.append(Product(**json.loads(data)))
                 return products
-
+        
         # Return mock products
         return list(mock_products.values())
-
+        
     except Exception as e:
         logger.error(f"Error fetching products: {e}")
         generate_mock_products()
@@ -796,7 +716,7 @@ async def add_product(product_data: Union[ProductFormData, Dict[str, Any]]):
     """
     try:
         generate_mock_products()  # Ensure mock data exists
-
+        
         # Handle both ProductFormData and raw dict (from auto-detection)
         if isinstance(product_data, dict):
             # Auto-detected product data
@@ -816,28 +736,22 @@ async def add_product(product_data: Union[ProductFormData, Dict[str, Any]]):
             response_delay_max = product_data.response_delay_max
             detected_data = {}
             is_auto_detected = False
-
+        
         product_id = f"prod-{len(mock_products) + 1:03d}"
-
+        
         # Create product with detected or default data
         if detected_data:
             # Use auto-detected product information
             new_product = Product(
                 id=product_id,
                 title=detected_data.get("title", "Auto-detected Product"),
-                description=detected_data.get(
-                    "description", "Product automatically imported from Wallapop"
-                ),
+                description=detected_data.get("description", "Product automatically imported from Wallapop"),
                 price=detected_data.get("price", 0.0),
                 category=detected_data.get("category", "General"),
                 condition=detected_data.get("condition", "unknown"),
                 status=detected_data.get("status", "active"),
                 wallapop_url=wallapop_url,
-                image_url=(
-                    detected_data.get("image_urls", [None])[0]
-                    if detected_data.get("image_urls")
-                    else None
-                ),
+                image_url=detected_data.get("image_urls", [None])[0] if detected_data.get("image_urls") else None,
                 images=detected_data.get("image_urls", []),
                 views=detected_data.get("views", 0),
                 messages_received=detected_data.get("messages_count", 0),
@@ -849,21 +763,17 @@ async def add_product(product_data: Union[ProductFormData, Dict[str, Any]]):
                 response_delay_min=response_delay_min,
                 response_delay_max=response_delay_max,
                 # Add auto-detection metadata
-                **(
-                    {
-                        "sku": f"AUTO-{product_id}",
-                        "original_price": None,
-                        "shipping_available": False,
-                        "shipping_cost": None,
-                        "conversion_rate": None,
-                        "avg_response_time": None,
-                        "fraud_attempts": 0,
-                        "successful_sales": 0,
-                        "last_activity": detected_data.get("detected_at"),
-                    }
-                    if is_auto_detected
-                    else {}
-                ),
+                **({
+                    "sku": f"AUTO-{product_id}",
+                    "original_price": None,
+                    "shipping_available": False,
+                    "shipping_cost": None,
+                    "conversion_rate": None,
+                    "avg_response_time": None,
+                    "fraud_attempts": 0,
+                    "successful_sales": 0,
+                    "last_activity": detected_data.get("detected_at")
+                } if is_auto_detected else {})
             )
         else:
             # Default/manual product creation (scrape URL in real implementation)
@@ -883,82 +793,78 @@ async def add_product(product_data: Union[ProductFormData, Dict[str, Any]]):
                 response_delay_min=response_delay_min,
                 response_delay_max=response_delay_max,
             )
-
+        
         # Store in mock storage
         mock_products[product_id] = new_product
-
+        
         # In production, store in Redis/database
         client = await get_redis_client()
         if client:
             await client.set(
                 f"product:{product_id}",
-                json.dumps(new_product.model_dump(), default=str),
+                json.dumps(new_product.model_dump(), default=str)
             )
-
+        
         # Log with appropriate context
         source = "auto-detection" if is_auto_detected else "manual"
         logger.info(f"Added new product ({source}): {product_id} - {new_product.title}")
-
+        
         # Broadcast update via WebSocket
-        await connection_manager.broadcast(
-            {
-                "type": "product_added",
-                "data": {
-                    "product": new_product.model_dump(),
-                    "source": source,
-                    "timestamp": datetime.now().isoformat(),
-                },
+        await connection_manager.broadcast({
+            "type": "product_added",
+            "data": {
+                "product": new_product.model_dump(),
+                "source": source,
+                "timestamp": datetime.now().isoformat()
             }
-        )
-
+        })
+        
         return new_product
-
+        
     except Exception as e:
         logger.error(f"Error adding product: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/products/{product_id}", response_model=Product)
-async def update_product(
-    product_id: str, updates: Dict[str, Union[str, int, float, bool]]
-):
+async def update_product(product_id: str, updates: Dict[str, Union[str, int, float, bool]]):
     """
     Update a product's settings
     """
     try:
         generate_mock_products()  # Ensure mock data exists
-
+        
         # Check if product exists
         if product_id not in mock_products:
             raise HTTPException(status_code=404, detail="Product not found")
-
+        
         # Update the product
         product = mock_products[product_id]
         product_dict = product.model_dump()
-
+        
         # Apply updates
         for key, value in updates.items():
             if hasattr(product, key):
                 product_dict[key] = value
-
+        
         # Update timestamp
-        product_dict["updated_at"] = datetime.now().isoformat()
-
+        product_dict['updated_at'] = datetime.now().isoformat()
+        
         # Create updated product
         updated_product = Product(**product_dict)
         mock_products[product_id] = updated_product
-
+        
         # In production, update in Redis/database
         client = await get_redis_client()
         if client:
             await client.set(
                 f"product:{product_id}",
-                json.dumps(updated_product.model_dump(), default=str),
+                json.dumps(updated_product.model_dump(), default=str)
             )
-
+        
         logger.info(f"Updated product: {product_id}")
         return updated_product
-
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -973,22 +879,22 @@ async def delete_product(product_id: str):
     """
     try:
         generate_mock_products()  # Ensure mock data exists
-
+        
         # Check if product exists
         if product_id not in mock_products:
             raise HTTPException(status_code=404, detail="Product not found")
-
+        
         # Remove from mock storage
         del mock_products[product_id]
-
+        
         # In production, remove from Redis/database
         client = await get_redis_client()
         if client:
             await client.delete(f"product:{product_id}")
-
+        
         logger.info(f"Deleted product: {product_id}")
         return {"message": "Product deleted successfully"}
-
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -1003,28 +909,9 @@ async def get_product_stats():
     """
     try:
         generate_mock_products()  # Ensure mock data exists
-        client = await get_redis_client()
-        products = []
         
-        if client:
-            # Try to get products from Redis (same logic as get_products)
-            product_keys = await client.keys("product:*")
-            if product_keys:
-                for key in product_keys:
-                    product_data = await client.get(key)
-                    if product_data:
-                        try:
-                            product_dict = json.loads(product_data)
-                            product = Product(**product_dict)
-                            products.append(product)
-                        except Exception as e:
-                            logger.error(f"Error parsing product from Redis: {e}")
-                            continue
+        products = list(mock_products.values())
         
-        # If no products from Redis, use mock data as fallback
-        if not products:
-            products = list(mock_products.values())
-
         stats = ProductStats(
             total=len(products),
             active=len([p for p in products if p.status == "active"]),
@@ -1033,15 +920,15 @@ async def get_product_stats():
             total_views=sum(p.views for p in products),
             total_messages=sum(p.messages_received for p in products),
             conversion_rate=0.0,
-            revenue_this_month=sum(p.price for p in products if p.status == "sold"),
+            revenue_this_month=sum(p.price for p in products if p.status == "sold")
         )
-
+        
         # Calculate conversion rate
         if stats.total_messages > 0:
             stats.conversion_rate = (stats.sold / stats.total_messages) * 100
-
+        
         return stats
-
+        
     except Exception as e:
         logger.error(f"Error fetching product stats: {e}")
         # Return default stats on error
@@ -1053,7 +940,7 @@ async def get_product_stats():
             total_views=0,
             total_messages=0,
             conversion_rate=0.0,
-            revenue_this_month=0.0,
+            revenue_this_month=0.0
         )
 
 
@@ -1064,28 +951,28 @@ async def bulk_update_products(bulk_update: BulkProductUpdate):
     """
     try:
         generate_mock_products()  # Ensure mock data exists
-
+        
         updated_products = []
-
+        
         for product_id in bulk_update.product_ids:
             if product_id in mock_products:
                 # Update product
                 product = mock_products[product_id]
                 product_dict = product.model_dump()
-
+                
                 # Apply updates
                 for key, value in bulk_update.updates.items():
                     if hasattr(product, key):
                         product_dict[key] = value
-
-                product_dict["updated_at"] = datetime.now().isoformat()
+                
+                product_dict['updated_at'] = datetime.now().isoformat()
                 updated_product = Product(**product_dict)
                 mock_products[product_id] = updated_product
                 updated_products.append(updated_product)
-
+        
         logger.info(f"Bulk updated {len(updated_products)} products")
         return {"message": f"Successfully updated {len(updated_products)} products"}
-
+        
     except Exception as e:
         logger.error(f"Error in bulk update: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1098,67 +985,64 @@ async def generate_live_data(connection_id: str, websocket: WebSocket):
     This function runs in a separate task for each connection
     """
     import random
-
     last_metrics_update = 0
     last_log_update = 0
     last_scraper_update = 0
-
+    
     try:
         while websocket in connection_manager.active_connections:
             current_time = datetime.now().timestamp()
-
+            
             # Send metrics update every 5 seconds (reduced frequency)
             if current_time - last_metrics_update >= 5:
                 metrics_data = await get_mock_metrics()
-                success = await connection_manager.send_to_connection(
-                    websocket,
-                    {"type": "metrics_update", "data": metrics_data.model_dump()},
-                )
+                success = await connection_manager.send_to_connection(websocket, {
+                    "type": "metrics_update",
+                    "data": metrics_data.model_dump()
+                })
                 if not success:
                     break
                 last_metrics_update = current_time
-
+            
             # Send new log every 3-7 seconds (randomized)
             if current_time - last_log_update >= random.uniform(3, 7):
                 logs = await get_mock_logs(1)
-                success = await connection_manager.send_to_connection(
-                    websocket, {"type": "new_log", "data": logs[0].model_dump()}
-                )
+                success = await connection_manager.send_to_connection(websocket, {
+                    "type": "new_log",
+                    "data": logs[0].model_dump()
+                })
                 if not success:
                     break
                 last_log_update = current_time
-
+            
             # Send scraper update every 8-12 seconds (randomized)
             if current_time - last_scraper_update >= random.uniform(8, 12):
                 scraper_data = {
                     "scraper_id": f"scraper-{random.randint(1, 3):03d}",
                     "status": random.choice(["active", "idle", "processing"]),
                     "messages_processed": random.randint(40, 150),
-                    "current_task": random.choice(
-                        [
-                            "Processing message queue",
-                            "Analyzing user responses",
-                            "Updating conversation state",
-                            None,
-                        ]
-                    ),
+                    "current_task": random.choice([
+                        "Processing message queue",
+                        "Analyzing user responses", 
+                        "Updating conversation state",
+                        None
+                    ])
                 }
-                success = await connection_manager.send_to_connection(
-                    websocket, {"type": "scraper_update", "data": scraper_data}
-                )
+                success = await connection_manager.send_to_connection(websocket, {
+                    "type": "scraper_update",
+                    "data": scraper_data
+                })
                 if not success:
                     break
                 last_scraper_update = current_time
-
+            
             # Check every 1 second, but send updates at different intervals
             await asyncio.sleep(1)
-
+            
     except asyncio.CancelledError:
         logger.info(f"Live data generation cancelled for connection {connection_id}")
     except Exception as e:
-        logger.error(
-            f"Error in live data generation for connection {connection_id}: {e}"
-        )
+        logger.error(f"Error in live data generation for connection {connection_id}: {e}")
     finally:
         # Clean up connection
         connection_manager.disconnect(websocket, connection_id)
@@ -1172,102 +1056,89 @@ async def websocket_live_data(websocket: WebSocket):
     Sends updates for metrics, logs, and scraper status with connection stability
     """
     connection_id = None
-
+    
     try:
         # Establish connection with connection manager
         connection_id = await connection_manager.connect(websocket)
-
+        
         # Send initial data immediately after connection
         try:
             initial_metrics = await get_mock_metrics()
             initial_logs = await get_mock_logs(10)
-
+            
             initial_data = {
                 "type": "initial",
                 "data": {
                     "metrics": initial_metrics.model_dump(),
                     "logs": [log.model_dump() for log in initial_logs],
                     "connection_id": connection_id,
-                    "server_time": datetime.now().isoformat(),
-                },
+                    "server_time": datetime.now().isoformat()
+                }
             }
-
-            success = await connection_manager.send_to_connection(
-                websocket, initial_data
-            )
+            
+            success = await connection_manager.send_to_connection(websocket, initial_data)
             if not success:
-                logger.warning(
-                    f"Failed to send initial data to connection {connection_id}"
-                )
+                logger.warning(f"Failed to send initial data to connection {connection_id}")
                 return
-
+            
         except Exception as e:
-            logger.error(
-                f"Error sending initial data to connection {connection_id}: {e}"
-            )
+            logger.error(f"Error sending initial data to connection {connection_id}: {e}")
             return
-
+        
         # Start continuous data generation in background task
-        data_task = asyncio.create_task(generate_live_data(connection_id, websocket))
+        data_task = asyncio.create_task(
+            generate_live_data(connection_id, websocket)
+        )
         connection_manager._connection_tasks[connection_id] = data_task
-
+        
         # Keep connection alive and wait for disconnection
         try:
             while True:
                 try:
                     # Wait for potential client messages (ping/pong, etc.)
-                    message = await asyncio.wait_for(
-                        websocket.receive_json(), timeout=30.0
-                    )
-
+                    message = await asyncio.wait_for(websocket.receive_json(), timeout=30.0)
+                    
                     # Handle client heartbeat or other messages
                     if message.get("type") == "ping":
-                        await connection_manager.send_to_connection(
-                            websocket,
-                            {"type": "pong", "timestamp": datetime.now().isoformat()},
-                        )
+                        await connection_manager.send_to_connection(websocket, {
+                            "type": "pong", 
+                            "timestamp": datetime.now().isoformat()
+                        })
                     elif message.get("type") == "get_status":
                         # Calculate uptime from when this connection was established
-                        connection_start_time = (
-                            datetime.now().timestamp() - 10
-                        )  # Approximate, since we don't store exact start time
+                        connection_start_time = datetime.now().timestamp() - 10  # Approximate, since we don't store exact start time
                         uptime = datetime.now().timestamp() - connection_start_time
-
-                        await connection_manager.send_to_connection(
-                            websocket,
-                            {
-                                "type": "status_response",
-                                "data": {
-                                    "connection_id": connection_id,
-                                    "active_connections": connection_manager.get_connection_count(),
-                                    "uptime_seconds": int(uptime),
-                                    "server_time": datetime.now().isoformat(),
-                                },
-                            },
-                        )
-
+                        
+                        await connection_manager.send_to_connection(websocket, {
+                            "type": "status_response",
+                            "data": {
+                                "connection_id": connection_id,
+                                "active_connections": connection_manager.get_connection_count(),
+                                "uptime_seconds": int(uptime),
+                                "server_time": datetime.now().isoformat()
+                            }
+                        })
+                        
                 except asyncio.TimeoutError:
                     # No message received within timeout - this is normal
                     # Send a heartbeat to check connection health
-                    success = await connection_manager.send_to_connection(
-                        websocket,
-                        {"type": "heartbeat", "timestamp": datetime.now().isoformat()},
-                    )
+                    success = await connection_manager.send_to_connection(websocket, {
+                        "type": "heartbeat",
+                        "timestamp": datetime.now().isoformat()
+                    })
                     if not success:
-                        logger.info(
-                            f"Connection {connection_id} failed heartbeat check"
-                        )
+                        logger.info(f"Connection {connection_id} failed heartbeat check")
                         break
                     continue
-
+                    
         except WebSocketDisconnect:
             logger.info(f"WebSocket connection {connection_id} disconnected by client")
         except Exception as e:
             logger.warning(f"WebSocket connection {connection_id} error: {e}")
-
+            
     except Exception as e:
         logger.error(f"WebSocket connection setup failed: {e}")
-
+        
     finally:
         # Ensure cleanup
         if connection_id:
@@ -1286,21 +1157,15 @@ async def websocket_status():
         "connection_manager_status": "running",
         "websocket_endpoint": "/api/dashboard/ws/live",
         "supported_message_types": [
-            "initial",
-            "metrics_update",
-            "new_log",
-            "scraper_update",
-            "heartbeat",
-            "ping",
-            "pong",
-            "status_response",
+            "initial", "metrics_update", "new_log", "scraper_update", 
+            "heartbeat", "ping", "pong", "status_response"
         ],
         "update_intervals": {
             "metrics": "5 seconds",
-            "logs": "3-7 seconds (randomized)",
+            "logs": "3-7 seconds (randomized)", 
             "scrapers": "8-12 seconds (randomized)",
-            "heartbeat": "30 seconds",
-        },
+            "heartbeat": "30 seconds"
+        }
     }
 
 
@@ -1309,7 +1174,6 @@ async def websocket_status():
 # Global detection manager instance
 detection_manager_instance = None
 
-
 def get_detection_manager():
     """Get or initialize Detection Manager instance"""
     global detection_manager_instance
@@ -1317,14 +1181,13 @@ def get_detection_manager():
         try:
             import sys
             from pathlib import Path
-
+            
             # Ensure src is in path
             src_path = str(Path(__file__).parent.parent)
             if src_path not in sys.path:
                 sys.path.insert(0, src_path)
-
+                
             from auto_detection import DetectionManager
-
             detection_manager_instance = DetectionManager()
             logger.info("Detection Manager initialized for dashboard")
         except Exception as e:
@@ -1335,7 +1198,6 @@ def get_detection_manager():
 
 class AutoDetectionConfig(BaseModel):
     """Auto-detection configuration"""
-
     enabled: bool = True
     scan_interval_minutes: int = Field(default=10, ge=5, le=120)
     auto_add_products: bool = True
@@ -1354,29 +1216,23 @@ async def get_auto_detection_status():
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
             return {
                 "status": "unavailable",
                 "error": "Detection manager not available",
-                "is_running": False,
+                "is_running": False
             }
-
-        # Get the detailed status from DetectionManager
-        detailed_status = detection_manager.get_status()
         
-        # Transform to match frontend interface
-        return {
-            "status": "running" if detailed_status["detection_manager"]["is_running"] else "stopped",
-            "is_running": detailed_status["detection_manager"]["is_running"],
-            "last_scan": detailed_status["stats"].get("last_detection_time"),
-            "products_detected": detailed_status["stats"].get("products_detected", 0),
-            "total_products_managed": detailed_status["stats"].get("products_auto_added", 0)
-        }
-
+        return detection_manager.get_status()
+        
     except Exception as e:
         logger.error(f"Error getting auto-detection status: {e}")
-        return {"status": "error", "error": str(e), "is_running": False}
+        return {
+            "status": "error",
+            "error": str(e),
+            "is_running": False
+        }
 
 
 @router.post("/auto-detection/start")
@@ -1386,25 +1242,21 @@ async def start_auto_detection():
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
-            raise HTTPException(
-                status_code=503, detail="Detection manager not available"
-            )
-
+            raise HTTPException(status_code=503, detail="Detection manager not available")
+        
         success = await detection_manager.start()
-
+        
         if success:
             return {
                 "status": "started",
                 "message": "Auto-detection system started successfully",
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now().isoformat()
             }
         else:
-            raise HTTPException(
-                status_code=500, detail="Failed to start auto-detection system"
-            )
-
+            raise HTTPException(status_code=500, detail="Failed to start auto-detection system")
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -1419,20 +1271,18 @@ async def stop_auto_detection():
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
-            raise HTTPException(
-                status_code=503, detail="Detection manager not available"
-            )
-
+            raise HTTPException(status_code=503, detail="Detection manager not available")
+        
         await detection_manager.stop()
-
+        
         return {
             "status": "stopped",
             "message": "Auto-detection system stopped successfully",
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat()
         }
-
+        
     except Exception as e:
         logger.error(f"Error stopping auto-detection: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1446,16 +1296,14 @@ async def manual_scan():
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
-            raise HTTPException(
-                status_code=503, detail="Detection manager not available"
-            )
-
+            raise HTTPException(status_code=503, detail="Detection manager not available")
+        
         scan_results = await detection_manager.manual_scan()
-
+        
         return scan_results
-
+        
     except Exception as e:
         logger.error(f"Error in manual scan: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1468,13 +1316,13 @@ async def get_auto_detection_config():
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
             # Return default config if manager not available
             return AutoDetectionConfig()
-
+        
         config = detection_manager.config
-
+        
         return AutoDetectionConfig(
             enabled=detection_manager.is_running,
             scan_interval_minutes=config.get("scan_interval_minutes", 10),
@@ -1483,9 +1331,9 @@ async def get_auto_detection_config():
             ai_personality=config.get("ai_personality", "professional"),
             response_delay_min=config.get("response_delay_min", 15),
             response_delay_max=config.get("response_delay_max", 60),
-            enable_notifications=detection_manager.notification_enabled,
+            enable_notifications=detection_manager.notification_enabled
         )
-
+        
     except Exception as e:
         logger.error(f"Error getting auto-detection config: {e}")
         return AutoDetectionConfig()  # Return defaults on error
@@ -1498,40 +1346,36 @@ async def update_auto_detection_config(config: AutoDetectionConfig):
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
-            raise HTTPException(
-                status_code=503, detail="Detection manager not available"
-            )
-
+            raise HTTPException(status_code=503, detail="Detection manager not available")
+        
         # Update detection manager configuration
-        detection_manager.update_config(
-            {
-                "scan_interval_minutes": config.scan_interval_minutes,
-                "auto_respond_new_products": config.auto_respond_new_products,
-                "ai_personality": config.ai_personality,
-                "response_delay_min": config.response_delay_min,
-                "response_delay_max": config.response_delay_max,
-                "enable_notifications": config.enable_notifications,
-            }
-        )
-
+        detection_manager.update_config({
+            "scan_interval_minutes": config.scan_interval_minutes,
+            "auto_respond_new_products": config.auto_respond_new_products,
+            "ai_personality": config.ai_personality,
+            "response_delay_min": config.response_delay_min,
+            "response_delay_max": config.response_delay_max,
+            "enable_notifications": config.enable_notifications
+        })
+        
         # Update manager settings
         detection_manager.set_auto_add_enabled(config.auto_add_products)
         detection_manager.set_notification_enabled(config.enable_notifications)
-
+        
         # Start/stop detection based on enabled flag
         if config.enabled and not detection_manager.is_running:
             await detection_manager.start()
         elif not config.enabled and detection_manager.is_running:
             await detection_manager.stop()
-
+        
         return {
             "status": "updated",
             "message": "Auto-detection configuration updated successfully",
-            "config": config.model_dump(),
+            "config": config.model_dump()
         }
-
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -1546,21 +1390,27 @@ async def get_auto_detection_statistics():
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
-            return {"available": False, "error": "Detection manager not available"}
-
+            return {
+                "available": False,
+                "error": "Detection manager not available"
+            }
+        
         stats = detection_manager.get_statistics()
-
+        
         return {
             "available": True,
             "statistics": stats,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat()
         }
-
+        
     except Exception as e:
         logger.error(f"Error getting auto-detection statistics: {e}")
-        return {"available": False, "error": str(e)}
+        return {
+            "available": False,
+            "error": str(e)
+        }
 
 
 @router.get("/auto-detection/detected-products")
@@ -1570,36 +1420,34 @@ async def get_detected_products():
     """
     try:
         detection_manager = get_detection_manager()
-
+        
         if not detection_manager:
             return []
-
+        
         scanner = detection_manager.scanner
         known_products = scanner.get_known_products()
-
+        
         # Convert to JSON-serializable format
         products_data = []
         for product in known_products:
-            products_data.append(
-                {
-                    "id": product.id,
-                    "title": product.title,
-                    "price": product.price,
-                    "description": product.description,
-                    "status": product.status.value,
-                    "wallapop_url": product.wallapop_url,
-                    "image_urls": product.image_urls,
-                    "views": product.views,
-                    "favorites": product.favorites,
-                    "messages_count": product.messages_count,
-                    "created_at": product.created_at.isoformat(),
-                    "last_seen": product.last_seen.isoformat(),
-                    "last_modified": product.last_modified.isoformat(),
-                }
-            )
-
+            products_data.append({
+                "id": product.id,
+                "title": product.title,
+                "price": product.price,
+                "description": product.description,
+                "status": product.status.value,
+                "wallapop_url": product.wallapop_url,
+                "image_urls": product.image_urls,
+                "views": product.views,
+                "favorites": product.favorites,
+                "messages_count": product.messages_count,
+                "created_at": product.created_at.isoformat(),
+                "last_seen": product.last_seen.isoformat(),
+                "last_modified": product.last_modified.isoformat()
+            })
+        
         return products_data
-
+        
     except Exception as e:
         logger.error(f"Error getting detected products: {e}")
         return []
@@ -1615,14 +1463,14 @@ async def health_check():
         # Check Redis connection
         client = await get_redis_client()
         redis_status = "connected" if client else "disconnected"
-
+        
         if client:
             try:
                 await client.ping()
                 redis_status = "healthy"
             except:
                 redis_status = "unhealthy"
-
+        
         return {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
@@ -1631,147 +1479,15 @@ async def health_check():
                 "redis": redis_status,
                 "websocket": {
                     "status": "running",
-                    "active_connections": connection_manager.get_connection_count(),
-                },
-            },
+                    "active_connections": connection_manager.get_connection_count()
+                }
+            }
         }
     except Exception as e:
         return JSONResponse(
-            status_code=503, content={"status": "unhealthy", "error": str(e)}
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "error": str(e)
+            }
         )
-
-
-# ============= Compliance API Endpoints =============
-
-# Initialize database manager for compliance operations
-db_manager: Optional[DatabaseManager] = None
-
-def get_db_manager():
-    """Get or initialize database manager"""
-    global db_manager
-    if not db_manager:
-        try:
-            # Load compliance configuration
-            config = load_config(ConfigMode.COMPLIANCE)
-            db_url = config.get("database", {}).get("url", "postgresql://wallapop_user:change_this_password@localhost:5432/wallapop_bot")
-            db_manager = DatabaseManager(db_url)
-            logger.info("Database manager initialized for compliance operations")
-        except Exception as e:
-            logger.error(f"Failed to initialize database manager: {e}")
-            return None
-    return db_manager
-
-@router.get("/compliance/status", response_model=ComplianceStatus)
-async def get_compliance_status():
-    """
-    Get current GDPR compliance status
-    Returns comprehensive compliance metrics
-    """
-    try:
-        # Load compliance configuration
-        config = load_config(ConfigMode.COMPLIANCE)
-
-        # Calculate compliance score based on configuration
-        gdpr_enabled = config.get("security", {}).get("gdpr_compliance", {}).get("enabled", False)
-        rate_limit = config.get("wallapop", {}).get("behavior", {}).get("max_messages_per_hour", 50)
-        max_allowed = 5  # Compliance limit
-        human_oversight = config.get("wallapop", {}).get("behavior", {}).get("human_confirmation_required", False)
-        transparency = config.get("security", {}).get("automation_disclosure", {}).get("enabled", False)
-
-        # Calculate compliance score
-        score = 0.0
-        if gdpr_enabled:
-            score += 30
-        if rate_limit <= max_allowed:
-            score += 25
-        if human_oversight:
-            score += 20
-        if transparency:
-            score += 15
-        if config.get("development", {}).get("audit_logging", False):
-            score += 10
-
-        return ComplianceStatus(
-            gdpr_enabled=gdpr_enabled,
-            audit_logging_active=config.get("development", {}).get("audit_logging", False),
-            rate_limit_compliant=rate_limit <= max_allowed,
-            human_oversight_enabled=human_oversight,
-            transparency_mode=transparency,
-            consent_system_active=gdpr_enabled,
-            current_rate_limit=rate_limit,
-            max_allowed_rate=max_allowed,
-            compliance_score=score,
-            last_audit_check=datetime.now()
-        )
-
-    except Exception as e:
-        logger.error(f"Error getting compliance status: {e}")
-        # Return default safe values
-        return ComplianceStatus(
-            gdpr_enabled=False,
-            audit_logging_active=False,
-            rate_limit_compliant=False,
-            human_oversight_enabled=False,
-            transparency_mode=False,
-            consent_system_active=False,
-            current_rate_limit=50,
-            max_allowed_rate=5,
-            compliance_score=0.0
-        )
-
-@router.post("/compliance/validate")
-async def validate_compliance():
-    """
-    Run compliance validation check
-    Returns validation results and recommendations
-    """
-    try:
-        # Load compliance configuration and validate
-        config = load_config(ConfigMode.COMPLIANCE)
-
-        validation_results = {
-            "status": "compliant",
-            "checks": {},
-            "recommendations": [],
-            "timestamp": datetime.now().isoformat()
-        }
-
-        # Check rate limits
-        rate_limit = config.get("wallapop", {}).get("behavior", {}).get("max_messages_per_hour", 50)
-        if rate_limit > 5:
-            validation_results["checks"]["rate_limit"] = "FAIL"
-            validation_results["recommendations"].append("Reduce rate limit to 5 messages/hour for compliance")
-            validation_results["status"] = "non_compliant"
-        else:
-            validation_results["checks"]["rate_limit"] = "PASS"
-
-        # Check GDPR compliance
-        gdpr_enabled = config.get("security", {}).get("gdpr_compliance", {}).get("enabled", False)
-        validation_results["checks"]["gdpr"] = "PASS" if gdpr_enabled else "FAIL"
-        if not gdpr_enabled:
-            validation_results["recommendations"].append("Enable GDPR compliance features")
-            validation_results["status"] = "non_compliant"
-
-        # Check human oversight
-        human_oversight = config.get("wallapop", {}).get("behavior", {}).get("human_confirmation_required", False)
-        validation_results["checks"]["human_oversight"] = "PASS" if human_oversight else "FAIL"
-        if not human_oversight:
-            validation_results["recommendations"].append("Enable human confirmation for all actions")
-            validation_results["status"] = "non_compliant"
-
-        # Check anti-detection
-        anti_detection = config.get("anti_detection", {}).get("enabled", True)
-        validation_results["checks"]["transparency"] = "PASS" if not anti_detection else "FAIL"
-        if anti_detection:
-            validation_results["recommendations"].append("Disable anti-detection for transparency compliance")
-            validation_results["status"] = "non_compliant"
-
-        return validation_results
-
-    except Exception as e:
-        logger.error(f"Error validating compliance: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }

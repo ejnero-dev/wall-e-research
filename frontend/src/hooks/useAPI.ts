@@ -41,8 +41,6 @@ export const useProducts = () => {
     queryKey: queryKeys.products,
     queryFn: api.getProducts,
     refetchInterval: 10000, // Refresh every 10 seconds
-    staleTime: 0, // Consider data stale immediately
-    cacheTime: 0, // Don't cache data (for debugging)
   });
 };
 
@@ -83,7 +81,7 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ productId, updates }: { productId: string; updates: Record<string, unknown> }) =>
+    mutationFn: ({ productId, updates }: { productId: string; updates: Record<string, any> }) =>
       api.updateProduct(productId, updates),
     onSuccess: (updatedProduct) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products });
