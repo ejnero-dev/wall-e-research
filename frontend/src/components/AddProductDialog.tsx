@@ -71,7 +71,7 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
     }
   };
 
-  const handleInputChange = (field: keyof ProductFormData, value: any) => {
+  const handleInputChange = (field: keyof ProductFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

@@ -58,6 +58,13 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const queryClient = useQueryClient();
   const heartbeatIntervalRef = useRef<NodeJS.Timeout>();
 
+  // Send message to server
+  const sendMessage = useCallback((message: any) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(message));
+    }
+  }, []);
+
   // Handle incoming messages
   const handleMessage = useCallback((event: MessageEvent) => {
     try {
@@ -144,14 +151,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     } catch (error) {
       console.error('Failed to parse WebSocket message:', error);
     }
-  }, [queryClient, onMessage]);
-
-  // Send message to server
-  const sendMessage = useCallback((message: any) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
-    }
-  }, []);
+  }, [queryClient, onMessage, sendMessage]);
 
   // Setup heartbeat mechanism
   const setupHeartbeat = useCallback(() => {
@@ -253,7 +253,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         error: error instanceof Error ? error.message : 'Unknown error',
       }));
     }
-  }, [url, handleMessage, state.reconnectCount, maxReconnectAttempts, reconnectInterval, setupHeartbeat, onConnect, onDisconnect, onError]);
+  }, [url, handleMessage, state.reconnectCount, state.isConnecting, maxReconnectAttempts, reconnectInterval, setupHeartbeat, onConnect, onDisconnect, onError]);
 
   // Disconnect from WebSocket
   const disconnect = useCallback(() => {
@@ -287,6 +287,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     return () => {
       disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoConnect]); // Only depend on autoConnect to avoid reconnecting on every change
 
   // Cleanup on unmount

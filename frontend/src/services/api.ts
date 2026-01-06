@@ -84,6 +84,39 @@ export interface ConfigValues {
   auto_response: boolean;
 }
 
+export interface AutoDetectionConfig {
+  enabled: boolean;
+  search_keywords: string[];
+  price_range_min: number;
+  price_range_max: number;
+  categories: string[];
+  auto_respond_new_products: boolean;
+  ai_personality: string;
+  response_delay_min: number;
+  response_delay_max: number;
+  enable_notifications: boolean;
+}
+
+export interface DetectedProduct {
+  id: string;
+  title: string;
+  price: number;
+  url: string;
+  image_url?: string;
+  detected_at: string;
+  status: string;
+  category?: string;
+  description?: string;
+}
+
+export interface AutoDetectionStatistics {
+  total_searches: number;
+  products_found: number;
+  products_added: number;
+  last_search_time?: string;
+  success_rate: number;
+}
+
 // API Error class
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -214,8 +247,8 @@ export const api = {
       enable_notifications: boolean;
     }>('/auto-detection/config'),
 
-  updateAutoDetectionConfig: (config: any) =>
-    fetchAPI<{ status: string; message: string; config: any }>('/auto-detection/config', {
+  updateAutoDetectionConfig: (config: Partial<AutoDetectionConfig>) =>
+    fetchAPI<{ status: string; message: string; config: AutoDetectionConfig }>('/auto-detection/config', {
       method: 'PUT',
       body: JSON.stringify(config),
     }),
@@ -223,13 +256,13 @@ export const api = {
   getAutoDetectionStatistics: () =>
     fetchAPI<{
       available: boolean;
-      statistics?: Record<string, any>;
+      statistics?: AutoDetectionStatistics;
       error?: string;
       timestamp: string;
     }>('/auto-detection/statistics'),
 
   getDetectedProducts: () =>
-    fetchAPI<any[]>('/auto-detection/detected-products'),
+    fetchAPI<DetectedProduct[]>('/auto-detection/detected-products'),
 
   // AI Engine
   getAIEngineStats: () =>
