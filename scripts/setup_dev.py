@@ -16,11 +16,7 @@ def run_command(command: str, description: str) -> bool:
     print(f"🔧 {description}...")
     try:
         result = subprocess.run(
-            command,
-            shell=True,
-            check=True,
-            capture_output=True,
-            text=True
+            command, shell=True, check=True, capture_output=True, text=True
         )
         print(f"✅ {description} completed successfully")
         return True
@@ -33,20 +29,20 @@ def main():
     """Main setup function."""
     print("🤖 Wallapop Automation Bot - Development Setup")
     print("=" * 50)
-    
+
     # Check if we're in the right directory
     project_root = Path(__file__).parent.parent
     if not (project_root / "requirements.txt").exists():
         print("❌ Please run this script from the project root directory")
         sys.exit(1)
-    
+
     # Check Python version
     if sys.version_info < (3, 11):
         print("❌ Python 3.11+ is required")
         sys.exit(1)
-    
+
     print(f"✅ Python {sys.version.split()[0]} detected")
-    
+
     # Install dependencies
     commands = [
         ("pip install --upgrade pip", "Upgrading pip"),
@@ -57,15 +53,15 @@ def main():
         ("playwright install chromium", "Installing Playwright browser"),
         ("playwright install-deps", "Installing Playwright system dependencies"),
     ]
-    
+
     failed_commands = []
-    
+
     for command, description in commands:
         if not run_command(command, description):
             failed_commands.append(description)
-    
+
     print("\n" + "=" * 50)
-    
+
     if failed_commands:
         print("⚠️  Setup completed with some errors:")
         for failed in failed_commands:
@@ -73,14 +69,14 @@ def main():
         print("\nPlease resolve these issues manually.")
     else:
         print("🎉 Development environment setup completed successfully!")
-    
+
     print("\n📋 Next steps:")
     print("1. Copy config/config.example.yaml to config/config.yaml")
     print("2. Copy config/price_analyzer.example.yaml to config/price_analyzer.yaml")
     print("3. Update configuration files with your settings")
     print("4. Run 'pytest' to ensure everything is working")
     print("5. Run 'pre-commit run --all-files' to check code quality")
-    
+
     print("\n🚀 Happy coding!")
 
 

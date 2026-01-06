@@ -15,6 +15,7 @@ import logging
 # Import configuration system for path management
 try:
     from src.enhanced_config_loader import ConfigPaths
+
     CONFIG_PATHS_AVAILABLE = True
 except ImportError:
     CONFIG_PATHS_AVAILABLE = False
@@ -26,10 +27,10 @@ logger = logging.getLogger(__name__)
 
 class RepositoryMigrator:
     """Handles migration of Wall-E project to separate repositories"""
-    
+
     def __init__(self, source_dir: str):
         self.source_dir = Path(source_dir)
-        
+
         # Initialize configuration paths (no more hardcoding)
         if CONFIG_PATHS_AVAILABLE:
             self.config_paths = ConfigPaths()
@@ -38,147 +39,146 @@ class RepositoryMigrator:
             # Fallback to hardcoded values if config system unavailable
             logger.warning("Configuration system unavailable, using fallback paths")
             self.migration_paths = {
-                'base_config_rel': 'config/base_config.yaml',
-                'config_loader_rel': 'src/config_loader.py',
-                'requirements_rel': 'requirements.txt',
-                'src_dir': 'src',
-                'scripts_dir': 'scripts',
-                'config_dir': 'config',
-                'environments_dir': 'config/environments',
-                'data_dir': 'data',
-                'logs_dir': 'logs',
-                'backups_dir': 'backups'
+                "base_config_rel": "config/base_config.yaml",
+                "config_loader_rel": "src/config_loader.py",
+                "requirements_rel": "requirements.txt",
+                "src_dir": "src",
+                "scripts_dir": "scripts",
+                "config_dir": "config",
+                "environments_dir": "config/environments",
+                "data_dir": "data",
+                "logs_dir": "logs",
+                "backups_dir": "backups",
             }
-            
+
         self.validate_source_directory()
-    
+
     def validate_source_directory(self):
         """Validate that source directory contains Wall-E project"""
         if not self.source_dir.exists():
             raise FileNotFoundError(f"Source directory not found: {self.source_dir}")
-        
+
         required_files = [
-            self.migration_paths['base_config_rel'],
-            self.migration_paths['config_loader_rel'],
-            self.migration_paths['requirements_rel']
+            self.migration_paths["base_config_rel"],
+            self.migration_paths["config_loader_rel"],
+            self.migration_paths["requirements_rel"],
         ]
-        
+
         for file_path in required_files:
             full_path = self.source_dir / file_path
             if not full_path.exists():
                 raise FileNotFoundError(f"Required file not found: {full_path}")
-    
+
     def create_base_repository(self, target_dir: str, repo_name: str) -> Path:
         """Create base repository structure"""
         target_path = Path(target_dir)
-        
+
         if target_path.exists():
             logger.warning(f"Target directory exists: {target_path}")
             response = input("Remove existing directory? (y/N): ")
-            if response.lower() == 'y':
+            if response.lower() == "y":
                 shutil.rmtree(target_path)
             else:
                 raise FileExistsError(f"Target directory exists: {target_path}")
-        
+
         # Copy entire source directory
         logger.info(f"Copying source directory to {target_path}")
         shutil.copytree(self.source_dir, target_path)
-        
+
         # Update repository-specific files
         self._update_repository_metadata(target_path, repo_name)
-        
+
         return target_path
-    
+
     def _update_repository_metadata(self, repo_path: Path, repo_name: str):
         """Update repository metadata files"""
-        
+
         # Update README if it exists
         readme_path = repo_path / "README.md"
         if readme_path.exists():
             content = readme_path.read_text()
             content = content.replace("project-wall-e", repo_name)
-            content = content.replace("Wall-E", f"Wall-E {repo_name.split('-')[-1].title()}")
+            content = content.replace(
+                "Wall-E", f"Wall-E {repo_name.split('-')[-1].title()}"
+            )
             readme_path.write_text(content)
-        
+
         # Update pyproject.toml if it exists
         pyproject_path = repo_path / "pyproject.toml"
         if pyproject_path.exists():
             content = pyproject_path.read_text()
             content = content.replace("project-wall-e", repo_name)
             pyproject_path.write_text(content)
-    
+
     def create_research_repository(self, target_dir: str) -> Path:
         """Create research-specific repository"""
         repo_path = self.create_base_repository(target_dir, "wall-e-research")
-        
+
         logger.info("Configuring research repository...")
-        
+
         # Create research-specific default config
         self._create_default_config(repo_path, "research")
-        
+
         # Add research disclaimers
         self._add_research_disclaimers(repo_path)
-        
+
         # Update documentation
         self._update_research_documentation(repo_path)
-        
+
         # Create research-specific scripts
         self._create_research_scripts(repo_path)
-        
+
         logger.info(f"Research repository created at: {repo_path}")
         return repo_path
-    
+
     def create_compliance_repository(self, target_dir: str) -> Path:
         """Create compliance-specific repository"""
         repo_path = self.create_base_repository(target_dir, "wall-e-compliance")
-        
+
         logger.info("Configuring compliance repository...")
-        
+
         # Create compliance-specific default config
         self._create_default_config(repo_path, "compliance")
-        
+
         # Remove aggressive anti-detection features
         self._sanitize_anti_detection_code(repo_path)
-        
+
         # Add compliance features
         self._add_compliance_features(repo_path)
-        
+
         # Update documentation
         self._update_compliance_documentation(repo_path)
-        
+
         # Create compliance-specific scripts
         self._create_compliance_scripts(repo_path)
-        
+
         logger.info(f"Compliance repository created at: {repo_path}")
         return repo_path
-    
+
     def _create_default_config(self, repo_path: Path, mode: str):
         """Create default configuration file for the repository"""
         config_dir = repo_path / "config"
-        
+
         # Create default config.yaml that loads the appropriate mode (configuration-driven paths)
         default_config = {
-            '_mode': mode,
-            '_loader_config': {
-                'base_config': self.migration_paths['base_config_rel'],
-                f'{mode}_overrides': f"{self.migration_paths['config_dir']}/{mode}_overrides.yaml",
-                'environment_override_dir': self.migration_paths['environments_dir']
+            "_mode": mode,
+            "_loader_config": {
+                "base_config": self.migration_paths["base_config_rel"],
+                f"{mode}_overrides": f"{self.migration_paths['config_dir']}/{mode}_overrides.yaml",
+                "environment_override_dir": self.migration_paths["environments_dir"],
             },
-            'default_settings': {
-                'mode': mode,
-                'environment': 'development'
-            }
+            "default_settings": {"mode": mode, "environment": "development"},
         }
-        
+
         config_path = config_dir / "config.yaml"
-        with open(config_path, 'w') as f:
+        with open(config_path, "w") as f:
             yaml.dump(default_config, f, default_flow_style=False, indent=2)
-        
+
         logger.info(f"Created default config for {mode} mode")
-    
+
     def _add_research_disclaimers(self, repo_path: Path):
         """Add research-specific disclaimers and warnings"""
-        
+
         # Create research disclaimer file
         disclaimer_content = """# RESEARCH DISCLAIMER
 
@@ -211,35 +211,37 @@ This version of Wall-E is designed for **RESEARCH AND EDUCATIONAL PURPOSES ONLY*
 
 **By using this software, you acknowledge and accept all risks and responsibilities.**
 """
-        
+
         disclaimer_path = repo_path / "RESEARCH_DISCLAIMER.md"
         disclaimer_path.write_text(disclaimer_content)
-        
+
         # Update main README with disclaimer
         readme_path = repo_path / "README.md"
         if readme_path.exists():
             content = readme_path.read_text()
             disclaimer_notice = "\n\n## ⚠️ RESEARCH VERSION DISCLAIMER\n\n**This is the research version of Wall-E. See [RESEARCH_DISCLAIMER.md](RESEARCH_DISCLAIMER.md) for important legal and ethical considerations.**\n\n"
-            
+
             # Insert disclaimer after first heading
-            lines = content.split('\n')
+            lines = content.split("\n")
             for i, line in enumerate(lines):
-                if line.startswith('# ') and i > 0:
+                if line.startswith("# ") and i > 0:
                     lines.insert(i + 1, disclaimer_notice)
                     break
-            
-            readme_path.write_text('\n'.join(lines))
-    
+
+            readme_path.write_text("\n".join(lines))
+
     def _sanitize_anti_detection_code(self, repo_path: Path):
         """Remove or modify aggressive anti-detection features for compliance"""
-        
-        anti_detection_file = repo_path / f"{self.migration_paths['src_dir']}/scraper/anti_detection.py"
+
+        anti_detection_file = (
+            repo_path / f"{self.migration_paths['src_dir']}/scraper/anti_detection.py"
+        )
         if anti_detection_file.exists():
             logger.info("Sanitizing anti-detection code for compliance...")
-            
+
             # Read current content
             content = anti_detection_file.read_text()
-            
+
             # Add compliance warning at the top
             compliance_warning = '''"""
 COMPLIANCE MODE: Anti-detection features are disabled for ethical compliance.
@@ -250,38 +252,43 @@ This module provides basic browser configuration without evasion techniques.
 # for ethical and legal compliance. Only basic browser configuration remains.
 
 '''
-            
+
             # Replace aggressive anti-detection with compliance notice
             sanitized_content = compliance_warning + "\n" + content
-            
+
             # Comment out aggressive functions (simple approach)
-            lines = sanitized_content.split('\n')
+            lines = sanitized_content.split("\n")
             sanitized_lines = []
-            
+
             for line in lines:
                 # Comment out specific aggressive functions
-                if any(keyword in line.lower() for keyword in [
-                    'webdriver_detection_bypass',
-                    'automation_markers_hiding',
-                    'stealth_mode',
-                    'fingerprint_randomization'
-                ]):
+                if any(
+                    keyword in line.lower()
+                    for keyword in [
+                        "webdriver_detection_bypass",
+                        "automation_markers_hiding",
+                        "stealth_mode",
+                        "fingerprint_randomization",
+                    ]
+                ):
                     sanitized_lines.append(f"    # COMPLIANCE: Disabled - {line}")
                 else:
                     sanitized_lines.append(line)
-            
-            anti_detection_file.write_text('\n'.join(sanitized_lines))
-    
+
+            anti_detection_file.write_text("\n".join(sanitized_lines))
+
     def _add_compliance_features(self, repo_path: Path):
         """Add compliance-specific features"""
-        
+
         # Create consent management module
         compliance_dir = repo_path / f"{self.migration_paths['src_dir']}/compliance"
         compliance_dir.mkdir(exist_ok=True)
-        
+
         # Create __init__.py
-        (compliance_dir / "__init__.py").write_text('"""Compliance and legal modules"""')
-        
+        (compliance_dir / "__init__.py").write_text(
+            '"""Compliance and legal modules"""'
+        )
+
         # Create consent management system
         consent_manager_content = '''"""
 Consent Management System for GDPR Compliance
@@ -357,10 +364,10 @@ class ConsentManager:
             return True
         return False
 '''
-        
+
         consent_file = compliance_dir / "consent_manager.py"
         consent_file.write_text(consent_manager_content)
-        
+
         # Create human oversight module
         oversight_content = '''"""
 Human Oversight System for Compliance
@@ -406,14 +413,14 @@ class HumanOversight:
             print(f"{key}: {value}")
         print("=" * 25)
 '''
-        
+
         oversight_file = compliance_dir / "human_oversight.py"
         oversight_file.write_text(oversight_content)
-    
+
     def _update_research_documentation(self, repo_path: Path):
         """Update documentation for research repository"""
         docs_dir = repo_path / "docs"
-        
+
         # Create research-specific setup guide
         research_setup = """# Research Setup Guide
 
@@ -459,14 +466,14 @@ The research version collects comprehensive data for analysis:
 
 All data is stored locally and can be exported for academic research.
 """
-        
+
         research_setup_file = docs_dir / "research-setup.md"
         research_setup_file.write_text(research_setup)
-    
+
     def _update_compliance_documentation(self, repo_path: Path):
         """Update documentation for compliance repository"""
         docs_dir = repo_path / "docs"
-        
+
         # Create compliance setup guide
         compliance_setup = """# Compliance Setup Guide
 
@@ -526,14 +533,14 @@ For legal questions or compliance issues:
 - Check platform terms of service
 - Monitor regulatory changes
 """
-        
+
         compliance_setup_file = docs_dir / "compliance-setup.md"
         compliance_setup_file.write_text(compliance_setup)
-    
+
     def _create_research_scripts(self, repo_path: Path):
         """Create research-specific scripts"""
-        scripts_dir = repo_path / self.migration_paths['scripts_dir']
-        
+        scripts_dir = repo_path / self.migration_paths["scripts_dir"]
+
         # Research launcher script
         research_launcher = '''#!/usr/bin/env python3
 """
@@ -600,15 +607,15 @@ def main():
 if __name__ == "__main__":
     main()
 '''
-        
+
         launcher_file = scripts_dir / "start_research_mode.py"
         launcher_file.write_text(research_launcher)
         launcher_file.chmod(0o755)
-    
+
     def _create_compliance_scripts(self, repo_path: Path):
         """Create compliance-specific scripts"""
-        scripts_dir = repo_path / self.migration_paths['scripts_dir']
-        
+        scripts_dir = repo_path / self.migration_paths["scripts_dir"]
+
         # Compliance launcher script
         compliance_launcher = '''#!/usr/bin/env python3
 """
@@ -702,34 +709,44 @@ def main():
 if __name__ == "__main__":
     main()
 '''
-        
+
         launcher_file = scripts_dir / "start_compliance_mode.py"
         launcher_file.write_text(compliance_launcher)
         launcher_file.chmod(0o755)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Migrate Wall-E to separate repositories")
-    parser.add_argument("--source", default=".", help="Source directory (current project)")
-    parser.add_argument("--research-target", help="Target directory for research repository")
-    parser.add_argument("--compliance-target", help="Target directory for compliance repository")
-    
+    parser = argparse.ArgumentParser(
+        description="Migrate Wall-E to separate repositories"
+    )
+    parser.add_argument(
+        "--source", default=".", help="Source directory (current project)"
+    )
+    parser.add_argument(
+        "--research-target", help="Target directory for research repository"
+    )
+    parser.add_argument(
+        "--compliance-target", help="Target directory for compliance repository"
+    )
+
     args = parser.parse_args()
-    
+
     if not args.research_target and not args.compliance_target:
-        print("Please specify at least one target directory (--research-target or --compliance-target)")
+        print(
+            "Please specify at least one target directory (--research-target or --compliance-target)"
+        )
         sys.exit(1)
-    
+
     migrator = RepositoryMigrator(args.source)
-    
+
     if args.research_target:
         research_repo = migrator.create_research_repository(args.research_target)
         print(f"✅ Research repository created: {research_repo}")
-    
+
     if args.compliance_target:
         compliance_repo = migrator.create_compliance_repository(args.compliance_target)
         print(f"✅ Compliance repository created: {compliance_repo}")
-    
+
     print("\n🎉 Repository migration completed!")
     print("\nNext steps:")
     print("1. Review generated configurations")

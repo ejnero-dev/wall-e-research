@@ -503,7 +503,7 @@ class DatabaseManager:
         session_id: str = None,
         risk_level: str = "low",
         compliance_relevant: bool = True,
-        **kwargs
+        **kwargs,
     ) -> AuditLog:
         """Create an audit log entry for compliance tracking"""
         with self.get_session() as session:
@@ -521,7 +521,7 @@ class DatabaseManager:
                 session_id=session_id,
                 risk_level=risk_level,
                 compliance_relevant=compliance_relevant,
-                audit_metadata=kwargs
+                audit_metadata=kwargs,
             )
             session.add(audit_log)
             session.flush()
@@ -538,7 +538,7 @@ class DatabaseManager:
         ip_address: str = None,
         user_agent: str = None,
         consent_version: str = "1.0",
-        **kwargs
+        **kwargs,
     ) -> ConsentRecord:
         """Create a consent record for GDPR compliance"""
         with self.get_session() as session:
@@ -551,7 +551,7 @@ class DatabaseManager:
                 ip_address=ip_address,
                 user_agent=user_agent,
                 consent_version=consent_version,
-                consent_evidence=kwargs
+                consent_evidence=kwargs,
             )
             session.add(consent)
             session.flush()
@@ -559,7 +559,11 @@ class DatabaseManager:
 
             # Create audit log for consent creation
             self.create_audit_log(
-                action=AuditAction.CONSENT_GRANTED if status == ConsentStatus.GRANTED else AuditAction.CREATE,
+                action=(
+                    AuditAction.CONSENT_GRANTED
+                    if status == ConsentStatus.GRANTED
+                    else AuditAction.CREATE
+                ),
                 entity_type="consent_records",
                 entity_id=str(consent.id),
                 buyer_id=buyer_id,
@@ -567,7 +571,7 @@ class DatabaseManager:
                 new_values={"consent_type": consent_type.value, "status": status.value},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                compliance_relevant=True
+                compliance_relevant=True,
             )
 
             return consent
@@ -580,7 +584,7 @@ class DatabaseManager:
         ip_address: str = None,
         user_agent: str = None,
         consent_version: str = "1.0",
-        evidence: Dict = None
+        evidence: Dict = None,
     ) -> ConsentRecord:
         """Grant consent for a specific purpose"""
         with self.get_session() as session:
@@ -590,7 +594,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         ConsentRecord.buyer_id == buyer_id,
-                        ConsentRecord.consent_type == consent_type
+                        ConsentRecord.consent_type == consent_type,
                     )
                 )
                 .first()
@@ -615,7 +619,7 @@ class DatabaseManager:
                     ip_address=ip_address,
                     user_agent=user_agent,
                     consent_version=consent_version,
-                    consent_evidence=evidence or {}
+                    consent_evidence=evidence or {},
                 )
                 session.add(consent)
 
@@ -641,7 +645,7 @@ class DatabaseManager:
                 new_values={"status": "granted", "purpose": purpose},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                compliance_relevant=True
+                compliance_relevant=True,
             )
 
             session.refresh(consent)
@@ -654,7 +658,7 @@ class DatabaseManager:
         reason: str = "",
         ip_address: str = None,
         user_agent: str = None,
-        evidence: Dict = None
+        evidence: Dict = None,
     ) -> bool:
         """Withdraw consent and schedule data deletion if required"""
         with self.get_session() as session:
@@ -664,7 +668,7 @@ class DatabaseManager:
                     and_(
                         ConsentRecord.buyer_id == buyer_id,
                         ConsentRecord.consent_type == consent_type,
-                        ConsentRecord.status == ConsentStatus.GRANTED
+                        ConsentRecord.status == ConsentStatus.GRANTED,
                     )
                 )
                 .first()
@@ -694,7 +698,7 @@ class DatabaseManager:
                     entity_id=str(buyer_id),
                     policy=DataRetentionPolicy.PERSONAL_DATA,
                     reason="Consent withdrawn for data processing",
-                    legal_basis="GDPR Article 17 - Right to be forgotten"
+                    legal_basis="GDPR Article 17 - Right to be forgotten",
                 )
 
             # Create audit log
@@ -708,7 +712,7 @@ class DatabaseManager:
                 new_values={"status": "withdrawn", "reason": reason},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                compliance_relevant=True
+                compliance_relevant=True,
             )
 
             return True
@@ -732,7 +736,7 @@ class DatabaseManager:
                     and_(
                         ConsentRecord.buyer_id == buyer_id,
                         ConsentRecord.consent_type == consent_type,
-                        ConsentRecord.status == ConsentStatus.GRANTED
+                        ConsentRecord.status == ConsentStatus.GRANTED,
                     )
                 )
                 .first()
@@ -746,7 +750,7 @@ class DatabaseManager:
         policy: DataRetentionPolicy,
         reason: str = "",
         legal_basis: str = "",
-        deletion_date: datetime = None
+        deletion_date: datetime = None,
     ) -> DataRetentionSchedule:
         """Schedule data for deletion based on retention policy"""
         with self.get_session() as session:
@@ -760,7 +764,7 @@ class DatabaseManager:
                 elif policy == DataRetentionPolicy.ANALYTICS_DATA:
                     deletion_date = now + timedelta(days=365)
                 elif policy == DataRetentionPolicy.AUDIT_DATA:
-                    deletion_date = now + timedelta(days=7*365)  # 7 years
+                    deletion_date = now + timedelta(days=7 * 365)  # 7 years
                 else:
                     deletion_date = now + timedelta(days=30)  # Default
 
@@ -770,7 +774,7 @@ class DatabaseManager:
                 policy=policy,
                 scheduled_deletion_at=deletion_date,
                 reason=reason,
-                legal_basis=legal_basis
+                legal_basis=legal_basis,
             )
             session.add(schedule)
             session.flush()
@@ -782,8 +786,11 @@ class DatabaseManager:
                 entity_type="data_retention_schedules",
                 entity_id=str(schedule.id),
                 description=f"Data deletion scheduled for {entity_type}:{entity_id}",
-                new_values={"scheduled_for": deletion_date.isoformat(), "policy": policy.value},
-                compliance_relevant=True
+                new_values={
+                    "scheduled_for": deletion_date.isoformat(),
+                    "policy": policy.value,
+                },
+                compliance_relevant=True,
             )
 
             return schedule
@@ -797,7 +804,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         DataRetentionSchedule.scheduled_deletion_at <= now,
-                        DataRetentionSchedule.processed == False
+                        DataRetentionSchedule.processed == False,
                     )
                 )
                 .all()
@@ -810,7 +817,11 @@ class DatabaseManager:
 
                     # Perform actual deletion based on entity type
                     if deletion.entity_type == "buyers":
-                        buyer = session.query(Buyer).filter(Buyer.id == deletion.entity_id).first()
+                        buyer = (
+                            session.query(Buyer)
+                            .filter(Buyer.id == deletion.entity_id)
+                            .first()
+                        )
                         if buyer:
                             # Anonymize instead of delete to preserve referential integrity
                             buyer.anonymized = True
@@ -832,7 +843,7 @@ class DatabaseManager:
                         entity_id=deletion.entity_id,
                         description=f"Data deleted/anonymized according to retention policy",
                         audit_metadata={"policy": deletion.policy.value},
-                        compliance_relevant=True
+                        compliance_relevant=True,
                     )
 
                 except Exception as e:
@@ -856,11 +867,7 @@ class DatabaseManager:
                 .all()
             )
 
-            messages = (
-                session.query(Message)
-                .filter(Message.buyer_id == buyer_id)
-                .all()
-            )
+            messages = session.query(Message).filter(Message.buyer_id == buyer_id).all()
 
             consents = (
                 session.query(ConsentRecord)
@@ -875,7 +882,7 @@ class DatabaseManager:
                 entity_id=str(buyer_id),
                 buyer_id=buyer_id,
                 description="User data exported for GDPR compliance",
-                compliance_relevant=True
+                compliance_relevant=True,
             )
 
             # Mark export as requested
@@ -889,17 +896,21 @@ class DatabaseManager:
                     "display_name": buyer.display_name,
                     "email": buyer.email,
                     "phone": buyer.phone,
-                    "created_at": buyer.created_at.isoformat() if buyer.created_at else None,
-                    "profile_data": buyer.profile_data
+                    "created_at": (
+                        buyer.created_at.isoformat() if buyer.created_at else None
+                    ),
+                    "profile_data": buyer.profile_data,
                 },
                 "conversations": [
                     {
                         "id": conv.id,
                         "product_id": conv.product_id,
                         "status": conv.status.value,
-                        "created_at": conv.created_at.isoformat() if conv.created_at else None,
+                        "created_at": (
+                            conv.created_at.isoformat() if conv.created_at else None
+                        ),
                         "negotiated_price": conv.negotiated_price,
-                        "meeting_location": conv.meeting_location
+                        "meeting_location": conv.meeting_location,
                     }
                     for conv in conversations
                 ],
@@ -909,7 +920,9 @@ class DatabaseManager:
                         "conversation_id": msg.conversation_id,
                         "content": msg.content,
                         "message_type": msg.message_type.value,
-                        "created_at": msg.created_at.isoformat() if msg.created_at else None
+                        "created_at": (
+                            msg.created_at.isoformat() if msg.created_at else None
+                        ),
                     }
                     for msg in messages
                 ],
@@ -917,24 +930,34 @@ class DatabaseManager:
                     {
                         "consent_type": consent.consent_type.value,
                         "status": consent.status.value,
-                        "granted_at": consent.granted_at.isoformat() if consent.granted_at else None,
-                        "withdrawn_at": consent.withdrawn_at.isoformat() if consent.withdrawn_at else None,
-                        "purpose": consent.purpose
+                        "granted_at": (
+                            consent.granted_at.isoformat()
+                            if consent.granted_at
+                            else None
+                        ),
+                        "withdrawn_at": (
+                            consent.withdrawn_at.isoformat()
+                            if consent.withdrawn_at
+                            else None
+                        ),
+                        "purpose": consent.purpose,
                     }
                     for consent in consents
-                ]
+                ],
             }
 
     def generate_compliance_report(
         self,
         report_type: str = "daily",
         period_start: datetime = None,
-        period_end: datetime = None
+        period_end: datetime = None,
     ) -> ComplianceReport:
         """Generate compliance report for monitoring"""
         with self.get_session() as session:
             if not period_start:
-                period_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                period_start = datetime.utcnow().replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                )
             if not period_end:
                 period_end = period_start + timedelta(days=1)
 
@@ -946,7 +969,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         ConsentRecord.granted_at.between(period_start, period_end),
-                        ConsentRecord.status == ConsentStatus.GRANTED
+                        ConsentRecord.status == ConsentStatus.GRANTED,
                     )
                 )
                 .scalar()
@@ -957,7 +980,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         ConsentRecord.withdrawn_at.between(period_start, period_end),
-                        ConsentRecord.status == ConsentStatus.WITHDRAWN
+                        ConsentRecord.status == ConsentStatus.WITHDRAWN,
                     )
                 )
                 .scalar()
@@ -968,7 +991,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         Buyer.data_export_requested == True,
-                        Buyer.updated_at.between(period_start, period_end)
+                        Buyer.updated_at.between(period_start, period_end),
                     )
                 )
                 .scalar()
@@ -979,7 +1002,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         Buyer.deletion_requested == True,
-                        Buyer.updated_at.between(period_start, period_end)
+                        Buyer.updated_at.between(period_start, period_end),
                     )
                 )
                 .scalar()
@@ -990,7 +1013,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         AuditLog.action == AuditAction.COMPLIANCE_VIOLATION,
-                        AuditLog.created_at.between(period_start, period_end)
+                        AuditLog.created_at.between(period_start, period_end),
                     )
                 )
                 .scalar()
@@ -1006,7 +1029,7 @@ class DatabaseManager:
                 data_exports_requested=data_exports_requested,
                 data_deletions_requested=data_deletions_requested,
                 compliance_violations=compliance_violations,
-                generated_by="system"
+                generated_by="system",
             )
 
             session.add(report)

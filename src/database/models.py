@@ -365,7 +365,9 @@ class ConsentRecord(Base):
     __tablename__ = "consent_records"
 
     id = Column(Integer, primary_key=True)
-    consent_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+    consent_id = Column(
+        UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True
+    )
 
     # Foreign keys
     buyer_id = Column(Integer, ForeignKey("buyers.id"), nullable=False)
@@ -375,7 +377,9 @@ class ConsentRecord(Base):
     status = Column(Enum(ConsentStatus), default=ConsentStatus.PENDING, nullable=False)
 
     # Legal basis for processing (GDPR Article 6)
-    legal_basis = Column(String(50))  # consent, contract, legal_obligation, vital_interests, public_task, legitimate_interests
+    legal_basis = Column(
+        String(50)
+    )  # consent, contract, legal_obligation, vital_interests, public_task, legitimate_interests
     purpose = Column(Text)  # Specific purpose of data processing
 
     # Consent metadata
@@ -393,8 +397,12 @@ class ConsentRecord(Base):
     withdrawal_evidence = Column(JSON)  # Store evidence of withdrawal
 
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     buyer = relationship("Buyer", back_populates="consent_records")
@@ -416,7 +424,9 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id = Column(Integer, primary_key=True)
-    audit_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+    audit_id = Column(
+        UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True
+    )
 
     # What happened
     action = Column(Enum(AuditAction), nullable=False)
@@ -443,7 +453,9 @@ class AuditLog(Base):
     compliance_relevant = Column(Boolean, default=True)
 
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
     # Relationships
     buyer = relationship("Buyer", back_populates="audit_logs")
@@ -466,7 +478,9 @@ class DataRetentionSchedule(Base):
     __tablename__ = "data_retention_schedules"
 
     id = Column(Integer, primary_key=True)
-    schedule_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+    schedule_id = Column(
+        UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True
+    )
 
     # What to delete
     entity_type = Column(String(50), nullable=False)  # table/model name
@@ -489,8 +503,12 @@ class DataRetentionSchedule(Base):
     retention_metadata = Column(JSON)
 
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     # Indexes
     __table_args__ = (
@@ -509,7 +527,9 @@ class ComplianceReport(Base):
     __tablename__ = "compliance_reports"
 
     id = Column(Integer, primary_key=True)
-    report_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+    report_id = Column(
+        UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True
+    )
 
     # Report details
     report_type = Column(String(50), nullable=False)  # daily, weekly, monthly, incident
@@ -536,7 +556,9 @@ class ComplianceReport(Base):
     status = Column(String(20), default="draft")  # draft, final, archived
 
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     reviewed_at = Column(DateTime(timezone=True))
 
     # Indexes

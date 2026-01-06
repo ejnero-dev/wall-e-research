@@ -26,8 +26,8 @@ def setup_logging():
         format="%(asctime)s - %(levelname)s - %(message)s",
         handlers=[
             logging.StreamHandler(sys.stdout),
-            logging.FileHandler("/tmp/compliance_validation.log")
-        ]
+            logging.FileHandler("/tmp/compliance_validation.log"),
+        ],
     )
 
 
@@ -67,7 +67,7 @@ def validate_compliance_mode_config() -> bool:
             "consent_required",
             "right_to_be_forgotten",
             "data_portability",
-            "breach_notification"
+            "breach_notification",
         ]
 
         for right in required_gdpr_rights:
@@ -95,12 +95,14 @@ def validate_compliance_mode_config() -> bool:
             ("human_confirmation_required", "Human confirmation"),
             ("transparency_disclosure", "Transparency disclosure"),
             ("consent_collection", "Consent collection"),
-            ("opt_out_mechanism", "Opt-out mechanism")
+            ("opt_out_mechanism", "Opt-out mechanism"),
         ]
 
         for setting, description in transparency_checks:
             if not wallapop_behavior.get(setting, False):
-                compliance_errors.append(f"{description} must be enabled for compliance")
+                compliance_errors.append(
+                    f"{description} must be enabled for compliance"
+                )
 
         # Check anti-detection is disabled
         anti_detection = config.get("anti_detection", {})
@@ -112,7 +114,7 @@ def validate_compliance_mode_config() -> bool:
             ("stealth_mode", "Stealth mode"),
             ("fingerprint_randomization", "Fingerprint randomization"),
             ("webdriver_detection_bypass", "WebDriver detection bypass"),
-            ("automation_markers_hiding", "Automation markers hiding")
+            ("automation_markers_hiding", "Automation markers hiding"),
         ]
 
         browser_config = anti_detection.get("browser", {})
@@ -120,14 +122,16 @@ def validate_compliance_mode_config() -> bool:
 
         for setting, description in stealth_features:
             if browser_config.get(setting, False) or evasion_config.get(setting, False):
-                compliance_errors.append(f"{description} must be disabled for compliance")
+                compliance_errors.append(
+                    f"{description} must be disabled for compliance"
+                )
 
         # Check compliance mode transparency settings
         compliance_mode_config = anti_detection.get("compliance_mode", {})
         transparency_requirements = [
             ("identify_as_automated", "Must identify as automated"),
             ("display_automation_notice", "Must display automation notice"),
-            ("allow_detection", "Must allow platform detection")
+            ("allow_detection", "Must allow platform detection"),
         ]
 
         for setting, description in transparency_requirements:
@@ -138,7 +142,7 @@ def validate_compliance_mode_config() -> bool:
         mandatory_systems = [
             ("consent_management", "Consent management system"),
             ("human_oversight", "Human oversight system"),
-            ("legal_documentation", "Legal documentation system")
+            ("legal_documentation", "Legal documentation system"),
         ]
 
         for system, description in mandatory_systems:
@@ -156,7 +160,7 @@ def validate_compliance_mode_config() -> bool:
             ("anonymize_data", "Data anonymization"),
             ("pseudonymization", "Data pseudonymization"),
             ("encryption_at_rest", "Encryption at rest"),
-            ("encryption_in_transit", "Encryption in transit")
+            ("encryption_in_transit", "Encryption in transit"),
         ]
 
         for setting, description in required_data_protection:
@@ -188,19 +192,31 @@ def print_compliance_summary(config: Dict[str, Any]) -> None:
 
     # Basic app info
     app = config.get("app", {})
-    logger.info(f"App: {app.get('name', 'Unknown')} (Mode: {app.get('mode', 'Unknown')})")
+    logger.info(
+        f"App: {app.get('name', 'Unknown')} (Mode: {app.get('mode', 'Unknown')})"
+    )
 
     # Rate limiting
     wallapop_behavior = config.get("wallapop", {}).get("behavior", {})
     logger.info(f"Rate Limits:")
-    logger.info(f"  - Max messages/hour: {wallapop_behavior.get('max_messages_per_hour', 'Not set')}")
-    logger.info(f"  - Max concurrent conversations: {wallapop_behavior.get('max_concurrent_conversations', 'Not set')}")
+    logger.info(
+        f"  - Max messages/hour: {wallapop_behavior.get('max_messages_per_hour', 'Not set')}"
+    )
+    logger.info(
+        f"  - Max concurrent conversations: {wallapop_behavior.get('max_concurrent_conversations', 'Not set')}"
+    )
 
     # Transparency features
     logger.info("Transparency Features:")
-    logger.info(f"  - Human confirmation required: {wallapop_behavior.get('human_confirmation_required', False)}")
-    logger.info(f"  - Transparency disclosure: {wallapop_behavior.get('transparency_disclosure', False)}")
-    logger.info(f"  - Consent collection: {wallapop_behavior.get('consent_collection', False)}")
+    logger.info(
+        f"  - Human confirmation required: {wallapop_behavior.get('human_confirmation_required', False)}"
+    )
+    logger.info(
+        f"  - Transparency disclosure: {wallapop_behavior.get('transparency_disclosure', False)}"
+    )
+    logger.info(
+        f"  - Consent collection: {wallapop_behavior.get('consent_collection', False)}"
+    )
 
     # GDPR compliance
     gdpr = config.get("security", {}).get("gdpr_compliance", {})
@@ -208,17 +224,27 @@ def print_compliance_summary(config: Dict[str, Any]) -> None:
     logger.info(f"  - GDPR enabled: {gdpr.get('enabled', False)}")
     logger.info(f"  - Data minimization: {gdpr.get('data_minimization', False)}")
     logger.info(f"  - Purpose limitation: {gdpr.get('purpose_limitation', False)}")
-    logger.info(f"  - Personal data retention: {gdpr.get('data_retention', {}).get('personal_data_days', 'Not set')} days")
+    logger.info(
+        f"  - Personal data retention: {gdpr.get('data_retention', {}).get('personal_data_days', 'Not set')} days"
+    )
 
     # Mandatory systems
     logger.info("Mandatory Systems:")
-    logger.info(f"  - Consent management: {config.get('consent_management', {}).get('enabled', False)}")
-    logger.info(f"  - Human oversight: {config.get('human_oversight', {}).get('enabled', False)}")
-    logger.info(f"  - Legal documentation: {config.get('legal_documentation', {}).get('enabled', False)}")
+    logger.info(
+        f"  - Consent management: {config.get('consent_management', {}).get('enabled', False)}"
+    )
+    logger.info(
+        f"  - Human oversight: {config.get('human_oversight', {}).get('enabled', False)}"
+    )
+    logger.info(
+        f"  - Legal documentation: {config.get('legal_documentation', {}).get('enabled', False)}"
+    )
 
     # Anti-detection status
     anti_detection = config.get("anti_detection", {})
-    logger.info(f"Anti-detection: {anti_detection.get('enabled', False)} (Must be False for compliance)")
+    logger.info(
+        f"Anti-detection: {anti_detection.get('enabled', False)} (Must be False for compliance)"
+    )
 
 
 def main():

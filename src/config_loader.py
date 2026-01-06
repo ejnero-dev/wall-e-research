@@ -340,31 +340,61 @@ class ConfigurationLoader:
             "app_name": config.get("app", {}).get("name", "unknown"),
             "wallapop_settings": {
                 "max_messages_per_hour": wallapop_behavior.get("max_messages_per_hour"),
-                "max_concurrent_conversations": wallapop_behavior.get("max_concurrent_conversations"),
-                "anti_detection_enabled": config.get("anti_detection", {}).get("enabled", False),
-                "human_confirmation_required": wallapop_behavior.get("human_confirmation_required", False),
-                "transparency_disclosure": wallapop_behavior.get("transparency_disclosure", False),
-                "consent_collection": wallapop_behavior.get("consent_collection", False),
+                "max_concurrent_conversations": wallapop_behavior.get(
+                    "max_concurrent_conversations"
+                ),
+                "anti_detection_enabled": config.get("anti_detection", {}).get(
+                    "enabled", False
+                ),
+                "human_confirmation_required": wallapop_behavior.get(
+                    "human_confirmation_required", False
+                ),
+                "transparency_disclosure": wallapop_behavior.get(
+                    "transparency_disclosure", False
+                ),
+                "consent_collection": wallapop_behavior.get(
+                    "consent_collection", False
+                ),
             },
             "compliance_features": {
                 "gdpr_enabled": gdpr_compliance.get("enabled", False),
-                "human_oversight": config.get("human_oversight", {}).get("enabled", False),
-                "consent_management": config.get("consent_management", {}).get("enabled", False),
-                "legal_documentation": config.get("legal_documentation", {}).get("enabled", False),
-                "audit_logging": config.get("development", {}).get("compliance_tools", {}).get("audit_logging", False),
+                "human_oversight": config.get("human_oversight", {}).get(
+                    "enabled", False
+                ),
+                "consent_management": config.get("consent_management", {}).get(
+                    "enabled", False
+                ),
+                "legal_documentation": config.get("legal_documentation", {}).get(
+                    "enabled", False
+                ),
+                "audit_logging": config.get("development", {})
+                .get("compliance_tools", {})
+                .get("audit_logging", False),
             },
             "gdpr_settings": {
                 "data_minimization": gdpr_compliance.get("data_minimization", False),
                 "purpose_limitation": gdpr_compliance.get("purpose_limitation", False),
                 "consent_required": gdpr_compliance.get("consent_required", False),
-                "right_to_be_forgotten": gdpr_compliance.get("right_to_be_forgotten", False),
-                "personal_data_retention_days": gdpr_compliance.get("data_retention", {}).get("personal_data_days", None),
+                "right_to_be_forgotten": gdpr_compliance.get(
+                    "right_to_be_forgotten", False
+                ),
+                "personal_data_retention_days": gdpr_compliance.get(
+                    "data_retention", {}
+                ).get("personal_data_days", None),
             },
             "security_settings": {
-                "fraud_detection_enabled": config.get("security", {}).get("fraud_detection", {}).get("enabled", False),
-                "strict_mode": config.get("security", {}).get("fraud_detection", {}).get("strict_mode", False),
-                "encryption_at_rest": config.get("security", {}).get("data_collection", {}).get("encryption_at_rest", False),
-                "anonymize_data": config.get("security", {}).get("data_collection", {}).get("anonymize_data", False),
+                "fraud_detection_enabled": config.get("security", {})
+                .get("fraud_detection", {})
+                .get("enabled", False),
+                "strict_mode": config.get("security", {})
+                .get("fraud_detection", {})
+                .get("strict_mode", False),
+                "encryption_at_rest": config.get("security", {})
+                .get("data_collection", {})
+                .get("encryption_at_rest", False),
+                "anonymize_data": config.get("security", {})
+                .get("data_collection", {})
+                .get("anonymize_data", False),
             },
             "database": {
                 "host": config.get("database", {}).get("host"),

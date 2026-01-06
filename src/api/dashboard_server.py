@@ -2,6 +2,7 @@
 Dashboard Server for Wall-E Research
 FastAPI application with WebSocket support for real-time dashboard
 """
+
 import asyncio
 import logging
 import sys
@@ -20,8 +21,7 @@ from src.api.dashboard_routes import router as dashboard_router
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -33,24 +33,24 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     logger.info("Starting Wall-E Dashboard API...")
-    
+
     # Initialize any required services here
     # For example: database connections, Redis, etc.
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Wall-E Dashboard API...")
-    
+
     # Clean up resources here
-    
+
 
 # Create FastAPI app
 app = FastAPI(
     title="Wall-E Research Dashboard API",
     description="Real-time monitoring and control API for Wall-E bot",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Configure CORS for frontend access
@@ -85,8 +85,8 @@ async def root():
             "dashboard": "/api/dashboard",
             "docs": "/docs",
             "redoc": "/redoc",
-            "health": "/api/dashboard/health"
-        }
+            "health": "/api/dashboard/health",
+        },
     }
 
 
@@ -97,10 +97,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={
-            "detail": "Internal server error",
-            "type": type(exc).__name__
-        }
+        content={"detail": "Internal server error", "type": type(exc).__name__},
     )
 
 
@@ -127,9 +124,9 @@ def main():
         "ws_ping_interval": 20,
         "ws_ping_timeout": 10,
     }
-    
+
     logger.info(f"Starting server on http://{config['host']}:{config['port']}")
-    
+
     # Run the server
     uvicorn.run(**config)
 

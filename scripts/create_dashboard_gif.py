@@ -19,14 +19,17 @@ from datetime import datetime
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-print("""
+print(
+    """
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                    🎬 CREADOR DE GIF PARA LINKEDIN                         ║
 ║                         Dashboard Wall-E                                   ║
 ╚════════════════════════════════════════════════════════════════════════════╝
-""")
+"""
+)
 
-print("""
+print(
+    """
 📋 PLAN DE CAPTURA DEL GIF (30-45 segundos totales):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -71,9 +74,11 @@ ESCENA 7: Notificaciones WebSocket (5s)
 ├── Mostrar notificación toast
 ├── Actualización de métricas
 └── Badge de contador en sidebar
-""")
+"""
+)
 
-print("""
+print(
+    """
 🎯 CARACTERÍSTICAS A DESTACAR:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ Actualización en tiempo real (WebSocket)
@@ -84,9 +89,11 @@ print("""
 ✅ Diseño responsive y moderno
 ✅ Notificaciones en tiempo real
 ✅ Navegación fluida con sidebar
-""")
+"""
+)
 
-print("""
+print(
+    """
 🛠️ HERRAMIENTAS RECOMENDADAS PARA CAPTURA:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -113,12 +120,15 @@ OPCIÓN 4: Kap (Mac)
 ├── Exportar a GIF optimizado
 ├── Ajustes de calidad y FPS
 └── Plugins para optimización
-""")
+"""
+)
 
-print("""
+print(
+    """
 📝 SCRIPT DE AUTOMATIZACIÓN CON PLAYWRIGHT:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-""")
+"""
+)
 
 # Crear script de Playwright para automatización
 playwright_script = '''
@@ -216,7 +226,8 @@ automation_script_path = project_root / "examples" / "create_dashboard_demo.py"
 automation_script_path.write_text(playwright_script)
 print(f"✅ Script guardado en: {automation_script_path}")
 
-print("""
+print(
+    """
 🎨 OPTIMIZACIÓN DEL GIF FINAL:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -242,9 +253,11 @@ print("""
    - ezgif.com para optimización adicional
    - Puede reducir 30-50% el tamaño
    - Mantiene buena calidad visual
-""")
+"""
+)
 
-print("""
+print(
+    """
 📱 CONTENIDO SUGERIDO PARA EL POST:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -263,9 +276,11 @@ Stack: React 18 + TypeScript + FastAPI + Python + PostgreSQL
 Código completo en GitHub [link]
 
 #FullStack #React #Python #RealTimeData #OpenSource"
-""")
+"""
+)
 
-print("""
+print(
+    """
 ⚡ COMANDOS RÁPIDOS:
 ━━━━━━━━━━━━━━━━━━
 
@@ -283,9 +298,11 @@ print("""
 
 5. Optimizar GIF:
    ffmpeg -i input.mp4 -vf "fps=15,scale=800:-1" output.gif
-""")
+"""
+)
 
-print("""
+print(
+    """
 ✨ TIPS FINALES:
 ━━━━━━━━━━━━━━━
 
@@ -313,13 +330,14 @@ print("""
    - Prueba en LinkedIn antes de publicar
 
 ¡Mucho éxito con tu GIF! 🚀
-""")
+"""
+)
 
 # Crear directorio para outputs
 output_dir = project_root / "outputs" / "gifs"
 output_dir.mkdir(parents=True, exist_ok=True)
 print(f"\n📁 Directorio para GIFs creado: {output_dir}")
 
-print("\n" + "="*80)
+print("\n" + "=" * 80)
 print("🎬 Script completado. ¡Listo para crear tu GIF profesional!")
-print("="*80)
+print("=" * 80)
