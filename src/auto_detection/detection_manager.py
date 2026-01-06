@@ -19,14 +19,14 @@ src_path = str(Path(__file__).parent.parent)
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-from scraper.account_scanner import (
+from scraper.account_scanner import (  # noqa: E402
     AccountScanner,
     DetectedProduct,
     ScanResults,
     ScanStatus,
 )
-from scraper.session_manager import AuthMethod
-from auto_detection.notifications import (
+from scraper.session_manager import AuthMethod  # noqa: E402
+from auto_detection.notifications import (  # noqa: E402
     notification_manager,
     NotificationType,
     NotificationPriority,

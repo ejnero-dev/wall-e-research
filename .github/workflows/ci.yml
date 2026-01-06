@@ -37,7 +37,7 @@ jobs:
       run: uv sync --extra dev
     
     - name: Run Black (Code Formatting)
-      run: uv run black --check --diff src/ tests/
+      run: uv run black --check --diff src/ tests/ --exclude src/_version.py
     
     - name: Run Flake8 (Linting)
       run: uv run flake8 src/ tests/
@@ -125,7 +125,7 @@ jobs:
     - name: Install spaCy model
       run: |
         uv run python -c "import spacy; print('spaCy is available')"
-        uv run python -m spacy download es_core_news_sm
+        uv pip install https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.7.0/es_core_news_sm-3.7.0-py3-none-any.whl
         uv run python -c "import spacy; nlp = spacy.load('es_core_news_sm'); print('Spanish model loaded successfully')"
     
     - name: Set up test environment

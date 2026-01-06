@@ -13,7 +13,12 @@
       "Bash(git checkout:*)",
       "Bash(pytest:*)",
       "Bash(source:*)",
-      "Bash(uv sync:*)"
+      "Bash(uv sync:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(uv run black:*)",
+      "Bash(gh run view:*)"
     ],
     "deny": []
   }
