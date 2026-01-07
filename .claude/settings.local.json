@@ -20,7 +20,8 @@
       "Bash(uv run black:*)",
       "Bash(gh run view:*)",
       "Bash(npm run type-check:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": []
   }

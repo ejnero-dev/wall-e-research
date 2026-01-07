@@ -39,7 +39,7 @@ export interface Notification {
   timestamp: string;
   read: boolean;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NotificationCenterProps {

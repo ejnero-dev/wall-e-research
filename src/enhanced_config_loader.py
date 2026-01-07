@@ -41,45 +41,57 @@ class ConfigChangeEvent:
         return f"ConfigChangeEvent({self.change_type}: {self.file_path} at {self.timestamp})"
 
 
-class ConfigFileWatcher(FileSystemEventHandler):
-    """File system event handler for configuration file changes"""
+if WATCHDOG_AVAILABLE:
 
-    def __init__(
-        self, callback: Callable[[ConfigChangeEvent], None], patterns: List[str] = None
-    ):
-        super().__init__()
-        self.callback = callback
-        self.patterns = patterns or ["*.yaml", "*.yml", "*.json"]
-        self.last_modified = {}
+    class ConfigFileWatcher(FileSystemEventHandler):
+        """File system event handler for configuration file changes"""
 
-    def _should_handle_file(self, file_path: str) -> bool:
-        """Check if file matches watch patterns"""
-        path = Path(file_path)
-        return any(path.match(pattern) for pattern in self.patterns)
+        def __init__(
+            self, callback: Callable[[ConfigChangeEvent], None], patterns: List[str] = None
+        ):
+            super().__init__()
+            self.callback = callback
+            self.patterns = patterns or ["*.yaml", "*.yml", "*.json"]
+            self.last_modified = {}
 
-    def _debounce_file_change(self, file_path: str) -> bool:
-        """Debounce rapid file changes (common with editors)"""
-        now = time.time()
-        last_time = self.last_modified.get(file_path, 0)
+        def _should_handle_file(self, file_path: str) -> bool:
+            """Check if file matches watch patterns"""
+            path = Path(file_path)
+            return any(path.match(pattern) for pattern in self.patterns)
 
-        if now - last_time < 1.0:  # Ignore changes within 1 second
-            return False
+        def _debounce_file_change(self, file_path: str) -> bool:
+            """Debounce rapid file changes (common with editors)"""
+            now = time.time()
+            last_time = self.last_modified.get(file_path, 0)
 
-        self.last_modified[file_path] = now
-        return True
+            if now - last_time < 1.0:  # Ignore changes within 1 second
+                return False
 
-    def on_modified(self, event):
-        if not event.is_directory and self._should_handle_file(event.src_path):
-            if self._debounce_file_change(event.src_path):
-                self.callback(ConfigChangeEvent(event.src_path, "modified"))
+            self.last_modified[file_path] = now
+            return True
 
-    def on_created(self, event):
-        if not event.is_directory and self._should_handle_file(event.src_path):
-            self.callback(ConfigChangeEvent(event.src_path, "created"))
+        def on_modified(self, event):
+            if not event.is_directory and self._should_handle_file(event.src_path):
+                if self._debounce_file_change(event.src_path):
+                    self.callback(ConfigChangeEvent(event.src_path, "modified"))
 
-    def on_deleted(self, event):
-        if not event.is_directory and self._should_handle_file(event.src_path):
-            self.callback(ConfigChangeEvent(event.src_path, "deleted"))
+        def on_created(self, event):
+            if not event.is_directory and self._should_handle_file(event.src_path):
+                self.callback(ConfigChangeEvent(event.src_path, "created"))
+
+        def on_deleted(self, event):
+            if not event.is_directory and self._should_handle_file(event.src_path):
+                self.callback(ConfigChangeEvent(event.src_path, "deleted"))
+
+else:
+    # Dummy class when watchdog is not available
+    class ConfigFileWatcher:
+        """Dummy file watcher when watchdog is not installed"""
+
+        def __init__(self, callback: Callable[[ConfigChangeEvent], None], patterns: List[str] = None):
+            logger.warning("Watchdog not available - config hot-reload disabled")
+            self.callback = callback
+            self.patterns = patterns or []
 
 
 class ConfigMode(Enum):
