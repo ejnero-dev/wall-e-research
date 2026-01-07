@@ -1,7 +1,401 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { \n  Bell, \n  CheckCircle, \n  AlertTriangle, \n  Info, \n  X, \n  Settings,\n  Filter,\n  MoreHorizontal,\n  MessageSquare,\n  TrendingUp,\n  Package,\n  DollarSign\n} from 'lucide-react';\nimport { cn } from '@/lib/utils';\nimport { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';\n\ninterface Notification {\n  id: string;\n  type: 'success' | 'error' | 'warning' | 'info';\n  category: 'sale' | 'message' | 'system' | 'detection' | 'fraud';\n  title: string;\n  message: string;\n  timestamp: string;\n  read: boolean;\n  actions?: {\n    label: string;\n    action: () => void;\n  }[];\n}\n\nconst mockNotifications: Notification[] = [\n  {\n    id: '1',\n    type: 'success',\n    category: 'sale',\n    title: 'Venta realizada',\n    message: 'iPhone 12 Pro vendido por 650\u20ac. El comprador ha confirmado la transacci\u00f3n.',\n    timestamp: '2025-01-09T10:30:00Z',\n    read: false,\n    actions: [\n      { label: 'Ver detalles', action: () => console.log('Ver detalles de venta') },\n      { label: 'Contactar', action: () => console.log('Contactar comprador') }\n    ]\n  },\n  {\n    id: '2',\n    type: 'info',\n    category: 'message',\n    title: 'Nuevo mensaje',\n    message: 'Has recibido 3 mensajes nuevos sobre \"MacBook Air M1\". Respuesta autom\u00e1tica enviada.',\n    timestamp: '2025-01-09T10:15:00Z',\n    read: false\n  },\n  {\n    id: '3',\n    type: 'warning',\n    category: 'fraud',\n    title: 'Posible fraude detectado',\n    message: 'Usuario sospechoso intent\u00f3 negociar fuera de la plataforma. Conversaci\u00f3n bloqueada autom\u00e1ticamente.',\n    timestamp: '2025-01-09T09:45:00Z',\n    read: true\n  },\n  {\n    id: '4',\n    type: 'success',\n    category: 'detection',\n    title: 'Productos detectados',\n    message: '5 productos similares detectados en tu zona con precios competitivos.',\n    timestamp: '2025-01-09T09:30:00Z',\n    read: true\n  },\n  {\n    id: '5',\n    type: 'error',\n    category: 'system',\n    title: 'Error en scraper',\n    message: 'El scraper de Amazon ha fallado. \u00daltimo intento hace 15 minutos.',\n    timestamp: '2025-01-09T09:00:00Z',\n    read: false,\n    actions: [\n      { label: 'Reintentar', action: () => console.log('Reintentar scraper') },\n      { label: 'Ver logs', action: () => console.log('Ver logs del scraper') }\n    ]\n  }\n];\n\nconst getTypeIcon = (type: Notification['type']) => {\n  switch (type) {\n    case 'success':\n      return CheckCircle;\n    case 'error':\n      return AlertTriangle;\n    case 'warning':\n      return AlertTriangle;\n    case 'info':\n      return Info;\n    default:\n      return Info;\n  }\n};\n\nconst getCategoryIcon = (category: Notification['category']) => {\n  switch (category) {\n    case 'sale':\n      return DollarSign;\n    case 'message':\n      return MessageSquare;\n    case 'system':\n      return Settings;\n    case 'detection':\n      return Package;\n    case 'fraud':\n      return AlertTriangle;\n    default:\n      return Bell;\n  }\n};\n\nconst getTypeColor = (type: Notification['type']) => {\n  switch (type) {\n    case 'success':\n      return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950';\n    case 'error':\n      return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950';\n    case 'warning':\n      return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950';\n    case 'info':\n      return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950';\n    default:\n      return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-950';\n  }\n};\n\nconst formatTimeAgo = (dateString: string) => {\n  const date = new Date(dateString);\n  const now = new Date();\n  const diffMs = now.getTime() - date.getTime();\n  const diffMins = Math.floor(diffMs / 60000);\n  \n  if (diffMins < 1) return 'hace menos de 1 minuto';\n  if (diffMins < 60) return `hace ${diffMins} minutos`;\n  \n  const diffHours = Math.floor(diffMins / 60);\n  if (diffHours < 24) return `hace ${diffHours} horas`;\n  \n  const diffDays = Math.floor(diffHours / 24);\n  return `hace ${diffDays} d\u00edas`;\n};\n\nexport const NotificationCenter = () => {\n  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);\n  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');\n  const [categoryFilter, setCategoryFilter] = useState<Notification['category'] | 'all'>('all');\n\n  const filteredNotifications = notifications.filter(notification => {\n    const matchesReadFilter = filter === 'all' || \n      (filter === 'read' && notification.read) || \n      (filter === 'unread' && !notification.read);\n    \n    const matchesCategoryFilter = categoryFilter === 'all' || notification.category === categoryFilter;\n    \n    return matchesReadFilter && matchesCategoryFilter;\n  });\n\n  const unreadCount = notifications.filter(n => !n.read).length;\n\n  const markAsRead = (id: string) => {\n    setNotifications(prev => prev.map(n => \n      n.id === id ? { ...n, read: true } : n\n    ));\n  };\n\n  const markAllAsRead = () => {\n    setNotifications(prev => prev.map(n => ({ ...n, read: true })));\n  };\n\n  const removeNotification = (id: string) => {\n    setNotifications(prev => prev.filter(n => n.id !== id));\n  };\n\n  return (\n    <Card className=\"w-full max-w-md\">\n      <CardHeader className=\"pb-3\">\n        <div className=\"flex items-center justify-between\">\n          <div className=\"flex items-center gap-2\">\n            <Bell className=\"h-5 w-5\" />\n            <CardTitle className=\"text-lg\">Notificaciones</CardTitle>\n            {unreadCount > 0 && (\n              <Badge variant=\"destructive\" className=\"h-5 min-w-5 text-xs px-1.5\">\n                {unreadCount}\n              </Badge>\n            )}\n          </div>\n          \n          <DropdownMenu>\n            <DropdownMenuTrigger asChild>\n              <Button variant=\"ghost\" size=\"sm\">\n                <MoreHorizontal className=\"h-4 w-4\" />\n              </Button>\n            </DropdownMenuTrigger>\n            <DropdownMenuContent align=\"end\">\n              <DropdownMenuItem onClick={markAllAsRead}>\n                Marcar todas como le\u00eddas\n              </DropdownMenuItem>\n              <DropdownMenuItem>\n                Configurar notificaciones\n              </DropdownMenuItem>\n            </DropdownMenuContent>\n          </DropdownMenu>\n        </div>\n        \n        {/* Filtros */}\n        <div className=\"flex items-center gap-2 mt-3\">\n          <div className=\"flex bg-muted rounded-md p-1\">\n            {(['all', 'unread', 'read'] as const).map((filterOption) => (\n              <button\n                key={filterOption}\n                onClick={() => setFilter(filterOption)}\n                className={cn(\n                  \"px-3 py-1 text-xs rounded-sm transition-colors\",\n                  filter === filterOption \n                    ? \"bg-background text-foreground shadow-sm\" \n                    : \"text-muted-foreground hover:text-foreground\"\n                )}\n              >\n                {filterOption === 'all' ? 'Todas' : \n                 filterOption === 'unread' ? 'No le\u00eddas' : 'Le\u00eddas'}\n              </button>\n            ))}\n          </div>\n          \n          <DropdownMenu>\n            <DropdownMenuTrigger asChild>\n              <Button variant=\"outline\" size=\"sm\" className=\"h-8 px-2\">\n                <Filter className=\"h-3 w-3 mr-1\" />\n                {categoryFilter === 'all' ? 'Todo' : categoryFilter}\n              </Button>\n            </DropdownMenuTrigger>\n            <DropdownMenuContent>\n              <DropdownMenuItem onClick={() => setCategoryFilter('all')}>\n                Todas las categor\u00edas\n              </DropdownMenuItem>\n              <Separator />\n              {(['sale', 'message', 'system', 'detection', 'fraud'] as const).map((cat) => {\n                const Icon = getCategoryIcon(cat);\n                return (\n                  <DropdownMenuItem \n                    key={cat} \n                    onClick={() => setCategoryFilter(cat)}\n                    className=\"flex items-center gap-2\"\n                  >\n                    <Icon className=\"h-4 w-4\" />\n                    {cat === 'sale' ? 'Ventas' :\n                     cat === 'message' ? 'Mensajes' :\n                     cat === 'system' ? 'Sistema' :\n                     cat === 'detection' ? 'Detecci\u00f3n' : 'Fraude'}\n                  </DropdownMenuItem>\n                );\n              })}\n            </DropdownMenuContent>\n          </DropdownMenu>\n        </div>\n      </CardHeader>\n      \n      <CardContent className=\"p-0\">\n        <ScrollArea className=\"h-[400px]\">\n          {filteredNotifications.length === 0 ? (\n            <div className=\"text-center py-8 text-muted-foreground\">\n              <Bell className=\"h-12 w-12 mx-auto mb-4 opacity-50\" />\n              <p>No hay notificaciones</p>\n              <p className=\"text-sm\">\n                {filter === 'unread' ? 'Todas las notificaciones han sido le\u00eddas' :\n                 filter === 'read' ? 'No hay notificaciones le\u00eddas' :\n                 'Tu bandeja de notificaciones est\u00e1 vac\u00eda'}\n              </p>\n            </div>\n          ) : (\n            <div className=\"space-y-1 p-1\">\n              {filteredNotifications.map((notification, index) => {\n                const TypeIcon = getTypeIcon(notification.type);\n                const CategoryIcon = getCategoryIcon(notification.category);\n                const typeColor = getTypeColor(notification.type);\n                \n                return (\n                  <div\n                    key={notification.id}\n                    className={cn(\n                      \"group relative p-3 rounded-lg border transition-all duration-200 hover:shadow-sm cursor-pointer\",\n                      !notification.read \n                        ? \"bg-accent/30 border-accent hover:bg-accent/40\" \n                        : \"bg-background hover:bg-accent/20\",\n                      \"animate-in slide-in-from-right-2\"\n                    )}\n                    style={{ animationDelay: `${index * 50}ms` }}\n                    onClick={() => !notification.read && markAsRead(notification.id)}\n                  >\n                    {/* Indicador de no le\u00eddo */}\n                    {!notification.read && (\n                      <div className=\"absolute top-3 left-1 w-2 h-2 bg-primary rounded-full\" />\n                    )}\n                    \n                    <div className=\"flex items-start gap-3 pl-2\">\n                      {/* \u00cdcono de categor\u00eda */}\n                      <div className=\"flex-shrink-0 mt-0.5\">\n                        <div className={cn(\"p-2 rounded-full\", typeColor)}>\n                          <CategoryIcon className=\"h-4 w-4\" />\n                        </div>\n                      </div>\n                      \n                      {/* Contenido */}\n                      <div className=\"flex-1 min-w-0 space-y-1\">\n                        <div className=\"flex items-start justify-between gap-2\">\n                          <h4 className={cn(\n                            \"text-sm font-medium truncate\",\n                            !notification.read && \"font-semibold\"\n                          )}>\n                            {notification.title}\n                          </h4>\n                          <div className=\"flex items-center gap-1 flex-shrink-0\">\n                            <TypeIcon className={cn(\n                              \"h-3 w-3\",\n                              notification.type === 'success' && \"text-green-600 dark:text-green-400\",\n                              notification.type === 'error' && \"text-red-600 dark:text-red-400\",\n                              notification.type === 'warning' && \"text-yellow-600 dark:text-yellow-400\",\n                              notification.type === 'info' && \"text-blue-600 dark:text-blue-400\"\n                            )} />\n                            <Button\n                              variant=\"ghost\"\n                              size=\"sm\"\n                              className=\"opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0\"\n                              onClick={(e) => {\n                                e.stopPropagation();\n                                removeNotification(notification.id);\n                              }}\n                            >\n                              <X className=\"h-3 w-3\" />\n                            </Button>\n                          </div>\n                        </div>\n                        \n                        <p className=\"text-xs text-muted-foreground line-clamp-2\">\n                          {notification.message}\n                        </p>\n                        \n                        <div className=\"flex items-center justify-between mt-2\">\n                          <span className=\"text-xs text-muted-foreground\">\n                            {formatTimeAgo(notification.timestamp)}\n                          </span>\n                          \n                          {/* Acciones */}\n                          {notification.actions && (\n                            <div className=\"flex gap-1\">\n                              {notification.actions.slice(0, 2).map((action, actionIndex) => (\n                                <Button\n                                  key={actionIndex}\n                                  variant=\"outline\"\n                                  size=\"sm\"\n                                  className=\"h-6 px-2 text-xs\"\n                                  onClick={(e) => {\n                                    e.stopPropagation();\n                                    action.action();\n                                  }}\n                                >\n                                  {action.label}\n                                </Button>\n                              ))}\n                            </div>\n                          )}\n                        </div>\n                      </div>\n                    </div>\n                  </div>\n                );\n              })}\n            </div>\n          )}\n        </ScrollArea>\n      </CardContent>\n    </Card>\n  );\n};\n\n// Bot\u00f3n de notificaciones para el header\nexport const NotificationButton = ({ onClick }: { onClick: () => void }) => {\n  const unreadCount = mockNotifications.filter(n => !n.read).length;\n  \n  return (\n    <Button\n      variant=\"ghost\"\n      size=\"sm\"\n      onClick={onClick}\n      className=\"relative p-2\"\n      aria-label={`Notificaciones${unreadCount > 0 ? ` (${unreadCount} no le\u00eddas)` : ''}`}\n    >\n      <Bell className=\"h-5 w-5\" />\n      {unreadCount > 0 && (\n        <>\n          <div className=\"absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full animate-pulse\" />\n          <Badge \n            variant=\"destructive\" \n            className=\"absolute -top-2 -right-2 h-5 min-w-5 text-xs px-1.5 animate-in zoom-in-50\"\n          >\n            {unreadCount > 99 ? '99+' : unreadCount}\n          </Badge>\n        </>\n      )}\n    </Button>\n  );\n};"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Bell,
+  AlertTriangle,
+  Info,
+  CheckCircle,
+  X,
+  Settings,
+  Filter,
+  AlertCircle,
+  ShoppingCart,
+  MessageSquare,
+  Clock,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// Notification types
+export type NotificationType = "info" | "success" | "warning" | "error" | "product" | "message";
+export type NotificationPriority = "low" | "medium" | "high" | "urgent";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  priority: NotificationPriority;
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  actionUrl?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface NotificationCenterProps {
+  notifications?: Notification[];
+  maxDisplay?: number;
+  onMarkAsRead?: (notificationId: string) => void;
+  onMarkAllAsRead?: () => void;
+  onClearAll?: () => void;
+  onNotificationClick?: (notification: Notification) => void;
+}
+
+export const NotificationCenter = ({
+  notifications = [],
+  maxDisplay = 50,
+  onMarkAsRead,
+  onMarkAllAsRead,
+  onClearAll,
+  onNotificationClick,
+}: NotificationCenterProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filter, setFilter] = useState<NotificationType | "all">("all");
+  const [localNotifications, setLocalNotifications] = useState<Notification[]>(notifications);
+
+  // Update local notifications when props change
+  useEffect(() => {
+    setLocalNotifications(notifications);
+  }, [notifications]);
+
+  // Sample notifications if none provided
+  useEffect(() => {
+    if (notifications.length === 0) {
+      setLocalNotifications([
+        {
+          id: "1",
+          type: "warning",
+          priority: "high",
+          title: "Posible fraude detectado",
+          message: "Se ha detectado un intento de fraude en la conversacion con el usuario @comprador123",
+          timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+          read: false,
+        },
+        {
+          id: "2",
+          type: "success",
+          priority: "medium",
+          title: "Venta completada",
+          message: "Producto 'iPhone 12 Pro' vendido por 450€",
+          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
+          read: false,
+        },
+        {
+          id: "3",
+          type: "info",
+          priority: "low",
+          title: "Nuevo mensaje recibido",
+          message: "Has recibido un nuevo mensaje sobre 'MacBook Air M1'",
+          timestamp: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
+          read: true,
+        },
+        {
+          id: "4",
+          type: "product",
+          priority: "medium",
+          title: "Producto detectado automaticamente",
+          message: "Se ha encontrado un nuevo producto que coincide con tus criterios: 'PlayStation 5'",
+          timestamp: new Date(Date.now() - 4 * 60 * 60000).toISOString(),
+          read: true,
+        },
+      ]);
+    }
+  }, [notifications.length]);
+
+  // Filter notifications
+  const filteredNotifications = filter === "all"
+    ? localNotifications
+    : localNotifications.filter((n) => n.type === filter);
+
+  // Get unread count
+  const unreadCount = localNotifications.filter((n) => !n.read).length;
+
+  // Get icon for notification type
+  const getNotificationIcon = (type: NotificationType) => {
+    switch (type) {
+      case "success":
+        return CheckCircle;
+      case "warning":
+        return AlertTriangle;
+      case "error":
+        return AlertCircle;
+      case "product":
+        return ShoppingCart;
+      case "message":
+        return MessageSquare;
+      default:
+        return Info;
+    }
+  };
+
+  // Get color for notification type
+  const getNotificationColor = (type: NotificationType) => {
+    switch (type) {
+      case "success":
+        return "text-green-500";
+      case "warning":
+        return "text-amber-500";
+      case "error":
+        return "text-red-500";
+      case "product":
+        return "text-blue-500";
+      case "message":
+        return "text-purple-500";
+      default:
+        return "text-blue-500";
+    }
+  };
+
+  // Get background color for notification type
+  const getNotificationBgColor = (type: NotificationType, read: boolean) => {
+    const opacity = read ? "bg-opacity-5" : "bg-opacity-10";
+    switch (type) {
+      case "success":
+        return `bg-green-500 ${opacity}`;
+      case "warning":
+        return `bg-amber-500 ${opacity}`;
+      case "error":
+        return `bg-red-500 ${opacity}`;
+      case "product":
+        return `bg-blue-500 ${opacity}`;
+      case "message":
+        return `bg-purple-500 ${opacity}`;
+      default:
+        return `bg-blue-500 ${opacity}`;
+    }
+  };
+
+  // Format timestamp
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Ahora mismo";
+    if (diffMins < 60) return `Hace ${diffMins}m`;
+    if (diffHours < 24) return `Hace ${diffHours}h`;
+    if (diffDays < 7) return `Hace ${diffDays}d`;
+    return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+  };
+
+  // Handle mark as read
+  const handleMarkAsRead = (notificationId: string) => {
+    setLocalNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+    );
+    onMarkAsRead?.(notificationId);
+  };
+
+  // Handle mark all as read
+  const handleMarkAllAsRead = () => {
+    setLocalNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    onMarkAllAsRead?.();
+  };
+
+  // Handle clear all
+  const handleClearAll = () => {
+    setLocalNotifications([]);
+    onClearAll?.();
+  };
+
+  // Handle notification click
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.read) {
+      handleMarkAsRead(notification.id);
+    }
+    onNotificationClick?.(notification);
+  };
+
+  // Get priority badge
+  const getPriorityBadge = (priority: NotificationPriority) => {
+    switch (priority) {
+      case "urgent":
+        return <Badge variant="destructive" className="text-xs">Urgente</Badge>;
+      case "high":
+        return <Badge variant="destructive" className="text-xs bg-amber-500">Alta</Badge>;
+      case "medium":
+        return <Badge variant="secondary" className="text-xs">Media</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          {unreadCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+            >
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </Badge>
+          )}
+          <span className="sr-only">Notificaciones</span>
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" className="w-[400px] p-0">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            <h3 className="font-semibold">Notificaciones</h3>
+            {unreadCount > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {unreadCount} nueva{unreadCount !== 1 ? "s" : ""}
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setFilter("all")}>
+                  <span className={cn(filter === "all" && "font-semibold")}>Todas</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setFilter("warning")}>
+                  <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
+                  Advertencias
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("product")}>
+                  <ShoppingCart className="h-4 w-4 mr-2 text-blue-500" />
+                  Productos
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("message")}>
+                  <MessageSquare className="h-4 w-4 mr-2 text-purple-500" />
+                  Mensajes
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("success")}>
+                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                  Exitos
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Notifications List */}
+        <ScrollArea className="h-[400px]">
+          {filteredNotifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Bell className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-sm font-medium text-muted-foreground">No hay notificaciones</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Te notificaremos cuando haya novedades
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {filteredNotifications.slice(0, maxDisplay).map((notification) => {
+                const Icon = getNotificationIcon(notification.type);
+                const iconColor = getNotificationColor(notification.type);
+                const bgColor = getNotificationBgColor(notification.type, notification.read);
+
+                return (
+                  <div
+                    key={notification.id}
+                    className={cn(
+                      "group relative p-4 cursor-pointer transition-colors hover:bg-accent/50",
+                      !notification.read && "border-l-4 border-l-primary",
+                      bgColor
+                    )}
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    {/* Unread indicator dot */}
+                    {!notification.read && (
+                      <div className="absolute top-4 left-2 h-2 w-2 rounded-full bg-primary" />
+                    )}
+
+                    <div className="flex items-start gap-3">
+                      {/* Icon */}
+                      <div className={cn("mt-0.5", iconColor)}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className={cn("text-sm font-medium", !notification.read && "font-semibold")}>
+                            {notification.title}
+                          </p>
+                          {getPriorityBadge(notification.priority)}
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{notification.message}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{formatTimestamp(notification.timestamp)}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkAsRead(notification.id);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </ScrollArea>
+
+        {/* Footer Actions */}
+        {filteredNotifications.length > 0 && (
+          <>
+            <Separator />
+            <div className="p-2 flex items-center justify-between gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={handleMarkAllAsRead}
+                disabled={unreadCount === 0}
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Marcar todas como leidas
+              </Button>
+              <Button variant="ghost" size="sm" className="text-xs" onClick={handleClearAll}>
+                <X className="h-4 w-4 mr-1" />
+                Limpiar todo
+              </Button>
+            </div>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};

@@ -64,7 +64,7 @@ export interface LogEntry {
   level: string;
   message: string;
   source: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AutoDetectionStatus {
@@ -167,7 +167,7 @@ export const api = {
       body: JSON.stringify(productData),
     }),
 
-  updateProduct: (productId: string, updates: Record<string, any>) =>
+  updateProduct: (productId: string, updates: Partial<Product>) =>
     fetchAPI<Product>(`/products/${productId}`, {
       method: 'PUT',
       body: JSON.stringify(updates),

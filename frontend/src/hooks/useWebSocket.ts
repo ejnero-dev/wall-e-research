@@ -7,10 +7,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './useAPI';
 import { toast } from './use-toast';
+import type { LogEntry, ScraperStatus } from '@/services/api';
 
 interface WebSocketMessage {
   type: string;
-  data: any;
+  data: unknown;
   timestamp?: string;
 }
 
@@ -59,7 +60,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const heartbeatIntervalRef = useRef<NodeJS.Timeout>();
 
   // Send message to server
-  const sendMessage = useCallback((message: any) => {
+  const sendMessage = useCallback((message: Record<string, unknown>) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     }
@@ -89,19 +90,20 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
         case 'new_log':
           // Add new log entry
-          queryClient.setQueryData(queryKeys.logs(50), (oldData: any[] | undefined) => {
-            if (!oldData) return [message.data];
-            return [message.data, ...oldData].slice(0, 50);
+          queryClient.setQueryData(queryKeys.logs(50), (oldData: LogEntry[] | undefined) => {
+            if (!oldData) return [message.data as LogEntry];
+            return [message.data as LogEntry, ...oldData].slice(0, 50);
           });
           break;
 
         case 'scraper_update':
           // Update scraper status
-          queryClient.setQueryData(queryKeys.scrapers, (oldData: any[] | undefined) => {
+          queryClient.setQueryData(queryKeys.scrapers, (oldData: ScraperStatus[] | undefined) => {
             if (!oldData) return [];
-            return oldData.map(scraper => 
-              scraper.scraper_id === message.data.scraper_id 
-                ? { ...scraper, ...message.data }
+            const updateData = message.data as Partial<ScraperStatus> & { scraper_id: string };
+            return oldData.map(scraper =>
+              scraper.scraper_id === updateData.scraper_id
+                ? { ...scraper, ...updateData }
                 : scraper
             );
           });

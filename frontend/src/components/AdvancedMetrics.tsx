@@ -1,31 +1,487 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Zap, Users, ShoppingCart, MessageSquare, AlertCircle, Clock, Target } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ShoppingCart,
+  MessageSquare,
+  Zap,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  Clock,
+  Target,
+  Activity,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface MetricCardProps {
-  title: string;
-  value: string | number;
-  change?: {
-    value: number;
-    type: 'increase' | 'decrease' | 'neutral';
-    period: string;
-  };
-  progress?: number;
-  icon: React.ElementType;
-  color: string;
-  description?: string;
-  target?: number;
+// Types for component props
+interface MetricData {
+  current: number;
+  target: number;
+  change: number;
+  trend: "up" | "down" | "neutral";
 }
 
-const MetricCard = ({ title, value, change, progress, icon: Icon, color, description, target }: MetricCardProps) => {
-  const getTrendIcon = () => {
-    if (!change) return null;
-    return change.type === 'increase' ? TrendingUp : change.type === 'decrease' ? TrendingDown : null;
+interface SalesMetrics {
+  total: number;
+  today: number;
+  thisWeek: number;
+  thisMonth: number;
+  target: number;
+  averageValue: number;
+  conversionRate: number;
+}
+
+interface MessagesMetrics {
+  total: number;
+  messagesPerHour: number;
+  responseTime: number;
+  automatedResponses: number;
+  pendingMessages: number;
+}
+
+interface AutomationMetrics {
+  activeScrapers: number;
+  successRate: number;
+  uptime: number;
+  tasksCompleted: number;
+  errorCount: number;
+}
+
+interface UsersMetrics {
+  totalUsers: number;
+  activeUsers: number;
+  newUsers: number;
+  engagementRate: number;
+}
+
+export interface AdvancedMetricsProps {
+  data?: {
+    sales?: SalesMetrics;
+    messages?: MessagesMetrics;
+    automation?: AutomationMetrics;
+    users?: UsersMetrics;
   };
-  
-  const TrendIcon = getTrendIcon();
-  
-  return (\n    <Card className=\"relative overflow-hidden group hover:shadow-lg transition-all duration-300\">\n      <div className={cn(\"absolute top-0 left-0 h-1 w-full\", color)} />\n      \n      <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n        <CardTitle className=\"text-sm font-medium\">{title}</CardTitle>\n        <Icon className={cn(\"h-4 w-4 transition-colors\", color.replace('bg-', 'text-'))} />\n      </CardHeader>\n      \n      <CardContent className=\"space-y-3\">\n        <div className=\"flex items-baseline gap-2\">\n          <div className=\"text-2xl font-bold\">{value}</div>\n          {change && (\n            <div className={cn(\n              \"flex items-center gap-1 text-xs\",\n              change.type === 'increase' ? 'text-green-600 dark:text-green-400' :\n              change.type === 'decrease' ? 'text-red-600 dark:text-red-400' :\n              'text-muted-foreground'\n            )}>\n              {TrendIcon && <TrendIcon className=\"h-3 w-3\" />}\n              <span>{Math.abs(change.value)}%</span>\n            </div>\n          )}\n        </div>\n        \n        {description && (\n          <p className=\"text-xs text-muted-foreground\">{description}</p>\n        )}\n        \n        {progress !== undefined && (\n          <div className=\"space-y-1\">\n            <Progress value={progress} className=\"h-2\" />\n            <div className=\"flex justify-between text-xs text-muted-foreground\">\n              <span>{change?.period || 'Progreso'}</span>\n              {target && (\n                <span>Meta: {target}</span>\n              )}\n            </div>\n          </div>\n        )}\n      </CardContent>\n    </Card>\n  );\n};\n\ninterface AdvancedMetricsProps {\n  data?: {\n    sales: {\n      total: number;\n      thisMonth: number;\n      target: number;\n      change: number;\n    };\n    messages: {\n      total: number;\n      rate: number;\n      responseTime: number;\n      change: number;\n    };\n    automation: {\n      activeScrapers: number;\n      successRate: number;\n      uptime: number;\n      change: number;\n    };\n    users: {\n      activeConversations: number;\n      fraudDetected: number;\n      conversion: number;\n      change: number;\n    };\n  };\n}\n\nexport const AdvancedMetrics = ({ data }: AdvancedMetricsProps) => {\n  const formatCurrency = (amount: number) => {\n    return new Intl.NumberFormat('es-ES', {\n      style: 'currency',\n      currency: 'EUR',\n      minimumFractionDigits: 0,\n    }).format(amount);\n  };\n\n  const formatTime = (seconds: number) => {\n    if (seconds < 60) return `${seconds}s`;\n    if (seconds < 3600) return `${Math.round(seconds / 60)}min`;\n    return `${Math.round(seconds / 3600)}h`;\n  };\n\n  if (!data) {\n    return (\n      <Card>\n        <CardContent className=\"flex items-center justify-center p-6\">\n          <div className=\"text-center space-y-2\">\n            <AlertCircle className=\"h-8 w-8 mx-auto text-muted-foreground\" />\n            <p className=\"text-sm text-muted-foreground\">No hay datos disponibles</p>\n          </div>\n        </CardContent>\n      </Card>\n    );\n  }\n\n  const metrics = [\n    {\n      title: \"Ventas Totales\",\n      value: formatCurrency(data.sales.total),\n      change: {\n        value: data.sales.change,\n        type: data.sales.change > 0 ? 'increase' as const : 'decrease' as const,\n        period: 'Este mes'\n      },\n      progress: (data.sales.thisMonth / data.sales.target) * 100,\n      icon: ShoppingCart,\n      color: \"bg-emerald-500\",\n      description: `${formatCurrency(data.sales.thisMonth)} de ${formatCurrency(data.sales.target)} objetivo`,\n      target: data.sales.target\n    },\n    {\n      title: \"Mensajes/Hora\",\n      value: Math.round(data.messages.rate),\n      change: {\n        value: data.messages.change,\n        type: data.messages.change > 0 ? 'increase' as const : 'decrease' as const,\n        period: 'Última hora'\n      },\n      progress: Math.min((data.messages.rate / 50) * 100, 100),\n      icon: MessageSquare,\n      color: \"bg-blue-500\",\n      description: `Tiempo respuesta: ${formatTime(data.messages.responseTime)}`\n    },\n    {\n      title: \"Automatización\",\n      value: `${Math.round(data.automation.successRate)}%`,\n      change: {\n        value: data.automation.change,\n        type: data.automation.change > 0 ? 'increase' as const : 'decrease' as const,\n        period: 'Última semana'\n      },\n      progress: data.automation.successRate,\n      icon: Zap,\n      color: \"bg-purple-500\",\n      description: `${data.automation.activeScrapers} scrapers activos, ${data.automation.uptime}% uptime`\n    },\n    {\n      title: \"Conversaciones\",\n      value: data.users.activeConversations,\n      change: {\n        value: data.users.change,\n        type: data.users.change > 0 ? 'increase' as const : 'decrease' as const,\n        period: 'Hoy'\n      },\n      progress: (data.users.conversion / 100) * 100,\n      icon: Users,\n      color: \"bg-orange-500\",\n      description: `${data.users.fraudDetected} fraudes detectados, ${data.users.conversion}% conversión`\n    }\n  ];\n\n  return (\n    <div className=\"space-y-6\">\n      {/* Métricas principales */}\n      <div className=\"grid gap-4 md:grid-cols-2 lg:grid-cols-4\">\n        {metrics.map((metric, index) => (\n          <MetricCard key={index} {...metric} />\n        ))}\n      </div>\n\n      {/* Detalles por categorías */}\n      <Tabs defaultValue=\"sales\" className=\"space-y-4\">\n        <TabsList className=\"grid w-full grid-cols-4\">\n          <TabsTrigger value=\"sales\">Ventas</TabsTrigger>\n          <TabsTrigger value=\"messages\">Mensajes</TabsTrigger>\n          <TabsTrigger value=\"automation\">Automatización</TabsTrigger>\n          <TabsTrigger value=\"users\">Usuarios</TabsTrigger>\n        </TabsList>\n\n        <TabsContent value=\"sales\" className=\"space-y-4\">\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"flex items-center gap-2\">\n                <ShoppingCart className=\"h-5 w-5\" />\n                Rendimiento de Ventas\n              </CardTitle>\n              <CardDescription>\n                Análisis detallado de tus ventas y objetivos\n              </CardDescription>\n            </CardHeader>\n            <CardContent className=\"space-y-4\">\n              <div className=\"grid gap-4 md:grid-cols-3\">\n                <div className=\"space-y-2\">\n                  <div className=\"flex items-center justify-between\">\n                    <span className=\"text-sm font-medium\">Ventas este mes</span>\n                    <Badge variant=\"secondary\">{formatCurrency(data.sales.thisMonth)}</Badge>\n                  </div>\n                  <Progress value={(data.sales.thisMonth / data.sales.target) * 100} className=\"h-2\" />\n                  <p className=\"text-xs text-muted-foreground\">\n                    {Math.round((data.sales.thisMonth / data.sales.target) * 100)}% del objetivo alcanzado\n                  </p>\n                </div>\n                \n                <div className=\"space-y-2\">\n                  <div className=\"flex items-center justify-between\">\n                    <span className=\"text-sm font-medium\">Crecimiento</span>\n                    <Badge variant={data.sales.change > 0 ? \"default\" : \"destructive\"}>\n                      {data.sales.change > 0 ? '+' : ''}{data.sales.change}%\n                    </Badge>\n                  </div>\n                  <div className=\"text-xs text-muted-foreground\">\n                    Comparado con el mes anterior\n                  </div>\n                </div>\n                \n                <div className=\"space-y-2\">\n                  <div className=\"flex items-center justify-between\">\n                    <span className=\"text-sm font-medium\">Objetivo anual</span>\n                    <Badge variant=\"outline\">{formatCurrency(data.sales.target * 12)}</Badge>\n                  </div>\n                  <div className=\"text-xs text-muted-foreground\">\n                    Proyección basada en objetivos mensuales\n                  </div>\n                </div>\n              </div>\n            </CardContent>\n          </Card>\n        </TabsContent>\n\n        <TabsContent value=\"messages\" className=\"space-y-4\">\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"flex items-center gap-2\">\n                <MessageSquare className=\"h-5 w-5\" />\n                Gestión de Mensajes\n              </CardTitle>\n              <CardDescription>\n                Estadísticas de comunicación y respuesta automática\n              </CardDescription>\n            </CardHeader>\n            <CardContent>\n              <div className=\"grid gap-4 md:grid-cols-2\">\n                <div className=\"space-y-4\">\n                  <div className=\"flex items-center justify-between\">\n                    <span className=\"text-sm font-medium\">Mensajes procesados</span>\n                    <Badge>{data.messages.total}</Badge>\n                  </div>\n                  <div className=\"flex items-center justify-between\">\n                    <span className=\"text-sm font-medium\">Tasa por hora</span>\n                    <Badge variant=\"secondary\">{Math.round(data.messages.rate)}/h</Badge>\n                  </div>\n                </div>\n                <div className=\"space-y-4\">\n                  <div className=\"flex items-center justify-between\">\n                    <span className=\"text-sm font-medium\">Tiempo respuesta</span>\n                    <Badge variant=\"outline\">{formatTime(data.messages.responseTime)}</Badge>\n                  </div>\n                  <div className=\"flex items-center gap-2\">\n                    <Clock className=\"h-4 w-4 text-muted-foreground\" />\n                    <span className=\"text-xs text-muted-foreground\">\n                      Promedio de respuesta automática\n                    </span>\n                  </div>\n                </div>\n              </div>\n            </CardContent>\n          </Card>\n        </TabsContent>\n\n        <TabsContent value=\"automation\" className=\"space-y-4\">\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"flex items-center gap-2\">\n                <Zap className=\"h-5 w-5\" />\n                Sistema de Automatización\n              </CardTitle>\n              <CardDescription>\n                Estado y rendimiento de los sistemas automatizados\n              </CardDescription>\n            </CardHeader>\n            <CardContent>\n              <div className=\"grid gap-4 md:grid-cols-3\">\n                <div className=\"text-center space-y-2\">\n                  <div className=\"text-2xl font-bold text-primary\">{data.automation.activeScrapers}</div>\n                  <p className=\"text-sm text-muted-foreground\">Scrapers Activos</p>\n                </div>\n                <div className=\"text-center space-y-2\">\n                  <div className=\"text-2xl font-bold text-green-600\">{Math.round(data.automation.successRate)}%</div>\n                  <p className=\"text-sm text-muted-foreground\">Tasa de Éxito</p>\n                </div>\n                <div className=\"text-center space-y-2\">\n                  <div className=\"text-2xl font-bold text-blue-600\">{data.automation.uptime}%</div>\n                  <p className=\"text-sm text-muted-foreground\">Tiempo Activo</p>\n                </div>\n              </div>\n            </CardContent>\n          </Card>\n        </TabsContent>\n\n        <TabsContent value=\"users\" className=\"space-y-4\">\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"flex items-center gap-2\">\n                <Users className=\"h-5 w-5\" />\n                Gestión de Usuarios\n              </CardTitle>\n              <CardDescription>\n                Análisis de conversaciones y detección de fraude\n              </CardDescription>\n            </CardHeader>\n            <CardContent>\n              <div className=\"space-y-4\">\n                <div className=\"grid gap-4 md:grid-cols-2\">\n                  <Card className=\"p-4\">\n                    <div className=\"flex items-center gap-2 mb-2\">\n                      <MessageSquare className=\"h-4 w-4 text-blue-500\" />\n                      <span className=\"text-sm font-medium\">Conversaciones Activas</span>\n                    </div>\n                    <div className=\"text-2xl font-bold\">{data.users.activeConversations}</div>\n                    <p className=\"text-xs text-muted-foreground\">En tiempo real</p>\n                  </Card>\n                  \n                  <Card className=\"p-4\">\n                    <div className=\"flex items-center gap-2 mb-2\">\n                      <AlertCircle className=\"h-4 w-4 text-red-500\" />\n                      <span className=\"text-sm font-medium\">Fraudes Detectados</span>\n                    </div>\n                    <div className=\"text-2xl font-bold\">{data.users.fraudDetected}</div>\n                    <p className=\"text-xs text-muted-foreground\">Sistema de protección</p>\n                  </Card>\n                </div>\n                \n                <div className=\"space-y-2\">\n                  <div className=\"flex items-center justify-between\">\n                    <span className=\"text-sm font-medium\">Tasa de Conversión</span>\n                    <Badge variant=\"secondary\">{data.users.conversion}%</Badge>\n                  </div>\n                  <Progress value={data.users.conversion} className=\"h-2\" />\n                  <p className=\"text-xs text-muted-foreground\">\n                    Conversaciones que resultan en ventas\n                  </p>\n                </div>\n              </div>\n            </CardContent>\n          </Card>\n        </TabsContent>\n      </Tabs>\n    </div>\n  );\n};
+  isLoading?: boolean;
+}
+
+export const AdvancedMetrics = ({ data, isLoading = false }: AdvancedMetricsProps) => {
+  const [activeTab, setActiveTab] = useState("sales");
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}k`;
+    }
+    return num.toString();
+  };
+
+  const getTrendIcon = (trend: "up" | "down" | "neutral") => {
+    return trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Activity;
+  };
+
+  const getTrendColor = (trend: "up" | "down" | "neutral") => {
+    return trend === "up"
+      ? "text-green-600 dark:text-green-400"
+      : trend === "down"
+      ? "text-red-600 dark:text-red-400"
+      : "text-muted-foreground";
+  };
+
+  // Default data if not provided
+  const defaultData = {
+    sales: {
+      total: 0,
+      today: 0,
+      thisWeek: 0,
+      thisMonth: 0,
+      target: 10000,
+      averageValue: 0,
+      conversionRate: 0,
+    },
+    messages: {
+      total: 0,
+      messagesPerHour: 0,
+      responseTime: 0,
+      automatedResponses: 0,
+      pendingMessages: 0,
+    },
+    automation: {
+      activeScrapers: 0,
+      successRate: 0,
+      uptime: 0,
+      tasksCompleted: 0,
+      errorCount: 0,
+    },
+    users: {
+      totalUsers: 0,
+      activeUsers: 0,
+      newUsers: 0,
+      engagementRate: 0,
+    },
+  };
+
+  const metricsData = { ...defaultData, ...data };
+
+  // Calculate metrics with trends
+  const metrics: Record<string, MetricData> = {
+    sales: {
+      current: metricsData.sales?.thisMonth || 0,
+      target: metricsData.sales?.target || 10000,
+      change: 12.5,
+      trend: "up",
+    },
+    messages: {
+      current: metricsData.messages?.messagesPerHour || 0,
+      target: 50,
+      change: -5.2,
+      trend: "down",
+    },
+    automation: {
+      current: metricsData.automation?.successRate || 0,
+      target: 100,
+      change: 8.3,
+      trend: "up",
+    },
+    users: {
+      current: metricsData.users?.activeUsers || 0,
+      target: 1000,
+      change: 15.8,
+      trend: "up",
+    },
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-20 w-full" />
+              </div>
+            ))}
+          </div>
+          <Skeleton className="h-64 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="h-5 w-5" />
+          Metricas Avanzadas
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Overview Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Sales Card */}
+          <Card className="relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="absolute top-0 left-0 h-1 w-full bg-emerald-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <ShoppingCart className="h-5 w-5 text-emerald-500" />
+                <div className={cn("flex items-center gap-1 text-xs", getTrendColor(metrics.sales.trend))}>
+                  {(() => {
+                    const Icon = getTrendIcon(metrics.sales.trend);
+                    return <Icon className="h-3 w-3" />;
+                  })()}
+                  <span>{metrics.sales.change.toFixed(1)}%</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold">{formatCurrency(metrics.sales.current)}</p>
+                <p className="text-xs text-muted-foreground">Ventas este mes</p>
+              </div>
+              <Progress value={(metrics.sales.current / metrics.sales.target) * 100} className="h-2 mt-3" />
+              <p className="text-xs text-muted-foreground mt-1">
+                Objetivo: {formatCurrency(metrics.sales.target)}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Messages Card */}
+          <Card className="relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="absolute top-0 left-0 h-1 w-full bg-blue-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <MessageSquare className="h-5 w-5 text-blue-500" />
+                <div className={cn("flex items-center gap-1 text-xs", getTrendColor(metrics.messages.trend))}>
+                  {(() => {
+                    const Icon = getTrendIcon(metrics.messages.trend);
+                    return <Icon className="h-3 w-3" />;
+                  })()}
+                  <span>{Math.abs(metrics.messages.change).toFixed(1)}%</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold">{Math.round(metrics.messages.current)}</p>
+                <p className="text-xs text-muted-foreground">Mensajes/hora</p>
+              </div>
+              <Progress value={(metrics.messages.current / metrics.messages.target) * 100} className="h-2 mt-3" />
+              <p className="text-xs text-muted-foreground mt-1">
+                Promedio esperado: {metrics.messages.target}/h
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Automation Card */}
+          <Card className="relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="absolute top-0 left-0 h-1 w-full bg-purple-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <Zap className="h-5 w-5 text-purple-500" />
+                <div className={cn("flex items-center gap-1 text-xs", getTrendColor(metrics.automation.trend))}>
+                  {(() => {
+                    const Icon = getTrendIcon(metrics.automation.trend);
+                    return <Icon className="h-3 w-3" />;
+                  })()}
+                  <span>{metrics.automation.change.toFixed(1)}%</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold">{Math.round(metrics.automation.current)}%</p>
+                <p className="text-xs text-muted-foreground">Tasa de exito</p>
+              </div>
+              <Progress value={metrics.automation.current} className="h-2 mt-3" />
+              <p className="text-xs text-muted-foreground mt-1">
+                {metricsData.automation?.activeScrapers || 0} scrapers activos
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Users Card */}
+          <Card className="relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="absolute top-0 left-0 h-1 w-full bg-amber-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <Users className="h-5 w-5 text-amber-500" />
+                <div className={cn("flex items-center gap-1 text-xs", getTrendColor(metrics.users.trend))}>
+                  {(() => {
+                    const Icon = getTrendIcon(metrics.users.trend);
+                    return <Icon className="h-3 w-3" />;
+                  })()}
+                  <span>{metrics.users.change.toFixed(1)}%</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold">{formatNumber(metrics.users.current)}</p>
+                <p className="text-xs text-muted-foreground">Usuarios activos</p>
+              </div>
+              <Progress value={(metrics.users.current / metrics.users.target) * 100} className="h-2 mt-3" />
+              <p className="text-xs text-muted-foreground mt-1">
+                +{metricsData.users?.newUsers || 0} nuevos esta semana
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Detailed Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="sales" className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              <span className="hidden sm:inline">Ventas</span>
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Mensajes</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              <span className="hidden sm:inline">Automatizacion</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Usuarios</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Sales Tab */}
+          <TabsContent value="sales" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Ventas Hoy</span>
+                  </div>
+                  <p className="text-2xl font-bold">{formatCurrency(metricsData.sales?.today || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {metricsData.sales?.today || 0} transacciones
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Esta Semana</span>
+                  </div>
+                  <p className="text-2xl font-bold">{formatCurrency(metricsData.sales?.thisWeek || 0)}</p>
+                  <Badge variant="secondary" className="mt-2">
+                    +{((metricsData.sales?.thisWeek || 0) / 7).toFixed(0)} promedio/dia
+                  </Badge>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Conversion</span>
+                  </div>
+                  <p className="text-2xl font-bold">{(metricsData.sales?.conversionRate || 0).toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Valor promedio: {formatCurrency(metricsData.sales?.averageValue || 0)}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Messages Tab */}
+          <TabsContent value="messages" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Total Mensajes</span>
+                  </div>
+                  <p className="text-2xl font-bold">{formatNumber(metricsData.messages?.total || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Desde el inicio</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Tiempo Respuesta</span>
+                  </div>
+                  <p className="text-2xl font-bold">{(metricsData.messages?.responseTime || 0).toFixed(1)}m</p>
+                  <Badge variant="secondary" className="mt-2">
+                    Promedio
+                  </Badge>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Automatizadas</span>
+                  </div>
+                  <p className="text-2xl font-bold">{formatNumber(metricsData.messages?.automatedResponses || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {metricsData.messages?.pendingMessages || 0} pendientes
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Automation Tab */}
+          <TabsContent value="automation" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Uptime</span>
+                  </div>
+                  <p className="text-2xl font-bold">{(metricsData.automation?.uptime || 0).toFixed(1)}%</p>
+                  <Badge variant="secondary" className="mt-2">
+                    Operacional
+                  </Badge>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Tareas Completadas</span>
+                  </div>
+                  <p className="text-2xl font-bold">{formatNumber(metricsData.automation?.tasksCompleted || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Total procesadas</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Errores</span>
+                  </div>
+                  <p className="text-2xl font-bold">{metricsData.automation?.errorCount || 0}</p>
+                  {(metricsData.automation?.errorCount || 0) > 0 ? (
+                    <Badge variant="destructive" className="mt-2">
+                      Requiere atencion
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="mt-2">
+                      Todo OK
+                    </Badge>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Total Usuarios</span>
+                  </div>
+                  <p className="text-2xl font-bold">{formatNumber(metricsData.users?.totalUsers || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Registrados</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Nuevos Usuarios</span>
+                  </div>
+                  <p className="text-2xl font-bold">{metricsData.users?.newUsers || 0}</p>
+                  <Badge variant="secondary" className="mt-2">
+                    Esta semana
+                  </Badge>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Engagement</span>
+                  </div>
+                  <p className="text-2xl font-bold">{(metricsData.users?.engagementRate || 0).toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tasa de participacion</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};

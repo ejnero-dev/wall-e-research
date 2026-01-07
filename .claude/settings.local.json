@@ -18,7 +18,9 @@
       "Bash(cat:*)",
       "Bash(git remote set-url:*)",
       "Bash(uv run black:*)",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }
