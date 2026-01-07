@@ -47,7 +47,9 @@ if WATCHDOG_AVAILABLE:
         """File system event handler for configuration file changes"""
 
         def __init__(
-            self, callback: Callable[[ConfigChangeEvent], None], patterns: List[str] = None
+            self,
+            callback: Callable[[ConfigChangeEvent], None],
+            patterns: List[str] = None,
         ):
             super().__init__()
             self.callback = callback
@@ -88,7 +90,11 @@ else:
     class ConfigFileWatcher:
         """Dummy file watcher when watchdog is not installed"""
 
-        def __init__(self, callback: Callable[[ConfigChangeEvent], None], patterns: List[str] = None):
+        def __init__(
+            self,
+            callback: Callable[[ConfigChangeEvent], None],
+            patterns: List[str] = None,
+        ):
             logger.warning("Watchdog not available - config hot-reload disabled")
             self.callback = callback
             self.patterns = patterns or []
