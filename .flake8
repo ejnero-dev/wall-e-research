@@ -51,8 +51,8 @@ docstring-convention = google
 
 # Per file ignores
 per-file-ignores =
-    # Tests can have longer lines and missing docstrings
-    tests/*:D100,D101,D102,D103,D104,D105,D106,D107
+    # Tests can have longer lines, missing docstrings, and imports after sys.path modification
+    tests/*:D100,D101,D102,D103,D104,D105,D106,D107,E402
     # Init files don't need docstrings
     __init__.py:D104
     # Alembic migration files

@@ -28,7 +28,7 @@ async def test_bot_ai_integration():
         config_path = "config/research_overrides.yaml"
         bot = ResearchWallapopBot(config_path)
 
-        logger.info(f"✅ Bot inicializado exitosamente")
+        logger.info("✅ Bot inicializado exitosamente")
         logger.info(f"   - AI Engine: {bot.ai_engine.status.value}")
         logger.info(
             f"   - Database: {'✅ Connected' if bot.db else '❌ Not available'}"

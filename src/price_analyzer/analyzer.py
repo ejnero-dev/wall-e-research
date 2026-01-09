@@ -15,6 +15,9 @@ import json
 from bs4 import BeautifulSoup
 import httpx
 
+from price_analyzer.scrapers.wallapop_scraper import WallapopPriceScraper
+from price_analyzer.scrapers.amazon_scraper import AmazonPriceScraper
+
 
 @dataclass
 class PriceData:
@@ -54,11 +57,8 @@ class PriceAnalyzer:
     def __init__(self):
         self.wallapop_scraper = WallapopPriceScraper()
         self.amazon_scraper = AmazonPriceScraper()
-        self.other_scrapers = {
-            "ebay": EbayScraper(),
-            "milanuncios": MilanunciosScraper(),
-            "vinted": VintedScraper(),
-        }
+        # TODO: Implement additional scrapers when needed
+        self.other_scrapers: Dict = {}
 
     async def analyze_product_price(
         self,
@@ -88,7 +88,7 @@ class PriceAnalyzer:
             try:
                 prices = await scraper.search_prices(product_name)
                 all_prices.extend(prices)
-            except:
+            except Exception:
                 pass  # Ignorar errores en plataformas secundarias
 
         # Analizar datos recopilados

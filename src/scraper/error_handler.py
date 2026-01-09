@@ -480,7 +480,7 @@ class ErrorHandler:
                     result = await func(*args, **kwargs)
                     breaker.record_success()
                     return result
-                except Exception as e:
+                except Exception:
                     breaker.record_failure()
                     raise
 

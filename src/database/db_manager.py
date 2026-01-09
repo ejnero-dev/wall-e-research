@@ -804,7 +804,7 @@ class DatabaseManager:
                 .filter(
                     and_(
                         DataRetentionSchedule.scheduled_deletion_at <= now,
-                        DataRetentionSchedule.processed == False,
+                        DataRetentionSchedule.processed.is_(False),
                     )
                 )
                 .all()
@@ -841,7 +841,7 @@ class DatabaseManager:
                         action=AuditAction.DATA_DELETED,
                         entity_type=deletion.entity_type,
                         entity_id=deletion.entity_id,
-                        description=f"Data deleted/anonymized according to retention policy",
+                        description="Data deleted/anonymized according to retention policy",
                         audit_metadata={"policy": deletion.policy.value},
                         compliance_relevant=True,
                     )
@@ -990,7 +990,7 @@ class DatabaseManager:
                 session.query(func.count(Buyer.id))
                 .filter(
                     and_(
-                        Buyer.data_export_requested == True,
+                        Buyer.data_export_requested.is_(True),
                         Buyer.updated_at.between(period_start, period_end),
                     )
                 )
@@ -1001,7 +1001,7 @@ class DatabaseManager:
                 session.query(func.count(Buyer.id))
                 .filter(
                     and_(
-                        Buyer.deletion_requested == True,
+                        Buyer.deletion_requested.is_(True),
                         Buyer.updated_at.between(period_start, period_end),
                     )
                 )

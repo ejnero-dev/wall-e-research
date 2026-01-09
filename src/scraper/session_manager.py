@@ -486,7 +486,7 @@ class SessionManager:
                             const match = href.match(/\\/user\\/([^/]+)/);
                             return match ? match[1] : null;
                         }
-                        
+
                         // Buscar en metadatos
                         const metaUserId = document.querySelector('meta[name="user-id"]');
                         return metaUserId ? metaUserId.content : null;
@@ -514,7 +514,7 @@ class SessionManager:
 
         return user_info
 
-    async def _fill_login_form(self, page: Page, username: str, password: str):
+    async def _fill_login_form(self, page: Page, username: str, password: str):  # noqa: C901
         """Llena el formulario de login de forma humana"""
         logger.info("Filling login form")
 

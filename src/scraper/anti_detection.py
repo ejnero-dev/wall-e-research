@@ -201,21 +201,21 @@ class AntiDetectionManager:
         Object.defineProperty(navigator, 'webdriver', {
             get: () => undefined,
         });
-        
+
         // Simular propiedades de navegador real
         Object.defineProperty(navigator, 'plugins', {
             get: () => [1, 2, 3, 4, 5],
         });
-        
+
         Object.defineProperty(navigator, 'languages', {
             get: () => ['es-ES', 'es', 'en'],
         });
-        
+
         // Ocultar propiedades de Playwright
         delete window.__playwright;
         delete window.__pw_manual;
         delete window.__PW_inspect;
-        
+
         // Simular comportamiento de mouse realista
         const originalAddEventListener = EventTarget.prototype.addEventListener;
         EventTarget.prototype.addEventListener = function(type, listener, options) {
@@ -228,7 +228,7 @@ class AntiDetectionManager:
             }
             return originalAddEventListener.call(this, type, listener, options);
         };
-        
+
         // WebGL spoofing
         const getParameter = WebGLRenderingContext.prototype.getParameter;
         WebGLRenderingContext.prototype.getParameter = function(parameter) {
@@ -240,7 +240,7 @@ class AntiDetectionManager:
             }
             return getParameter(parameter);
         };
-        
+
         // Canvas fingerprinting protection
         const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
         HTMLCanvasElement.prototype.toDataURL = function() {
@@ -255,7 +255,7 @@ class AntiDetectionManager:
             context.putImageData(originalData, 0, 0);
             return originalData.call(this);
         };
-        
+
         console.log('Anti-detection measures activated');
         """ % (
             self.current_fingerprint.webgl_vendor,

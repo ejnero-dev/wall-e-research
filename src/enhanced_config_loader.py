@@ -41,7 +41,7 @@ class ConfigChangeEvent:
         return f"ConfigChangeEvent({self.change_type}: {self.file_path} at {self.timestamp})"
 
 
-if WATCHDOG_AVAILABLE:
+if WATCHDOG_AVAILABLE:  # noqa: C901
 
     class ConfigFileWatcher(FileSystemEventHandler):
         """File system event handler for configuration file changes"""
@@ -281,7 +281,6 @@ class EnhancedConfigurationLoader:
                     return
 
                 # Update cached configuration
-                old_config = self._current_config.copy()
                 self._current_config = new_config
                 self._config_hash = new_hash
 
@@ -771,7 +770,6 @@ def load_config(
 
 def get_config_value(key_path: str, default: Any = None) -> Any:
     """Get a configuration value from the global config loader"""
-    global _global_config_loader
     if _global_config_loader is None:
         logger.warning("No global configuration loader available")
         return default
@@ -780,7 +778,6 @@ def get_config_value(key_path: str, default: Any = None) -> Any:
 
 def update_config_value(key_path: str, new_value: Any, persist: bool = False) -> bool:
     """Update a configuration value in the global config loader"""
-    global _global_config_loader
     if _global_config_loader is None:
         logger.error("No global configuration loader available")
         return False
@@ -791,7 +788,6 @@ def add_config_change_callback(
     callback: Callable[[Dict[str, Any], ConfigChangeEvent], None],
 ):
     """Add a callback for configuration changes"""
-    global _global_config_loader
     if _global_config_loader is not None:
         _global_config_loader.add_change_callback(callback)
     else:

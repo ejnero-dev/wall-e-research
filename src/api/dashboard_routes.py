@@ -1090,7 +1090,7 @@ async def generate_live_data(connection_id: str, websocket: WebSocket):
 
 # ============= WebSocket Endpoint =============
 @router.websocket("/ws/live")
-async def websocket_live_data(websocket: WebSocket):
+async def websocket_live_data(websocket: WebSocket):  # noqa: C901
     """
     WebSocket endpoint for real-time dashboard data
     Sends updates for metrics, logs, and scraper status with connection stability

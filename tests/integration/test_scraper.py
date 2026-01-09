@@ -475,7 +475,7 @@ class TestPerformance:
         # Procesar 100 veces
         for _ in range(100):
             cleaned = TextCleaner.clean_message_text(long_text)
-            price = TextCleaner.extract_price(cleaned)
+            TextCleaner.extract_price(cleaned)
 
         end_time = time.time()
         processing_time = end_time - start_time

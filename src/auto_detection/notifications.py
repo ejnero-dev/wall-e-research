@@ -168,7 +168,7 @@ class NotificationManager:
         channel_name = channel.value
         return self.config.get(channel_name, {}).get("enabled", False)
 
-    async def _send_through_channel(
+    async def _send_through_channel(  # noqa: C901
         self, channel: NotificationChannel, notification: Dict[str, Any]
     ):
         """Send notification through specific channel"""

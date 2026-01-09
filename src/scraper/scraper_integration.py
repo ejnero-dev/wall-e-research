@@ -151,7 +151,7 @@ class ScraperIntegration:
 
             for conv_data in conversations:
                 # Verificar si ya tenemos esta conversación en BD
-                existing_conv = await self._get_or_create_conversation(conv_data)
+                await self._get_or_create_conversation(conv_data)
 
                 # Actualizar tiempo de última actividad
                 if conv_data.unread_count > 0:
@@ -271,7 +271,7 @@ class ScraperIntegration:
 
         try:
             # Guardar mensaje en BD
-            db_message = await self._save_message_to_db(message_data, conversation)
+            await self._save_message_to_db(message_data, conversation)
 
             # Crear objetos para el motor de conversaciones
             buyer = await self._create_buyer_object(conversation)

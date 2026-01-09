@@ -78,7 +78,7 @@ class WallapopPriceScraper:
 
         # Añadir ubicación si es específica
         if location and location != "España":
-            url += f"&latitude=40.4168&longitude=-3.7038"  # Madrid por defecto
+            url += "&latitude=40.4168&longitude=-3.7038"  # Madrid por defecto
 
         return url
 
@@ -101,32 +101,32 @@ class WallapopPriceScraper:
                         // Título
                         const titleEl = item.querySelector('.ItemCard__title');
                         const title = titleEl ? titleEl.textContent.trim() : '';
-                        
+
                         // Precio
                         const priceEl = item.querySelector('.ItemCard__price');
                         const priceText = priceEl ? priceEl.textContent.trim() : '';
                         const price = parseFloat(priceText.replace('€', '').replace(',', '.')) || 0;
-                        
+
                         // Descripción/Estado
                         const descEl = item.querySelector('.ItemCard__description');
                         const description = descEl ? descEl.textContent.trim() : '';
-                        
+
                         // Ubicación
                         const locationEl = item.querySelector('.ItemCard__location');
                         const location = locationEl ? locationEl.textContent.trim() : '';
-                        
+
                         // URL del producto
                         const linkEl = item.querySelector('a');
                         const url = linkEl ? linkEl.href : '';
-                        
+
                         // Vendido o no
                         const soldEl = item.querySelector('.ItemCard__sold');
                         const sold = !!soldEl;
-                        
+
                         // Imagen para análisis posterior
                         const imgEl = item.querySelector('img');
                         const image = imgEl ? imgEl.src : '';
-                        
+
                         return {
                             title,
                             price,
@@ -226,23 +226,23 @@ class WallapopPriceScraper:
                             // Vendedor
                             const sellerEl = document.querySelector('.UserInfo__name');
                             const seller = sellerEl ? sellerEl.textContent.trim() : '';
-                            
+
                             // Valoraciones del vendedor
                             const ratingsEl = document.querySelector('.UserInfo__rating');
                             const ratings = ratingsEl ? ratingsEl.textContent.trim() : '';
-                            
+
                             // Vistas
                             const viewsEl = document.querySelector('.ItemDetail__views');
                             const views = viewsEl ? viewsEl.textContent.trim() : '';
-                            
+
                             // Favoritos
                             const favsEl = document.querySelector('.ItemDetail__favorites');
                             const favorites = favsEl ? favsEl.textContent.trim() : '';
-                            
+
                             // Descripción completa
                             const descEl = document.querySelector('.ItemDetail__description');
                             const fullDescription = descEl ? descEl.textContent.trim() : '';
-                            
+
                             return {
                                 seller,
                                 ratings,

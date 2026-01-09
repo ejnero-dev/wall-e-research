@@ -380,7 +380,7 @@ class AccountScanner:
                     )
                     if element:
                         return True
-                except:
+                except Exception:
                     continue
 
             # Verificar URL
@@ -426,7 +426,7 @@ class AccountScanner:
                                 "Successfully navigated to My Products via profile menu"
                             )
                             return
-                except:
+                except Exception:
                     continue
 
             raise Exception("Could not find link to My Products")
@@ -499,7 +499,7 @@ class AccountScanner:
             logger.error(f"Error extracting user products: {e}")
             return []
 
-    async def _extract_single_product(
+    async def _extract_single_product(  # noqa: C901
         self, element_info, index: int
     ) -> Optional[DetectedProduct]:
         """Extrae datos de un producto individual"""
@@ -557,7 +557,7 @@ class AccountScanner:
                                 .split("?")[0]
                                 .split("#")[0]
                             )
-                        except:
+                        except Exception:
                             pass
 
             # Estado del producto
@@ -584,7 +584,7 @@ class AccountScanner:
                             elif "expirado" in status_text or "expired" in status_text:
                                 status = ProductStatus.EXPIRED
                         break
-                except:
+                except Exception:
                     continue
 
             # Descripción (si está visible)
@@ -609,7 +609,7 @@ class AccountScanner:
                     src = await img.get_attribute("src")
                     if src and src.startswith("http"):
                         image_urls.append(src)
-            except:
+            except Exception:
                 pass
 
             # Estadísticas (si están disponibles)
@@ -630,7 +630,7 @@ class AccountScanner:
                         messages_count = (
                             int(numbers[-1]) if numbers[-1].isdigit() else 0
                         )
-            except:
+            except Exception:
                 pass
 
             return DetectedProduct(
@@ -684,7 +684,7 @@ class AccountScanner:
             f"{len(scan_results.removed_products)} removed"
         )
 
-    async def _process_scan_results(self, scan_results: ScanResults):
+    async def _process_scan_results(self, scan_results: ScanResults):  # noqa: C901
         """Procesa resultados del escaneo y ejecuta callbacks"""
         try:
             # Procesar productos nuevos

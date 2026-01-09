@@ -30,10 +30,10 @@ def test_imports():
         templates = SpanishPromptTemplates()
         print(f"✅ Templates loaded: {len(templates.PERSONALITIES)} personalities")
 
-        validator = AIResponseValidator()
+        _ = AIResponseValidator()
         print("✅ Validator initialized")
 
-        fallback = FallbackHandler(config)
+        _ = FallbackHandler(config)
         print("✅ Fallback handler initialized")
 
         return True

@@ -1,9 +1,9 @@
+/* Importar estilos de accesibilidad - debe estar antes de @tailwind */
+@import './styles/accessibility.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Importar estilos de accesibilidad */
-@import './styles/accessibility.css';
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.

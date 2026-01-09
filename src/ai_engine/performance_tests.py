@@ -565,7 +565,7 @@ class PerformanceTestSuite:
         self.logger.info("Full benchmark suite completed")
         return results
 
-    def generate_performance_report(self, results: Dict[str, BenchmarkResult]) -> str:
+    def generate_performance_report(self, results: Dict[str, BenchmarkResult]) -> str:  # noqa: C901
         """Generate comprehensive performance report"""
 
         report = ["=" * 80]

@@ -17,7 +17,7 @@ from datetime import datetime
 
 
 @pytest.mark.asyncio
-async def test_endpoints():
+async def test_endpoints():  # noqa: C901
     """Test all dashboard endpoints"""
     base_url = "http://localhost:8000"
 
@@ -57,7 +57,7 @@ async def test_endpoints():
             async with session.get(f"{base_url}/api/dashboard/metrics/summary") as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    print(f"✅ Metrics:")
+                    print("✅ Metrics:")
                     print(f"   - Message rate: {data['msg_rate']:.1f}/hour")
                     print(f"   - Active scrapers: {data['active_scrapers']}")
                     print(f"   - Success rate: {data['success_rate']:.1f}%")
@@ -103,7 +103,7 @@ async def test_endpoints():
             async with session.get(f"{base_url}/api/dashboard/config/current") as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    print(f"✅ Configuration:")
+                    print("✅ Configuration:")
                     print(f"   - Messages/hour: {data['msg_per_hour']}")
                     print(f"   - Retry attempts: {data['retry_attempts']}")
                     print(f"   - Debug mode: {data['debug_mode']}")
@@ -134,7 +134,7 @@ async def test_endpoints():
         # Test WebSocket connection
         print("\n📍 Testing WebSocket connection...")
         try:
-            ws_url = f"ws://localhost:8000/api/dashboard/ws/live"
+            ws_url = "ws://localhost:8000/api/dashboard/ws/live"
             async with session.ws_connect(ws_url) as ws:
                 print("✅ WebSocket connected")
 

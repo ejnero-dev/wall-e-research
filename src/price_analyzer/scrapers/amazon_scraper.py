@@ -153,7 +153,7 @@ class AmazonPriceScraper:
             price_text = price_text.replace(",", ".").replace("€", "").strip()
             try:
                 return float(price_text)
-            except:
+            except Exception:
                 pass
 
         # Buscar precio alternativo
@@ -166,7 +166,7 @@ class AmazonPriceScraper:
                 price_str = match.group(1).replace(",", ".")
                 try:
                     return float(price_str)
-                except:
+                except Exception:
                     pass
 
         return None
@@ -178,7 +178,7 @@ class AmazonPriceScraper:
             rating_str = match.group(1).replace(",", ".")
             try:
                 return float(rating_str)
-            except:
+            except Exception:
                 pass
         return None
 
@@ -190,7 +190,7 @@ class AmazonPriceScraper:
             if match:
                 try:
                     return int(match.group(1))
-                except:
+                except Exception:
                     pass
         return 0
 
@@ -292,6 +292,6 @@ class AmazonPriceScraper:
             price_str = match.group(1).replace(",", ".")
             try:
                 return float(price_str)
-            except:
+            except Exception:
                 pass
         return None

@@ -343,7 +343,7 @@ class TestAIEnginePerformance:
             if elapsed < expected_elapsed:
                 time.sleep(expected_elapsed - elapsed)
 
-        total_time = time.time() - start_time
+        _ = time.time() - start_time  # total_time used for reference
         success_rate = success_count / total_requests
         avg_response_time = statistics.mean(response_times)
 
