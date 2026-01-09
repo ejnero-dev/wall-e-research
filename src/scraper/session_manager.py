@@ -514,9 +514,9 @@ class SessionManager:
 
         return user_info
 
-    async def _fill_login_form(
+    async def _fill_login_form(  # noqa: C901
         self, page: Page, username: str, password: str
-    ):  # noqa: C901
+    ):
         """Llena el formulario de login de forma humana"""
         logger.info("Filling login form")
 
