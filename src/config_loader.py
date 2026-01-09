@@ -206,7 +206,9 @@ class ConfigurationLoader:
         logger.info(f"Configuration loaded successfully for mode: {mode.value}")
         return config
 
-    def validate_configuration(self, config: Dict[str, Any], mode: ConfigMode) -> bool:  # noqa: C901
+    def validate_configuration(
+        self, config: Dict[str, Any], mode: ConfigMode
+    ) -> bool:  # noqa: C901
         """
         Validate configuration for compliance and correctness
 

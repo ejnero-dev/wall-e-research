@@ -524,9 +524,7 @@ class WallapopScraper:
                 ".timestamp",
                 '[data-testid="message-time"]',
             ]
-            await ElementFinder.find_element_with_fallback(
-                element, timestamp_selectors
-            )
+            await ElementFinder.find_element_with_fallback(element, timestamp_selectors)
             timestamp = datetime.now()  # Por defecto, usar tiempo actual
 
             # Estado de lectura
