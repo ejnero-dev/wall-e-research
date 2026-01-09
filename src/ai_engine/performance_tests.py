@@ -461,7 +461,7 @@ class PerformanceTestSuite:
 
         # Track memory over time
         memory_samples = []
-        gc_collections = gc.get_count()
+        _ = gc.get_count()  # Initial GC count (used for reference)
 
         # Force initial GC
         gc.collect()
@@ -473,7 +473,7 @@ class PerformanceTestSuite:
             request = self.test_requests[i % len(self.test_requests)]
 
             try:
-                response = await self.ai_engine.generate_response_async(request)
+                await self.ai_engine.generate_response_async(request)
 
                 # Sample memory every 10 requests
                 if i % 10 == 0:

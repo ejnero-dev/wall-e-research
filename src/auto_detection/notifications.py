@@ -459,7 +459,7 @@ From: Wall-E Auto-Detection System
         await self.send_notification(
             NotificationType.NEW_PRODUCT,
             f"New Product Detected: {product_data.get('title', 'Unknown')}",
-            f"A new product has been automatically detected and added to your dashboard.",
+            "A new product has been automatically detected and added to your dashboard.",
             data=product_data,
             priority=NotificationPriority.NORMAL,
         )
@@ -483,7 +483,7 @@ From: Wall-E Auto-Detection System
         await self.send_notification(
             NotificationType.PRODUCT_REMOVED,
             f"Product Removed: {product_data.get('title', 'Unknown')}",
-            f"Product is no longer available on Wallapop.",
+            "Product is no longer available on Wallapop.",
             data=product_data,
             priority=NotificationPriority.NORMAL,
         )
@@ -509,7 +509,7 @@ From: Wall-E Auto-Detection System
         await self.send_notification(
             NotificationType.SYSTEM_STATUS,
             f"System Status: {status.title()}",
-            f"Auto-detection system status update.",
+            "Auto-detection system status update.",
             data=details,
             priority=priority,
         )

@@ -116,7 +116,7 @@ ESTILO: {style}
 
 CONTEXTO DE VENTA:
 - Producto: {product_name}
-- Precio actual: {price}€  
+- Precio actual: {price}€
 - Estado: {condition}
 - Ubicación: {location}
 

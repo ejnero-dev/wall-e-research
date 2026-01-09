@@ -12,12 +12,12 @@ from contextlib import asynccontextmanager
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import uvicorn
+from fastapi import FastAPI, Request  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.responses import JSONResponse  # noqa: E402
+import uvicorn  # noqa: E402
 
-from src.api.dashboard_routes import router as dashboard_router
+from src.api.dashboard_routes import router as dashboard_router  # noqa: E402
 
 # Configure logging
 logging.basicConfig(

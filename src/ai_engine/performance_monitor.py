@@ -191,8 +191,6 @@ class AlertManager:
         """Continuously evaluate alert rules"""
         while self._alert_active:
             try:
-                current_time = time.time()
-
                 with self.lock:
                     rules_to_evaluate = list(self.alert_rules.values())
 

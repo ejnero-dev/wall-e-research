@@ -1240,7 +1240,6 @@ def get_detection_manager():
     if not detection_manager_instance:
         try:
             import sys
-            from pathlib import Path
 
             # Ensure src is in path
             src_path = str(Path(__file__).parent.parent)

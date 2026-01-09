@@ -340,7 +340,7 @@ class ComplianceWallapopBot:
         finally:
             try:
                 signal.alarm(0)  # Cancelar timeout
-            except:
+            except Exception:
                 pass
 
     async def _verify_gdpr_consent(self, user_id: str) -> bool:
@@ -511,7 +511,7 @@ class ComplianceWallapopBot:
 
             # 1. Verificar rate limits
             if not self._check_rate_limits():
-                logger.warning(f"[COMPLIANCE] Rate limit exceeded, queuing for later")
+                logger.warning("[COMPLIANCE] Rate limit exceeded, queuing for later")
                 return
 
             # 2. Verificar consentimiento GDPR
@@ -724,101 +724,6 @@ class ComplianceWallapopBot:
 
             except Exception as e:
                 logger.error(f"Error checking abandoned conversations: {e}")
-
-    def _save_state(self):
-        """Guarda el estado actual del bot"""
-        state = {
-            "stats": self.stats,
-            "active_conversations": len(self.active_conversations),
-            "pending_responses": len(self.pending_responses),
-            "timestamp": datetime.now().isoformat(),
-        }
-
-        with open("logs/bot_state.json", "w") as f:
-            json.dump(state, f, indent=2)
-
-        logger.info("Bot state saved")
-
-    def _check_rate_limits(self) -> bool:
-        """Verifica límites de rate COMPLIANCE"""
-        now = datetime.now()
-
-        # Reset contador por hora
-        if now > self.hourly_reset_time:
-            self.hourly_message_count = 0
-            self.hourly_reset_time = now + timedelta(hours=1)
-
-        # Verificar límite por hora
-        max_per_hour = self.config["wallapop"]["behavior"].get(
-            "max_messages_per_hour", 5
-        )
-        if self.hourly_message_count >= max_per_hour:
-            logger.warning(
-                f"[COMPLIANCE] Hourly message limit ({max_per_hour}) reached"
-            )
-            return False
-
-        self.hourly_message_count += 1
-        return True
-
-    async def _verify_gdpr_consent(self, user_id: str) -> bool:
-        """Verifica consentimiento GDPR del usuario"""
-        if (
-            not self.config.get("development", {})
-            .get("gdpr_compliance", {})
-            .get("consent_required", True)
-        ):
-            return True
-
-        consent = self.user_consents.get(user_id)
-        if not consent:
-            return False
-
-        # Verificar expiración del consentimiento
-        consent_date = datetime.fromisoformat(consent["date"])
-        retention_days = (
-            self.config.get("development", {})
-            .get("gdpr_compliance", {})
-            .get("data_retention_days", 30)
-        )
-
-        if datetime.now() - consent_date > timedelta(days=retention_days):
-            logger.info(f"[GDPR] Consent expired for {user_id}")
-            return False
-
-        return consent.get("granted", False)
-
-    async def _request_gdpr_consent(self, user_id: str):
-        """Solicita consentimiento GDPR al usuario"""
-        logger.info(f"[GDPR] Requesting consent from {user_id}")
-        # En implementación real, enviaría mensaje solicitando consentimiento
-        pass
-
-    def _log_audit_entry(
-        self,
-        action: str,
-        user_id: str,
-        details: Dict,
-        automated: bool = True,
-        human_confirmed: bool = False,
-    ):
-        """Registra entrada en audit trail"""
-        entry = AuditLogEntry(
-            timestamp=datetime.now(),
-            action=action,
-            user_id=user_id,
-            details=details,
-            automated=automated,
-            human_confirmed=human_confirmed,
-            gdpr_compliant=(
-                self._verify_gdpr_consent(user_id) if user_id != "unknown" else True
-            ),
-        )
-
-        self.audit_log.append(entry)
-
-        # Guardar en archivo para persistencia
-        self._save_audit_log(entry)
 
     def _save_audit_log(self, entry: AuditLogEntry):
         """Guarda entrada de audit en archivo"""
